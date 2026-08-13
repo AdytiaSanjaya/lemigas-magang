@@ -71,79 +71,70 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     // Google OAuth (JIT provisioning): pastikan email sudah ada di database
-    // Prisma. Jika belum, buat User baru dengan role PENDAFTAR secara otomatis.
-    // Error ditangkap dan dikembalikan agar tidak melempar error server.
+    // Prisma. Jika belum, buat User baru dengan role PENDAFTAR. Callback ini
+    // SELALU mengembalikan true sehingga pembuatan session tidak pernah
+    // terblokir oleh error DB atau timeout di serverless (Vercel).
     async signIn({ account, user }) {
-      if (account?.provider !== "google") return true;
-
-      const email = (user?.email ?? "").toLowerCase().trim();
-      if (!email) return false;
-
-      try {
-        const existing = await prisma.user.findUnique({ where: { email } });
-        if (existing) {
-          // Akun non-aktif tidak boleh login (konsisten dengan credentials).
-          if (!existing.isAktif) return false;
-          return true;
-        }
-        // passwordHash diisi acak: akun Google tidak pernah login via
-        // kredensial, jadi password ini hanya untuk memenuhi kolom NOT NULL.
-        const passwordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 10);
-        await prisma.user.create({
-          data: {
-            nama: user.name?.trim() || email.split("@")[0] || "Peserta Magang",
-            email,
-            passwordHash,
-            role: ROLE_PENDAFTAR,
-          },
-        });
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    // Masukkan id & role ke dalam token JWT agar tersedia di server & middleware.
-    async jwt({ token, user, account }) {
       if (account?.provider === "google") {
-        // Ambil data User dari DB (dijamin sudah dibuat di callback signIn).
         const email = (user?.email ?? "").toLowerCase().trim();
-        const dbUser = email
-          ? await prisma.user.findUnique({
-              where: { email },
-              include: { unit: true },
-            })
-          : null;
-
-        if (!dbUser) {
-          token.uid = undefined;
-          token.role = "GUEST";
-          token.unitId = null;
-          token.unitNama = null;
-          return token;
+        if (email) {
+          try {
+            const existing = await prisma.user.findUnique({ where: { email } });
+            if (!existing) {
+              // passwordHash diisi acak: akun Google tidak pernah login via
+              // kredensial, jadi password ini hanya memenuhi kolom NOT NULL.
+              const passwordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 10);
+              await prisma.user.create({
+                data: {
+                  nama: user.name?.trim() || email.split("@")[0] || "Peserta Magang",
+                  email,
+                  passwordHash,
+                  role: ROLE_PENDAFTAR,
+                },
+              });
+            }
+          } catch {
+            // Jangan blokir login walau DB gagal; data tetap diteruskan di jwt.
+          }
         }
-
-        token.uid = dbUser.id;
-        token.role = dbUser.role;
-        token.unitId = dbUser.unitId ?? null;
-        token.unitNama = dbUser.unit?.nama ?? null;
-        token.name = dbUser.nama;
-        return token;
       }
+      return true;
+    },
+    // Isi token JWT hanya dari data yang diteruskan (TANPA query database),
+    // agar flow OAuth tidak timeout di fungsi serverless.
+    async jwt({ token, user, account }) {
+      if (!user) return token; // refresh token: biarkan data lama tetap ada.
 
-      if (user) {
-        token.role = (user as { role?: string }).role ?? "ADMIN";
+      const isGoogle = account?.provider === "google";
+      token.email = user.email ?? token.email ?? "";
+      token.name = user.name ?? token.name ?? "";
+
+      if (isGoogle) {
+        // Login Google hanya untuk pendaftar/peserta magang, jadi role selalu
+        // PENDAFTAR. id = sub Google karena tidak ada query DB untuk mengambil
+        // primary key Prisma.
+        token.uid = token.sub;
+        token.role = ROLE_PENDAFTAR;
+        token.unitId = null;
+        token.unitNama = null;
+      } else {
+        // Credentials: authorize sudah menyediakan id/role/unit lengkap.
         token.uid = user.id;
+        token.role = (user as { role?: string }).role ?? "GUEST";
         token.unitId = (user as { unitId?: string }).unitId ?? null;
         token.unitNama = (user as { unitNama?: string }).unitNama ?? null;
       }
       return token;
     },
+    // Salin data token ke session tanpa interaksi DB.
     session({ session, token }) {
       if (session.user) {
         session.user.id = (token.uid as string | undefined) ?? token.sub ?? "";
         session.user.role = (token.role as string | undefined) ?? "GUEST";
         session.user.unitId = (token.unitId as string | null) ?? null;
         session.user.unitNama = (token.unitNama as string | null) ?? null;
+        if (token.email) session.user.email = token.email as string;
+        if (token.name) session.user.name = token.name as string;
       }
       return session;
     },
