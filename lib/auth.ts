@@ -19,6 +19,7 @@ export const isGoogleAuthEnabled = useGoogleAuth;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -62,8 +63,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...(useGoogleAuth
       ? [
           Google({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            clientId: process.env.GOOGLE_CLIENT_ID || "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
           }),
         ]
       : []),
@@ -82,7 +83,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) {
           // Akun non-aktif tidak boleh login (konsisten dengan credentials).
-          return existing.isAktif;
+          if (!existing.isAktif) return false;
+          return true;
         }
         // passwordHash diisi acak: akun Google tidak pernah login via
         // kredensial, jadi password ini hanya untuk memenuhi kolom NOT NULL.
