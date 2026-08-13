@@ -1,0 +1,119 @@
+   ▲ Next.js 15.5.23 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://10.160.30.119:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Compiled middleware in 394ms
+ ✓ Ready in 2.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.8s
+ GET / 200 in 6973ms
+ GET / 200 in 267ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 6.3s
+ GET /login 200 in 8600ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 4.4s
+ GET / 200 in 1735ms
+ GET /api/auth/session 200 in 7816ms
+ ○ Compiling /cek-status ...
+ GET /api/auth/session 200 in 1293ms
+ ✓ Compiled /cek-status in 3.2s
+ GET /cek-status 200 in 4019ms
+ ○ Compiling /api/cek-status ...
+ ✓ Compiled /api/cek-status in 1106ms
+ POST /api/cek-status 200 in 2198ms
+ GET /login 200 in 1158ms
+ GET /api/auth/providers 200 in 1129ms
+ GET /api/auth/csrf 200 in 1060ms
+ POST /api/auth/signin/google? 200 in 1594ms
+ GET /api/auth/callback/google?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0AXEQxIA5GpyOnOe8ni-jqNzhjeADQpK-4YX0pWfWhTfpZwFPhTzjb6XgG72jnNR0TIdSWA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=none 302 in 1655ms
+ GET / 200 in 2291ms
+ GET /api/auth/session 200 in 1059ms
+ GET /api/auth/session 200 in 1123ms
+ GET /cek-status 200 in 1213ms
+ GET /api/auth/session 200 in 4093ms
+ GET /api/auth/session 200 in 2064ms
+ GET /api/auth/session 200 in 1473ms
+ GET /api/auth/session 200 in 1305ms
+ POST /api/cek-status 200 in 1403ms
+ GET /login 200 in 2280ms
+ GET / 200 in 1742ms
+ GET / 200 in 1655ms
+ GET /api/auth/session 200 in 1425ms
+ GET /api/auth/session 200 in 1051ms
+ ✓ Compiled in 317ms
+ ✓ Compiled in 278ms
+ ✓ Compiled /login in 142ms
+ GET /login 200 in 1006ms
+ GET /login?callbackUrl=/peserta/dashboard 200 in 318ms
+ GET /login 200 in 311ms
+ GET / 200 in 2354ms
+ GET /api/auth/session 200 in 1164ms
+ GET /api/auth/session 200 in 1081ms
+ GET /login 200 in 1201ms
+ GET /api/auth/providers 200 in 1104ms
+ GET /api/auth/csrf 200 in 1120ms
+ POST /api/auth/signin/google? 200 in 1384ms
+ GET /api/auth/callback/google?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0AXEQxICrGlrYr1rdZlobddAt8QnS1cLIDE3LhrflUHm6BAwVH6NGVcuqiKjLIhiRuoMHYA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0&prompt=none 302 in 1512ms
+ ○ Compiling /peserta/dashboard ...
+ ✓ Compiled /peserta/dashboard in 3.7s
+ GET /peserta/dashboard 200 in 6900ms
+ GET /api/auth/session 200 in 1167ms
+ GET /api/auth/session 200 in 1055ms
+ ○ Compiling /peserta/kehadiran ...
+ ✓ Compiled /peserta/kehadiran in 3.5s
+ GET /peserta/kehadiran 200 in 4756ms
+ ○ Compiling /peserta/izin ...
+ ✓ Compiled /peserta/izin in 3.4s
+ GET /peserta/izin 200 in 4511ms
+ GET /login 200 in 1636ms
+ POST /peserta/izin 303 in 2864ms
+ GET / 200 in 1390ms
+ GET /cek-status 200 in 1803ms
+ POST /api/cek-status 200 in 1105ms
+ GET /login?callbackUrl=%2Fpeserta%2Fdashboard 200 in 1119ms
+ GET /api/auth/csrf 200 in 1166ms
+ POST /api/auth/signout 200 in 1215ms
+ GET / 200 in 2200ms
+ GET /api/auth/session 200 in 1127ms
+ GET /api/auth/session 200 in 1071ms
+ GET /login 200 in 1416ms
+ GET / 200 in 1427ms
+ GET /login?callbackUrl=%2Fdaftar 200 in 1134ms
+ GET / 200 in 1235ms
+ ✓ Compiled in 482ms
+ ✓ Compiled / in 138ms
+ GET / 200 in 682ms
+ GET / 200 in 602ms
+ GET /api/auth/callback/google?iss=https%3A%2F%2Faccounts.google.com&code=4%2F0AXEQxICoXB9uqF1H-ZzPxChc2-FjQ_471Vl7eceIwpwnwjh067ZUw95ht-cKyP7EkXHIOw&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=none 302 in 1619ms
+ GET /peserta/dashboard 200 in 2835ms
+ GET /api/auth/session 200 in 1124ms
+ GET /api/auth/session 200 in 1278ms
+ GET /peserta/izin 200 in 1373ms
+ ○ Compiling /api/peserta/izin ...
+ ✓ Compiled /api/peserta/izin in 1835ms
+ POST /api/peserta/izin 201 in 2900ms
+ GET /peserta/izin 200 in 1443ms
+ GET /login 200 in 1268ms
+ POST /peserta/izin 303 in 2405ms
+ GET /api/auth/providers 200 in 1046ms
+ GET /api/auth/csrf 200 in 1131ms
+ POST /api/auth/callback/credentials? 200 in 1759ms
+ GET /api/auth/session 200 in 1134ms
+ GET /api/auth/session 200 in 1106ms
+ ○ Compiling /mentor/peserta ...
+ GET /api/auth/session 200 in 1282ms
+ ✓ Compiled /mentor/peserta in 3.1s
+ GET /mentor/peserta 200 in 4329ms
+ GET /mentor/peserta 200 in 1436ms
+ ○ Compiling /mentor/izin ...
+ ✓ Compiled /mentor/izin in 3.4s
+ GET /mentor/izin 200 in 4401ms
+ GET /mentor/peserta 200 in 1215ms
+ GET /api/auth/session 200 in 1158ms
+ GET /api/auth/session 200 in 1076ms
+ GET /api/auth/session 200 in 1122ms
+ GET /api/auth/session 200 in 1014ms
+[?25h

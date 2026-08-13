@@ -1,0 +1,236 @@
+// Prisma schema untuk "Pembangunan Aplikasi/Website Pendaftaran dan
+// Manajemen Data Peserta Magang/PKL" - Balai Besar Pengujian Minyak dan Gas Bumi (LEMIGAS)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MENTOR
+  PENDAFTAR
+}
+
+enum StatusPendaftar {
+  MENUNGGU
+  DITERIMA
+  DITOLAK
+  PESERTA_AKTIF
+}
+
+enum TipePeriode {
+  GENAP
+  GANJIL
+}
+
+enum StatusKehadiran {
+  HADIR
+  IZIN
+  SAKIT
+}
+
+enum TipeIzin {
+  IZIN
+  SAKIT
+}
+
+enum StatusPengajuan {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ===== Modul Manajemen Unit (master data) =====
+model Unit {
+  id        String   @id @default(cuid())
+  nama      String   @unique
+  deskripsi String?
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mentors   User[]
+  pendaftar Pendaftar[]
+  peserta   Peserta[]
+
+  @@index([aktif])
+}
+
+// ===== Modul Autentikasi & Hak Akses (RBAC) =====
+model User {
+  id           String   @id @default(cuid())
+  nama         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  unitId       String?
+  unit         Unit?    @relation(fields: [unitId], references: [id])
+  isAktif      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  diproses      Pendaftar[]     @relation("AdminVerifikasi")
+  sebagaiMentor Peserta[]
+  ubahStatus    StatusHistory[]
+  kehadiran     Attendance[]
+  pengajuanIzin LeaveRequest[]  @relation("PengajuanIzin")
+  reviewIzin    LeaveRequest[]  @relation("ReviewIzin")
+  penilaian     Evaluasi[]      @relation("PenilaiEvaluasi")
+
+  @@index([role])
+  @@index([unitId])
+}
+
+// ===== Modul Pendaftaran Online & Verifikasi/Seleksi =====
+model Pendaftar {
+  id                String          @id @default(cuid())
+  noPendaftaran     String          @unique
+  nama              String
+  asalInstansi      String // sekolah/kampus
+  jurusan           String?
+  jenisKelamin      String? // L / P
+  noHp              String
+  email             String
+  unitMinatId       String
+  unitMinat         Unit            @relation(fields: [unitMinatId], references: [id])
+  berkasCV          String // path file PDF (wajib)
+  berkasSurat       String? // path file PDF surat pengantar (opsional)
+  cvUrl             String? // URL berkas CV (PDF)
+  suratPengantarUrl String? // URL berkas surat pengantar (PDF)
+  ktpKtmUrl         String? // URL berkas KTP/KTM (PDF/JPG)
+  transkripUrl      String? // URL berkas transkrip nilai (PDF)
+  status            StatusPendaftar @default(MENUNGGU)
+  catatan           String? // catatan admin
+  diprosesAdminId   String?
+  diprosesAdmin     User?           @relation("AdminVerifikasi", fields: [diprosesAdminId], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  statusHistories StatusHistory[]
+  peserta         Peserta?
+
+  @@index([email])
+  @@index([status])
+  @@index([unitMinatId])
+  @@index([createdAt])
+  @@index([noPendaftaran])
+}
+
+// Riwayat perubahan status (audit trail untuk notifikasi & rekapitulasi)
+model StatusHistory {
+  id           String          @id @default(cuid())
+  pendaftarId  String
+  pendaftar    Pendaftar       @relation(fields: [pendaftarId], references: [id], onDelete: Cascade)
+  status       StatusPendaftar
+  catatan      String?
+  diubahOlehId String?
+  diubahOleh   User?           @relation(fields: [diubahOlehId], references: [id])
+  createdAt    DateTime        @default(now())
+
+  @@index([pendaftarId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ===== Modul Manajemen Data Peserta Aktif =====
+model Peserta {
+  id             String    @id @default(cuid())
+  pendaftarId    String    @unique
+  pendaftar      Pendaftar @relation(fields: [pendaftarId], references: [id])
+  unitId         String
+  unit           Unit      @relation(fields: [unitId], references: [id])
+  tanggalMulai   DateTime
+  tanggalSelesai DateTime
+  mentorId       String?
+  mentor         User?     @relation(fields: [mentorId], references: [id])
+  catatan        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  evaluasi Evaluasi[]
+
+  @@index([unitId])
+  @@index([mentorId])
+  @@index([tanggalMulai])
+  @@index([tanggalSelesai])
+}
+
+// ===== Modul Informasi / Pengumuman Program (opsional, di-cache ISR) =====
+model InfoProgram {
+  id        String   @id @default(cuid())
+  judul     String
+  isi       String
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aktif])
+}
+
+// ===== Modul Presensi Kehadiran Harian Peserta =====
+// Satu record per peserta per hari. Check-in/out dicatat peserta dari portal;
+// status (HADIR/IZIN/SAKIT) dapat disesuaikan oleh mentor sebagai rekapitulasi.
+model Attendance {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       DateTime // tanggal (dinormalisasi ke UTC tengah malam)
+  checkIn    DateTime?
+  checkOut   DateTime?
+  status     StatusKehadiran @default(HADIR)
+  keterangan String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([status])
+}
+
+// ===== Modul Pengajuan Izin / Sakit Peserta =====
+model LeaveRequest {
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation("PengajuanIzin", fields: [userId], references: [id], onDelete: Cascade)
+  type           TipeIzin // IZIN / SAKIT
+  startDate      DateTime
+  endDate        DateTime
+  reason         String
+  attachmentUrl  String? // path berkas bukti pendukung (opsional)
+  status         StatusPengajuan @default(PENDING)
+  catatanReview  String? // tanggapan mentor saat approve/reject
+  diprosesOlehId String?
+  diprosesOleh   User?           @relation("ReviewIzin", fields: [diprosesOlehId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ===== Modul Evaluasi Peserta oleh Mentor =====
+// Penilaian mentor terhadap peserta (disiplin, keaktifan, kinerja) beserta
+// catatan evaluasi. Seorang peserta dapat memiliki banyak riwayat penilaian.
+model Evaluasi {
+  id            String   @id @default(cuid())
+  pesertaId     String
+  peserta       Peserta  @relation(fields: [pesertaId], references: [id], onDelete: Cascade)
+  kedisiplinan  Int // skala 1-100
+  keaktifan     Int // skala 1-100
+  kinerja       Int // skala 1-100
+  catatan       String?
+  dinilaiOlehId String?
+  dinilaiOleh   User?    @relation("PenilaiEvaluasi", fields: [dinilaiOlehId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([pesertaId])
+  @@index([dinilaiOlehId])
+}
