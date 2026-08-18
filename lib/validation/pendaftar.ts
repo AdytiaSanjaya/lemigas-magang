@@ -26,6 +26,16 @@ export const pendaftarSchema = z.object({
   unitMinatId: z
     .string({ message: "Unit yang diminati wajib dipilih" })
     .min(1, "Silakan pilih unit"),
+  applicationType: z.enum(["INDIVIDUAL", "GROUP"]).default("INDIVIDUAL"),
+  groupMembers: z
+    .array(
+      z.object({
+        name: z.string({ message: "Nama anggota wajib diisi" }).min(1, "Nama anggota wajib diisi"),
+        identifier: z.string({ message: "No. identitas anggota wajib diisi" }).min(1, "No. identitas anggota wajib diisi"),
+        major: z.string({ message: "Jurusan anggota wajib diisi" }).min(1, "Jurusan anggota wajib diisi"),
+      })
+    )
+    .optional(),
 });
 
 export type PendaftarInput = z.infer<typeof pendaftarSchema>;

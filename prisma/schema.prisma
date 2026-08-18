@@ -106,6 +106,8 @@ model Pendaftar {
   transkripUrl      String? // URL berkas transkrip nilai (PDF)
   status            StatusPendaftar @default(MENUNGGU)
   catatan           String? // catatan admin
+  applicationType   String          @default("INDIVIDUAL") // "INDIVIDUAL" atau "GROUP"
+  groupMembers      Json? // Array object [{ name, identifier, major }] untuk anggota kelompok
   diprosesAdminId   String?
   diprosesAdmin     User?           @relation("AdminVerifikasi", fields: [diprosesAdminId], references: [id])
   createdAt         DateTime        @default(now())
