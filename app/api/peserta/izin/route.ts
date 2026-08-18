@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { izinSchema } from "@/lib/validation/presensi";
 import { getPesertaBySession } from "@/lib/peserta";
 import { toUtcDate } from "@/lib/dates";
-import { validateUploadFile, safeFileName, uploadDir } from "@/lib/security";
+import { validateUploadFile } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -74,7 +72,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Lampiran bukti (opsional): verifikasi tipe asli file (magic bytes).
+  // Lampiran bukti (opsional): verifikasi tipe asli file (magic bytes), lalu
+  // simpan sebagai data URL di database (tanpa filesystem, aman di Vercel).
   const attachment = form.get("attachment") as File | null;
   let attachmentUrl: string | null = null;
   if (attachment && attachment.size > 0) {
@@ -82,11 +81,7 @@ export async function POST(req: NextRequest) {
     if (!result.ok) {
       return NextResponse.json({ error: `Lampiran: ${result.error}` }, { status: 422 });
     }
-    const dir = uploadDir();
-    await mkdir(dir, { recursive: true });
-    const name = safeFileName(result.extension!);
-    await writeFile(path.join(dir, name), result.buffer!);
-    attachmentUrl = `/berkas/${name}`;
+    attachmentUrl = `data:${result.mime};base64,${result.buffer!.toString("base64")}`;
   }
 
   const record = await prisma.leaveRequest.create({

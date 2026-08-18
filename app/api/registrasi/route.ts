@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { auth, ROLE_PENDAFTAR } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { pendaftarSchema } from "@/lib/validation/pendaftar";
 import { rateLimiter, getClientIp } from "@/lib/rate-limit";
-import { validateUploadFile, safeFileName, uploadDir } from "@/lib/security";
+import { validateUploadFile } from "@/lib/security";
+
+// Ubah buffer terverifikasi menjadi data URL (mis. "data:application/pdf;base64,...")
+// agar berkas tersimpan di database tanpa bergantung pada filesystem serverless.
+function toDataUrl(mime: string, buffer: Buffer): string {
+  return `data:${mime};base64,${buffer.toString("base64")}`;
+}
 
 // Generator nomor pendaftaran: LEMIGAS-<Tahun>-<urutan>
 async function generateNoPendaftaran(): Promise<string> {
@@ -135,12 +139,9 @@ export async function POST(req: NextRequest) {
     { key: "transkripUrl", label: "Transkrip nilai", file: transkrip, allowed: ["application/pdf"] },
   ];
 
-  // 7) Siapkan direktori upload & simpan CV ke disk (bukan public/ agar hanya
-  //    bisa diakses via route berizin).
-  const dir = uploadDir();
-  await mkdir(dir, { recursive: true });
-  const cvName = safeFileName(cvResult.extension!);
-  await writeFile(path.join(dir, cvName), cvResult.buffer!);
+  // 7) Ubah semua berkas terverifikasi menjadi data URL (disimpan di database,
+  //    bukan ditulis ke filesystem — kompatibel dengan runtime serverless Vercel).
+  const cvDataUrl = toDataUrl(cvResult.mime!, cvResult.buffer!);
 
   const saved = new Map<string, string>();
   for (const spec of uploadSpecs) {
@@ -153,9 +154,7 @@ export async function POST(req: NextRequest) {
         { status: 422 }
       );
     }
-    const name = safeFileName(result.extension!);
-    saved.set(spec.key, name);
-    await writeFile(path.join(dir, name), result.buffer!);
+    saved.set(spec.key, toDataUrl(result.mime!, result.buffer!));
   }
 
   // 8) Simpan data pendaftar dalam transaksi (beserta riwayat status awal).
@@ -171,20 +170,12 @@ export async function POST(req: NextRequest) {
         noHp: parsed.data.noHp,
         email: parsed.data.email.toLowerCase().trim(),
         unitMinatId: parsed.data.unitMinatId,
-        berkasCV: `/berkas/${cvName}`,
-        berkasSurat: saved.has("suratPengantarUrl")
-          ? `/berkas/${saved.get("suratPengantarUrl")}`
-          : null,
-        cvUrl: `/berkas/${cvName}`,
-        suratPengantarUrl: saved.has("suratPengantarUrl")
-          ? `/berkas/${saved.get("suratPengantarUrl")}`
-          : null,
-        ktpKtmUrl: saved.has("ktpKtmUrl")
-          ? `/berkas/${saved.get("ktpKtmUrl")}`
-          : null,
-        transkripUrl: saved.has("transkripUrl")
-          ? `/berkas/${saved.get("transkripUrl")}`
-          : null,
+        berkasCV: cvDataUrl,
+        berkasSurat: saved.get("suratPengantarUrl") ?? null,
+        cvUrl: cvDataUrl,
+        suratPengantarUrl: saved.get("suratPengantarUrl") ?? null,
+        ktpKtmUrl: saved.get("ktpKtmUrl") ?? null,
+        transkripUrl: saved.get("transkripUrl") ?? null,
         status: "MENUNGGU",
         applicationType: parsed.data.applicationType,
         groupMembers:
