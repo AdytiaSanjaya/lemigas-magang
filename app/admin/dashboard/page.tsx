@@ -40,30 +40,56 @@ const CARD_STYLES = {
 } as const;
 
 export default async function AdminDashboardPage() {
+  // Autentikasi session admin (getServerSession via auth()): jika session
+  // invalid/role bukan ADMIN langsung redirect ke /login.
   await requireAdmin();
 
-  const [
-    totalPendaftar,
-    totalMenunggu,
-    totalDiterima,
-    totalDitolak,
-    totalPeserta,
-    units,
-  ] = await Promise.all([
-    prisma.pendaftar.count(),
-    prisma.pendaftar.count({ where: { status: "MENUNGGU" } }),
-    prisma.pendaftar.count({ where: { status: "DITERIMA" } }),
-    prisma.pendaftar.count({ where: { status: "DITOLAK" } }),
-    prisma.peserta.count(),
-    prisma.unit.findMany({ orderBy: { nama: "asc" } }),
-  ]);
+  // Data fetching paralel (Promise.all) dengan fallback aman: jika salah satu
+  // query Prisma bermasalah, halaman tetap render dengan data kosong.
+  let data: {
+    totalPendaftar: number;
+    totalMenunggu: number;
+    totalDiterima: number;
+    totalDitolak: number;
+    totalPeserta: number;
+    units: Array<{ id: string; nama: string }>;
+  } = {
+    totalPendaftar: 0,
+    totalMenunggu: 0,
+    totalDiterima: 0,
+    totalDitolak: 0,
+    totalPeserta: 0,
+    units: [],
+  };
+
+  try {
+    const [totalPendaftar, totalMenunggu, totalDiterima, totalDitolak, totalPeserta, units] =
+      await Promise.all([
+        prisma.pendaftar.count(),
+        prisma.pendaftar.count({ where: { status: "MENUNGGU" } }),
+        prisma.pendaftar.count({ where: { status: "DITERIMA" } }),
+        prisma.pendaftar.count({ where: { status: "DITOLAK" } }),
+        prisma.peserta.count(),
+        prisma.unit.findMany({ orderBy: { nama: "asc" } }),
+      ]);
+    data = {
+      totalPendaftar,
+      totalMenunggu,
+      totalDiterima,
+      totalDitolak,
+      totalPeserta,
+      units,
+    };
+  } catch {
+    // Abaikan error: halaman dashboard tetap tampil dengan nilai fallback di atas.
+  }
 
   const cards = [
-    { key: "total", label: "Total Pendaftar", value: totalPendaftar },
-    { key: "menunggu", label: "Menunggu Verifikasi", value: totalMenunggu },
-    { key: "diterima", label: "Diterima", value: totalDiterima },
-    { key: "ditolak", label: "Ditolak", value: totalDitolak },
-    { key: "peserta", label: "Peserta Aktif", value: totalPeserta },
+    { key: "total", label: "Total Pendaftar", value: data.totalPendaftar },
+    { key: "menunggu", label: "Menunggu Verifikasi", value: data.totalMenunggu },
+    { key: "diterima", label: "Diterima", value: data.totalDiterima },
+    { key: "ditolak", label: "Ditolak", value: data.totalDitolak },
+    { key: "peserta", label: "Peserta Aktif", value: data.totalPeserta },
   ] as const;
 
   return (
@@ -107,7 +133,7 @@ export default async function AdminDashboardPage() {
         })}
       </div>
 
-      <ReportSection units={units.map((u) => ({ id: u.id, nama: u.nama }))} />
+      <ReportSection units={data.units.map((u) => ({ id: u.id, nama: u.nama }))} />
     </div>
   );
 }
