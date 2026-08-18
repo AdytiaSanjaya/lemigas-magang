@@ -7,7 +7,7 @@ export async function requireAuth(roles: Array<"ADMIN" | "MENTOR"> = ["ADMIN", "
   if (!session?.user) redirect("/login");
 
   const role = session.user.role as "ADMIN" | "MENTOR";
-  if (!roles.includes(role)) redirect("/unauthorized");
+  if (!roles.includes(role)) redirect("/login");
 
   return session;
 }
@@ -28,7 +28,7 @@ export async function requirePeserta() {
   if (!session?.user) redirect("/login");
 
   const role = session.user.role;
-  if (role !== "PENDAFTAR") redirect("/unauthorized");
+  if (role !== "PENDAFTAR") redirect("/login");
 
   return session;
 }
