@@ -143,7 +143,7 @@ model StatusHistory {
 model Peserta {
   id             String    @id @default(cuid())
   pendaftarId    String    @unique
-  pendaftar      Pendaftar @relation(fields: [pendaftarId], references: [id])
+  pendaftar      Pendaftar @relation(fields: [pendaftarId], references: [id], onDelete: Cascade)
   unitId         String
   unit           Unit      @relation(fields: [unitId], references: [id])
   tanggalMulai   DateTime
@@ -186,6 +186,8 @@ model Attendance {
   checkOut   DateTime?
   status     StatusKehadiran @default(HADIR)
   keterangan String?
+  latitude   Float? // koordinat geografis saat check-in (geolokasi)
+  longitude  Float?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 

@@ -55,5 +55,6 @@ export async function POST(req: NextRequest) {
 
   // Hanya kembalikan data status yang aman (tanpa email/no.HP).
   const { email: _email, ...safeData } = pendaftar;
+  void _email;
   return NextResponse.json({ pendaftar: safeData });
 }

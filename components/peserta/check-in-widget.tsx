@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import RealtimeClock from "@/components/peserta/realtime-clock";
+import {
+  KANTOR_LEMIGAS,
+  ABSEN_RADIUS_METERS,
+  haversineMeters,
+} from "@/lib/geo";
 import { LogIn, LogOut, Loader2, CheckCircle2, CircleAlert } from "lucide-react";
 
 export interface KehadiranState {
@@ -47,14 +52,69 @@ export default function CheckInWidget({
       : "idle";
   const pill = STATUS_PILL[status];
 
+  // Minta izin GPS browser; resolve koordinat, reject dengan alasan error.
+  function getCurrentPosition(): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+      if (!("geolocation" in navigator)) {
+        reject(new Error("unsupported"));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      });
+    });
+  }
+
   async function act(action: "CHECK_IN" | "CHECK_OUT") {
     setLoading(action);
     setNotice(null);
     try {
+      // 1) Ambil koordinat GPS pengguna.
+      let latitude: number;
+      let longitude: number;
+      try {
+        const pos = await getCurrentPosition();
+        latitude = pos.coords.latitude;
+        longitude = pos.coords.longitude;
+      } catch (geoErr) {
+        const denied =
+          !!geoErr &&
+          typeof geoErr === "object" &&
+          "code" in geoErr &&
+          (geoErr as GeolocationPositionError).code ===
+            GeolocationPositionError.PERMISSION_DENIED;
+        setNotice({
+          ok: false,
+          text: denied
+            ? "Izin lokasi ditolak. Aktifkan GPS/lokasi untuk presensi."
+            : "Tidak dapat memperoleh lokasi Anda. Coba lagi.",
+        });
+        setLoading(null);
+        return;
+      }
+
+      // 2) Validasi radius: maksimal 200 meter dari kantor LEMIGAS.
+      const jarak = haversineMeters(
+        latitude,
+        longitude,
+        KANTOR_LEMIGAS.latitude,
+        KANTOR_LEMIGAS.longitude
+      );
+      if (jarak > ABSEN_RADIUS_METERS) {
+        setNotice({
+          ok: false,
+          text: "Anda berada di luar radius kantor LEMIGAS.",
+        });
+        setLoading(null);
+        return;
+      }
+
       const res = await fetch("/api/peserta/kehadiran", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, latitude, longitude }),
       });
       const data = await res.json();
       if (!res.ok) {

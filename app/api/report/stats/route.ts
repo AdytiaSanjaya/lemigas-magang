@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     if (monthBuckets[key]) monthBuckets[key][r.status] += 1;
   }
 
-  const perBulan = Object.keys(monthBuckets).map((key, idx) => {
+  const perBulan = Object.keys(monthBuckets).map((key) => {
     const [y, m] = key.split("-").map(Number);
     const b = monthBuckets[key];
     return {

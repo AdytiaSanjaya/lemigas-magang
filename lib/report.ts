@@ -44,7 +44,6 @@ export async function buildPdfBuffer(rows: ReportRow[]): Promise<Buffer> {
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
 
-  const { width } = page.getSize();
   const margin = 40;
   const rowH = 18;
   let y = page.getHeight() - margin;

@@ -1,9 +1,18 @@
 import { z } from "zod";
+import { COORD_BOUNDS } from "@/lib/geo";
 
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal tidak valid");
 
 export const kehadiranSchema = z.object({
   action: z.enum(["CHECK_IN", "CHECK_OUT"]),
+  latitude: z
+    .number()
+    .min(COORD_BOUNDS.lat.min, "Latitude tidak valid")
+    .max(COORD_BOUNDS.lat.max, "Latitude tidak valid"),
+  longitude: z
+    .number()
+    .min(COORD_BOUNDS.lon.min, "Longitude tidak valid")
+    .max(COORD_BOUNDS.lon.max, "Longitude tidak valid"),
 });
 
 export type KehadiranInput = z.infer<typeof kehadiranSchema>;

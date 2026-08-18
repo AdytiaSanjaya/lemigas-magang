@@ -4,6 +4,11 @@ import { auth } from "@/lib/auth";
 import { kehadiranSchema } from "@/lib/validation/presensi";
 import { getPesertaBySession } from "@/lib/peserta";
 import { todayString, toUtcDate } from "@/lib/dates";
+import {
+  KANTOR_LEMIGAS,
+  ABSEN_RADIUS_METERS,
+  haversineMeters,
+} from "@/lib/geo";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -52,7 +57,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { action } = parsed.data;
+  const { action, latitude, longitude } = parsed.data;
+
+  // Validasi radius lokasi: presensi hanya sah bila peserta berada dalam
+  // radius maksimal 200 meter dari kantor LEMIGAS.
+  const jarak = haversineMeters(
+    latitude,
+    longitude,
+    KANTOR_LEMIGAS.latitude,
+    KANTOR_LEMIGAS.longitude
+  );
+  if (jarak > ABSEN_RADIUS_METERS) {
+    return NextResponse.json(
+      { error: "Anda berada di luar radius kantor LEMIGAS." },
+      { status: 422 }
+    );
+  }
+
   const date = toUtcDate(todayString());
 
   const existing = await prisma.attendance.findUnique({
@@ -67,7 +88,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const record = await prisma.attendance.create({
-      data: { userId: session.user.id, date, checkIn: now },
+      data: { userId: session.user.id, date, checkIn: now, latitude, longitude },
     });
     return NextResponse.json(
       { message: "Check-in berhasil. Selamat bekerja!", record },
@@ -97,7 +118,7 @@ export async function POST(req: NextRequest) {
 
   const record = await prisma.attendance.update({
     where: { id: existing.id },
-    data: { checkOut: now },
+    data: { checkOut: now, latitude, longitude },
   });
   return NextResponse.json({ message: "Check-out berhasil. Sampai jumpa!", record });
 }
