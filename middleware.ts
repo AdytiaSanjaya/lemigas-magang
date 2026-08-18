@@ -39,30 +39,19 @@ const ROLE_HOME: Record<string, string> = {
   PENDAFTAR: "/peserta/dashboard",
 };
 
-// Path publik/auth/aset yang TIDAK boleh kena guard redirect ke /login,
-// agar tidak terjadi loop redirect.
-function isPublicPath(pathname: string): boolean {
+// Rute yang SELALU lolos tanpa cek token / guard redirect (mencegah loop).
+function isBypassPath(pathname: string): boolean {
   return (
     pathname === "/" ||
-    pathname === "/login" ||
-    pathname.startsWith("/login") ||
-    pathname === "/api" ||
-    pathname.startsWith("/api/") ||
-    pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
     pathname.startsWith("/informasi") ||
-    pathname === "/unauthorized" ||
-    pathname.startsWith("/cek-status") ||
-    pathname.startsWith("/daftar")
+    pathname.startsWith("/daftar") ||
+    pathname === "/api/auth" ||
+    pathname.startsWith("/api/auth/") ||
+    pathname === "/api/admin/setup" ||
+    pathname.startsWith("/api/admin/setup/") ||
+    pathname.startsWith("/_next") ||
+    pathname === "/favicon.ico"
   );
-}
-
-// Cegah open-redirect: hanya terima callbackUrl internal.
-function safeCallbackUrl(value?: string | null): string | null {
-  if (value && value.startsWith("/") && !value.startsWith("//")) {
-    return value;
-  }
-  return null;
 }
 
 function isStateChanging(method: string): boolean {
@@ -78,15 +67,15 @@ export async function middleware(request: NextRequest) {
     response.headers.set(header, value);
   });
 
-  // --- CSRF protection ---
-  // Untuk request penulisan (POST/PUT/PATCH/DELETE) ke /api (kecuali /api/auth
-  // yang dikelola NextAuth), validasi origin. Jika browser mengirim Origin
-  // header tapi berbeda dari Host, tolak.
-  if (
-    isStateChanging(request.method) &&
-    pathname.startsWith("/api") &&
-    !pathname.startsWith("/api/auth")
-  ) {
+  // Rute publik/auth/aset selalu lolos — tidak ada redirect di sini.
+  if (isBypassPath(pathname)) {
+    return response;
+  }
+
+  // --- CSRF protection (rute /api selain yang di-bypass di atas) ---
+  // Untuk request penulisan (POST/PUT/PATCH/DELETE), validasi origin. Jika
+  // browser mengirim Origin header tapi berbeda dari Host, tolak.
+  if (isStateChanging(request.method) && pathname.startsWith("/api")) {
     const origin = request.headers.get("origin");
     const host = request.headers.get("host");
     if (origin && host) {
@@ -104,26 +93,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // --- Role-based route guard (first line). Server akan memverifikasi lagi. ---
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  const role = (token?.role as string | undefined) ?? null;
-
-  // Pengguna yang sudah login tidak perlu melihat halaman login.
-  // Arahkan ke callbackUrl yang aman atau dashboard sesuai perannya.
-  if (token && pathname === "/login") {
-    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-    const target =
-      safeCallbackUrl(callbackUrl) ??
-      (role ? ROLE_HOME[role] : null) ??
-      "/peserta/dashboard";
+  // Halaman login: saat belum login biarkan lewat; saat sudah login arahkan
+  // ke dashboard sesuai peran (tanpa callbackUrl berantai).
+  if (pathname === "/login" || pathname.startsWith("/login/")) {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) {
+      return response;
+    }
+    const role = (token?.role as string | undefined) ?? null;
+    const target = (role && ROLE_HOME[role]) ?? "/peserta/dashboard";
     return NextResponse.redirect(new URL(target, request.url));
   }
 
-  // Rute publik tidak boleh di-redirect ke /login (hindari loop).
-  if (isPublicPath(pathname)) {
-    return response;
-  }
-
+  // --- Role-based route guard (first line). Server akan memverifikasi lagi. ---
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
   const isMentorRoute = pathname === "/mentor" || pathname.startsWith("/mentor/");
   const isPesertaRoute = pathname === "/peserta" || pathname.startsWith("/peserta/");
@@ -132,10 +114,12 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const role = (token?.role as string | undefined) ?? null;
+
+  // Belum login → ke /login TANPA callbackUrl agar tidak berantai.
   if (!token) {
-    const login = new URL("/login", request.url);
-    login.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(login);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   if (isAdminRoute && role !== "ADMIN") {
