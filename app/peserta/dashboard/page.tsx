@@ -23,7 +23,12 @@ const DAY_MS = 86400000;
 
 export default async function PesertaDashboardPage() {
   const session = await requirePeserta();
-  const peserta = await getPesertaBySession(session);
+  let peserta: Awaited<ReturnType<typeof getPesertaBySession>> = null;
+  try {
+    peserta = await getPesertaBySession(session);
+  } catch {
+    peserta = null;
+  }
 
   // Belum tercatat sebagai peserta aktif.
   if (!peserta) {
@@ -49,6 +54,7 @@ export default async function PesertaDashboardPage() {
   const today = toUtcDate(todayString());
   const todayKey = utcDateString(today);
 
+  // Query dibungkus catch + fallback agar halaman tetap render bila error DB.
   const [
     totalKehadiran,
     kehadiranBulanIni,
@@ -58,38 +64,46 @@ export default async function PesertaDashboardPage() {
     recentAttendance,
     recentIzin,
   ] = await Promise.all([
-    prisma.attendance.count({ where: { userId: session.user.id } }),
-    prisma.attendance.count({
-      where: {
-        userId: session.user.id,
-        date: { gte: toUtcDate(todayKey.slice(0, 7) + "-01") },
-      },
-    }),
-    prisma.attendance.findUnique({
-      where: { userId_date: { userId: session.user.id, date: today } },
-    }),
-    prisma.leaveRequest.findFirst({
-      where: {
-        userId: session.user.id,
-        status: "APPROVED",
-        startDate: { lte: today },
-        endDate: { gte: today },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.leaveRequest.count({
-      where: { userId: session.user.id, status: "PENDING" },
-    }),
-    prisma.attendance.findMany({
-      where: { userId: session.user.id },
-      orderBy: { date: "desc" },
-      take: 6,
-    }),
-    prisma.leaveRequest.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
+    prisma.attendance.count({ where: { userId: session.user.id } }).catch(() => 0),
+    prisma.attendance
+      .count({
+        where: {
+          userId: session.user.id,
+          date: { gte: toUtcDate(todayKey.slice(0, 7) + "-01") },
+        },
+      })
+      .catch(() => 0),
+    prisma.attendance
+      .findUnique({ where: { userId_date: { userId: session.user.id, date: today } } })
+      .catch(() => null),
+    prisma.leaveRequest
+      .findFirst({
+        where: {
+          userId: session.user.id,
+          status: "APPROVED",
+          startDate: { lte: today },
+          endDate: { gte: today },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+      .catch(() => null),
+    prisma.leaveRequest
+      .count({ where: { userId: session.user.id, status: "PENDING" } })
+      .catch(() => 0),
+    prisma.attendance
+      .findMany({
+        where: { userId: session.user.id },
+        orderBy: { date: "desc" },
+        take: 6,
+      })
+      .catch(() => []),
+    prisma.leaveRequest
+      .findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      })
+      .catch(() => []),
   ]);
 
   // Status hari ini
@@ -207,7 +221,7 @@ export default async function PesertaDashboardPage() {
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-navy-100">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15">
                 <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-                {peserta.unit.nama}
+                {peserta.unit?.nama ?? "-"}
               </span>
               {peserta.mentor && (
                 <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs ring-1 ring-white/15">

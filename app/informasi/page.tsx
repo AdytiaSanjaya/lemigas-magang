@@ -161,10 +161,12 @@ const tahapanSeleksi = [
 ];
 
 export default async function InformasiPage() {
-  const items = await prisma.infoProgram.findMany({
-    where: { aktif: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const items = await prisma.infoProgram
+    .findMany({
+      where: { aktif: true },
+      orderBy: { createdAt: "desc" },
+    })
+    .catch(() => []);
 
   return (
     <main className="min-h-screen bg-slate-50">

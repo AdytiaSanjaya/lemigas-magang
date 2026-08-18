@@ -36,19 +36,24 @@ export default async function AdminPendaftarPage({
       : {}),
   };
 
+  // Query dibungkus catch + fallback agar halaman tetap render bila ada error DB.
   const [pendaftar, total] = await Promise.all([
-    prisma.pendaftar.findMany({
-      where,
-      include: { unitMinat: true },
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    prisma.pendaftar.count({ where }),
+    prisma.pendaftar
+      .findMany({
+        where,
+        include: { unitMinat: true },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      })
+      .catch(() => []),
+    prisma.pendaftar.count({ where }).catch(() => 0),
   ]);
 
-  const units = await prisma.unit.findMany({ orderBy: { nama: "asc" } });
-  const mentors = await prisma.user.findMany({ where: { role: "MENTOR" }, orderBy: { nama: "asc" } });
+  const units = await prisma.unit.findMany({ orderBy: { nama: "asc" } }).catch(() => []);
+  const mentors = await prisma.user
+    .findMany({ where: { role: "MENTOR" }, orderBy: { nama: "asc" } })
+    .catch(() => []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const qs = new URLSearchParams();
@@ -118,7 +123,7 @@ export default async function AdminPendaftarPage({
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{p.noPendaftaran}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">{p.nama}</td>
                   <td className="px-4 py-3 text-slate-600">{p.asalInstansi}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.unitMinat.nama}</td>
+                  <td className="px-4 py-3 text-slate-600">{p.unitMinat?.nama ?? "-"}</td>
                   <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
                   <td className="px-4 py-3 text-slate-500">{formatTanggal(p.createdAt)}</td>
                   <td className="px-4 py-3">

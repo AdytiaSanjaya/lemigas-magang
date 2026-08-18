@@ -187,7 +187,7 @@ export default function CekStatusPage() {
                       {data.noPendaftaran}
                     </span>
                     <span className="h-1 w-1 rounded-full bg-slate-500" aria-hidden="true" />
-                    <span>{data.unitMinat.nama}</span>
+                    <span>{data.unitMinat?.nama ?? "-"}</span>
                   </div>
                   {data.peserta && (
                     <p className="mt-2 text-xs text-slate-400">
@@ -234,7 +234,7 @@ export default function CekStatusPage() {
             <dl className="mt-5 divide-y divide-zinc-100 text-sm">
               <div className="flex justify-between py-2.5">
                 <dt className="text-zinc-500">Unit yang diminati</dt>
-                <dd className="font-medium text-zinc-800">{data.unitMinat.nama}</dd>
+                <dd className="font-medium text-zinc-800">{data.unitMinat?.nama ?? "-"}</dd>
               </div>
               {data.peserta && (
                 <>

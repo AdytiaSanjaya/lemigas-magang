@@ -12,7 +12,12 @@ export default async function PesertaLayout({
   children: React.ReactNode;
 }) {
   const session = await requirePeserta();
-  const peserta = await getPesertaBySession(session);
+  let peserta: Awaited<ReturnType<typeof getPesertaBySession>> = null;
+  try {
+    peserta = await getPesertaBySession(session);
+  } catch {
+    peserta = null;
+  }
 
   const initials = (session.user.name ?? "P")
     .split(" ")
@@ -34,7 +39,7 @@ export default async function PesertaLayout({
           <div className="mx-3 mt-3 rounded-2xl border border-navy-100 bg-navy-50/60 p-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-navy-700">
               <Building2 size={14} aria-hidden="true" />
-              {peserta.unit.nama}
+              {peserta.unit?.nama ?? "-"}
             </div>
             <div className="mt-2 space-y-1 text-[11px] text-slate-600">
               <div className="flex justify-between gap-2">

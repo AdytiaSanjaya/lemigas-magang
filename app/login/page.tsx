@@ -26,7 +26,12 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    session = null;
+  }
   const { callbackUrl } = await searchParams;
 
   // Jika sudah login, langsung diarahkan ke callbackUrl (mis. dari portal

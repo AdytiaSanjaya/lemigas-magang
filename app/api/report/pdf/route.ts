@@ -30,28 +30,32 @@ export async function GET(req: NextRequest) {
       : {}),
   };
 
-  const data = await prisma.pendaftar.findMany({
-    where,
-    include: { unitMinat: { select: { nama: true } } },
-    orderBy: { createdAt: "asc" },
-    take: 2000,
-  });
+  try {
+    const data = await prisma.pendaftar.findMany({
+      where,
+      include: { unitMinat: { select: { nama: true } } },
+      orderBy: { createdAt: "asc" },
+      take: 2000,
+    });
 
-  const rows: ReportRow[] = data.map((p) => ({
-    noPendaftaran: p.noPendaftaran,
-    nama: p.nama,
-    asalInstansi: p.asalInstansi,
-    unit: p.unitMinat.nama,
-    status: STATUS_TEXT[p.status] ?? p.status,
-    tanggalDaftar: formatTanggal(p.createdAt),
-  }));
+    const rows: ReportRow[] = data.map((p) => ({
+      noPendaftaran: p.noPendaftaran,
+      nama: p.nama,
+      asalInstansi: p.asalInstansi,
+      unit: p.unitMinat?.nama ?? "-",
+      status: STATUS_TEXT[p.status] ?? p.status,
+      tanggalDaftar: formatTanggal(p.createdAt),
+    }));
 
-  const buf = await buildPdfBuffer(rows);
-  return new NextResponse(new Uint8Array(buf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="rekap-pendaftaran-${new Date().toISOString().slice(0, 10)}.pdf"`,
-      "Content-Length": String(buf.length),
-    },
-  });
+    const buf = await buildPdfBuffer(rows);
+    return new NextResponse(new Uint8Array(buf), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="rekap-pendaftaran-${new Date().toISOString().slice(0, 10)}.pdf"`,
+        "Content-Length": String(buf.length),
+      },
+    });
+  } catch {
+    return NextResponse.json({ error: "Gagal membuat laporan PDF." }, { status: 500 });
+  }
 }

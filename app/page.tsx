@@ -90,7 +90,12 @@ const steps = [
 ];
 
 export default async function HomePage() {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    session = null;
+  }
 
   // Admin/Mentor langsung diarahkan ke panelnya masing-masing. Peserta
   // (Google OAuth) tetap bisa mengakses beranda.

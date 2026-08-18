@@ -30,28 +30,32 @@ export async function GET(req: NextRequest) {
       : {}),
   };
 
-  const data = await prisma.pendaftar.findMany({
-    where,
-    include: { unitMinat: { select: { nama: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 5000,
-  });
+  try {
+    const data = await prisma.pendaftar.findMany({
+      where,
+      include: { unitMinat: { select: { nama: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5000,
+    });
 
-  const rows: ReportRow[] = data.map((p) => ({
-    noPendaftaran: p.noPendaftaran,
-    nama: p.nama,
-    asalInstansi: p.asalInstansi,
-    unit: p.unitMinat.nama,
-    status: STATUS_TEXT[p.status] ?? p.status,
-    tanggalDaftar: formatTanggal(p.createdAt),
-  }));
+    const rows: ReportRow[] = data.map((p) => ({
+      noPendaftaran: p.noPendaftaran,
+      nama: p.nama,
+      asalInstansi: p.asalInstansi,
+      unit: p.unitMinat?.nama ?? "-",
+      status: STATUS_TEXT[p.status] ?? p.status,
+      tanggalDaftar: formatTanggal(p.createdAt),
+    }));
 
-  const buf = await buildExcelBuffer(rows);
-  return new NextResponse(new Uint8Array(buf), {
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="rekap-pendaftaran-${new Date().toISOString().slice(0, 10)}.xlsx"`,
-      "Content-Length": String(buf.length),
-    },
-  });
+    const buf = await buildExcelBuffer(rows);
+    return new NextResponse(new Uint8Array(buf), {
+      headers: {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="rekap-pendaftaran-${new Date().toISOString().slice(0, 10)}.xlsx"`,
+        "Content-Length": String(buf.length),
+      },
+    });
+  } catch {
+    return NextResponse.json({ error: "Gagal membuat laporan Excel." }, { status: 500 });
+  }
 }

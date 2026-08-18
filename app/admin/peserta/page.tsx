@@ -24,19 +24,25 @@ export default async function AdminPesertaPage({
     ...(q ? { pendaftar: { nama: { contains: q, mode: "insensitive" as const } } } : {}),
   };
 
+  // Query dibungkus catch + fallback agar halaman tetap render bila ada error
+  // DB atau data relasi belum lengkap (tidak crash 500).
   const [items, total] = await Promise.all([
-    prisma.peserta.findMany({
-      where,
-      include: { pendaftar: true, unit: true, mentor: { select: { id: true, nama: true } } },
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    prisma.peserta.count({ where }),
+    prisma.peserta
+      .findMany({
+        where,
+        include: { pendaftar: true, unit: true, mentor: { select: { id: true, nama: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      })
+      .catch(() => []),
+    prisma.peserta.count({ where }).catch(() => 0),
   ]);
 
-  const units = await prisma.unit.findMany({ orderBy: { nama: "asc" } });
-  const mentors = await prisma.user.findMany({ where: { role: "MENTOR" }, orderBy: { nama: "asc" } });
+  const units = await prisma.unit.findMany({ orderBy: { nama: "asc" } }).catch(() => []);
+  const mentors = await prisma.user
+    .findMany({ where: { role: "MENTOR" }, orderBy: { nama: "asc" } })
+    .catch(() => []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const qs = new URLSearchParams();
@@ -80,9 +86,9 @@ export default async function AdminPesertaPage({
             ) : (
               items.map((p) => (
                 <tr key={p.id}>
-                  <td className="px-4 py-3 font-medium text-slate-800">{p.pendaftar.nama}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.pendaftar.asalInstansi}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.unit.nama}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800">{p.pendaftar?.nama ?? "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">{p.pendaftar?.asalInstansi ?? "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">{p.unit?.nama ?? "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{formatTanggal(p.tanggalMulai)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatTanggal(p.tanggalSelesai)}</td>
                   <td className="px-4 py-3 text-slate-600">{p.mentor?.nama ?? "-"}</td>
@@ -90,7 +96,7 @@ export default async function AdminPesertaPage({
                     <PesertaActions
                       peserta={{
                         id: p.id,
-                        pendaftarNama: p.pendaftar.nama,
+                        pendaftarNama: p.pendaftar?.nama ?? "-",
                         unitId: p.unitId,
                         tanggalMulai: p.tanggalMulai.toISOString().slice(0, 10),
                         tanggalSelesai: p.tanggalSelesai.toISOString().slice(0, 10),
