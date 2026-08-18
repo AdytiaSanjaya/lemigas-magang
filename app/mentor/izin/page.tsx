@@ -11,17 +11,25 @@ export default async function MentorIzinPage() {
   const session = await requireMentor();
 
   // Peserta yang dibimbing oleh mentor ini (melalui email pendaftar yang sama).
-  const bimbingan = await prisma.peserta.findMany({
-    where: { mentorId: session.user.id },
-    select: { pendaftar: { select: { email: true } } },
-  });
-  const emails = bimbingan.map((p) => p.pendaftar.email);
+  // Dibungkus catch + null-safe agar halaman tetap render bila query error
+  // atau belum ada peserta bimbingan.
+  const bimbingan = await prisma.peserta
+    .findMany({
+      where: { mentorId: session.user.id },
+      select: { pendaftar: { select: { email: true } } },
+    })
+    .catch(() => []);
+  const emails = bimbingan
+    .map((p) => p.pendaftar?.email ?? "")
+    .filter(Boolean);
 
-  const requests = await prisma.leaveRequest.findMany({
-    where: { user: { email: { in: emails } } },
-    include: { user: true },
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-  });
+  const requests = await prisma.leaveRequest
+    .findMany({
+      where: { user: { email: { in: emails } } },
+      include: { user: true },
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    })
+    .catch(() => []);
 
   const pending = requests.filter((r) => r.status === "PENDING");
 
@@ -82,8 +90,8 @@ export default async function MentorIzinPage() {
                 requests.map((r) => (
                   <tr key={r.id} className="align-top transition-colors hover:bg-slate-50/60">
                     <td className="px-5 py-3">
-                      <div className="font-medium text-slate-800">{r.user.nama}</div>
-                      <div className="text-xs text-slate-400">{r.user.email}</div>
+                      <div className="font-medium text-slate-800">{r.user?.nama ?? "-"}</div>
+                      <div className="text-xs text-slate-400">{r.user?.email ?? "-"}</div>
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -127,7 +135,7 @@ export default async function MentorIzinPage() {
                             startDate: r.startDate.toISOString(),
                             endDate: r.endDate.toISOString(),
                             reason: r.reason,
-                            nama: r.user.nama,
+                            nama: r.user?.nama ?? "-",
                           }}
                         />
                       ) : (

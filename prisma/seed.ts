@@ -26,7 +26,8 @@ async function main() {
     { nama: "Bagian SDM & Umum", deskripsi: "Administrasi & kepegawaian" },
   ];
   await prisma.unit.createMany({ data: units.map((u) => ({ nama: u.nama, deskripsi: u.deskripsi })) });
-  const unitRows = await prisma.unit.findMany({ orderBy: { nama: "asc" } });
+  const unitRows = await prisma.unit.findMany();
+  const unitIdByNama = new Map(unitRows.map((u) => [u.nama, u.id]));
 
   // --- User: Admin & Mentor (semua password: Magang123) ---
   console.log("Membuat user admin & mentor ...");
@@ -42,7 +43,7 @@ async function main() {
       email: "mentor.lab@lemigas.example",
       passwordHash,
       role: "MENTOR",
-      unitId: unitRows[0].id,
+      unitId: unitIdByNama.get("Laboratorium Pengujian Migas") ?? null,
     },
   });
 
@@ -52,7 +53,7 @@ async function main() {
       email: "mentor.litbang@lemigas.example",
       passwordHash,
       role: "MENTOR",
-      unitId: unitRows[2].id,
+      unitId: unitIdByNama.get("Pusat Riset & Pengembangan") ?? null,
     },
   });
 
@@ -62,12 +63,12 @@ async function main() {
   const now = new Date();
   const samples: Array<{
     nama: string; asal: string; jurusan?: string; noHp: string;
-    email: string; unitIdx: number; status: StatusPendaftar;
+    email: string; unitNama: string; status: StatusPendaftar;
   }> = [
-    { nama: "Andi Wijaya", asal: "Universitas Indonesia", jurusan: "Teknik Kimia", noHp: "081234560001", email: "andi.w@mail.com", unitIdx: 0, status: "MENUNGGU" },
-    { nama: "Sari Puspita", asal: "Politeknik Negeri Bandung", jurusan: "Teknik Pengolahan Migas", noHp: "081234560002", email: "sari.p@mail.com", unitIdx: 1, status: "DITERIMA" },
-    { nama: "Rizky Pratama", asal: "Universitas Gadjah Mada", jurusan: "Geofisika", noHp: "081234560003", email: "rizky.p@mail.com", unitIdx: 2, status: "DITOLAK" },
-    { nama: "Lina Marlina", asal: "STT Migas Balikpapan", jurusan: "Teknik Keselamatan", noHp: "081234560004", email: "lina.m@mail.com", unitIdx: 0, status: "MENUNGGU" },
+    { nama: "Andi Wijaya", asal: "Universitas Indonesia", jurusan: "Teknik Kimia", noHp: "081234560001", email: "andi.w@mail.com", unitNama: "Laboratorium Pengujian Migas", status: "DITERIMA" },
+    { nama: "Sari Puspita", asal: "Politeknik Negeri Bandung", jurusan: "Teknik Pengolahan Migas", noHp: "081234560002", email: "sari.p@mail.com", unitNama: "SPBE & Teknologi Migas", status: "DITERIMA" },
+    { nama: "Rizky Pratama", asal: "Universitas Gadjah Mada", jurusan: "Geofisika", noHp: "081234560003", email: "rizky.p@mail.com", unitNama: "Pusat Riset & Pengembangan", status: "DITOLAK" },
+    { nama: "Lina Marlina", asal: "STT Migas Balikpapan", jurusan: "Teknik Keselamatan", noHp: "081234560004", email: "lina.m@mail.com", unitNama: "Laboratorium Pengujian Migas", status: "MENUNGGU" },
   ];
 
   let seq = 1;
@@ -81,7 +82,7 @@ async function main() {
         jurusan: s.jurusan,
         noHp: s.noHp,
         email: s.email,
-        unitMinatId: unitRows[s.unitIdx].id,
+        unitMinatId: unitIdByNama.get(s.unitNama) ?? unitRows[0].id,
         berkasCV: "/uploads/sample-cv.pdf",
         status: s.status,
         createdAt: new Date(now.getTime() - seq * 86400000),
@@ -90,10 +91,10 @@ async function main() {
               diprosesAdminId: admin?.id ?? null,
               peserta: {
                 create: {
-                  unitId: unitRows[s.unitIdx].id,
+                  unitId: unitIdByNama.get(s.unitNama) ?? unitRows[0].id,
                   tanggalMulai: new Date(now.getTime() + 7 * 86400000),
                   tanggalSelesai: new Date(now.getTime() + 97 * 86400000),
-                  mentorId: s.unitIdx === 0 ? mentorLab.id : null,
+                  mentorId: s.unitNama === "Laboratorium Pengujian Migas" ? mentorLab.id : null,
                 },
               },
             }

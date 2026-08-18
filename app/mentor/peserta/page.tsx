@@ -35,67 +35,83 @@ export default async function MentorPesertaPage() {
     );
   }
 
-  const peserta = await prisma.peserta.findMany({
-    where: { mentorId: session.user.id },
-    include: { pendaftar: true, unit: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const peserta = await prisma.peserta
+    .findMany({
+      where: { mentorId: session.user.id },
+      include: { pendaftar: true, unit: true },
+      orderBy: { createdAt: "desc" },
+    })
+    .catch(() => []);
 
   const pesertaIds = peserta.map((p) => p.id);
-  const emails = peserta.map((p) => p.pendaftar.email.toLowerCase().trim());
+  const emails = peserta
+    .map((p) => p.pendaftar?.email.toLowerCase().trim() ?? "")
+    .filter(Boolean);
 
   // Attendance dihubungkan lewat akun User (email sama dengan email pendaftar).
-  const users = await prisma.user.findMany({
-    where: { email: { in: emails } },
-    select: { id: true, email: true },
-  });
+  const users = await prisma.user
+    .findMany({
+      where: { email: { in: emails } },
+      select: { id: true, email: true },
+    })
+    .catch(() => []);
   const userIds = users.map((u) => u.id);
   const today = toUtcDate(todayString());
 
+  // Query pendukung dibungkus catch agar halaman tetap render (tabel kosong)
+  // bila terjadi error query atau mentor belum memiliki peserta bimbingan.
   const [attendanceToday, leaveToday, attendance30, evaluasiList, pendingIzin] =
     await Promise.all([
-      prisma.attendance.findMany({
-        where: { userId: { in: userIds }, date: today },
-        select: {
-          id: true,
-          userId: true,
-          status: true,
-          checkIn: true,
-          checkOut: true,
-        },
-      }),
-      prisma.leaveRequest.findMany({
-        where: {
-          userId: { in: userIds },
-          status: "APPROVED",
-          startDate: { lte: today },
-          endDate: { gte: today },
-        },
-        select: { userId: true, type: true },
-      }),
-      prisma.attendance.findMany({
-        where: {
-          userId: { in: userIds },
-          date: { gte: toUtcDate(todayString(new Date(Date.now() - 29 * DAY_MS))) },
-        },
-        select: {
-          id: true,
-          userId: true,
-          date: true,
-          status: true,
-          checkIn: true,
-          checkOut: true,
-        },
-        orderBy: { date: "desc" },
-      }),
-      prisma.evaluasi.findMany({
-        where: { pesertaId: { in: pesertaIds } },
-        include: { dinilaiOleh: { select: { nama: true } } },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.leaveRequest.count({
-        where: { user: { email: { in: emails } }, status: "PENDING" },
-      }),
+      prisma.attendance
+        .findMany({
+          where: { userId: { in: userIds }, date: today },
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            checkIn: true,
+            checkOut: true,
+          },
+        })
+        .catch(() => []),
+      prisma.leaveRequest
+        .findMany({
+          where: {
+            userId: { in: userIds },
+            status: "APPROVED",
+            startDate: { lte: today },
+            endDate: { gte: today },
+          },
+          select: { userId: true, type: true },
+        })
+        .catch(() => []),
+      prisma.attendance
+        .findMany({
+          where: {
+            userId: { in: userIds },
+            date: { gte: toUtcDate(todayString(new Date(Date.now() - 29 * DAY_MS))) },
+          },
+          select: {
+            id: true,
+            userId: true,
+            date: true,
+            status: true,
+            checkIn: true,
+            checkOut: true,
+          },
+          orderBy: { date: "desc" },
+        })
+        .catch(() => []),
+      prisma.evaluasi
+        .findMany({
+          where: { pesertaId: { in: pesertaIds } },
+          include: { dinilaiOleh: { select: { nama: true } } },
+          orderBy: { createdAt: "desc" },
+        })
+        .catch(() => []),
+      prisma.leaveRequest
+        .count({ where: { user: { email: { in: emails } }, status: "PENDING" } })
+        .catch(() => 0),
     ]);
 
   const userByEmail = new Map(
@@ -105,7 +121,7 @@ export default async function MentorPesertaPage() {
   const leaveTodayByUser = new Map(leaveToday.map((l) => [l.userId, l] as const));
 
   const rows: PesertaRow[] = peserta.map((p) => {
-    const userId = userByEmail.get(p.pendaftar.email.toLowerCase().trim());
+    const userId = userByEmail.get(p.pendaftar?.email.toLowerCase().trim() ?? "");
     const attToday = userId ? attTodayByUser.get(userId) : undefined;
     const leaveToday = userId ? leaveTodayByUser.get(userId) : undefined;
 
@@ -118,7 +134,7 @@ export default async function MentorPesertaPage() {
       statusHariIni = "BELUM ABSEN";
     }
 
-    // Progress masa magang.
+    // Progress masa magang (null-safe bila tanggal belum diisi).
     const mulai = new Date(p.tanggalMulai);
     mulai.setHours(0, 0, 0, 0);
     const selesai = new Date(p.tanggalSelesai);
@@ -131,13 +147,13 @@ export default async function MentorPesertaPage() {
 
     return {
       id: p.id,
-      nama: p.pendaftar.nama,
-      instansi: p.pendaftar.asalInstansi,
-      jurusan: p.pendaftar.jurusan,
-      jenisKelamin: p.pendaftar.jenisKelamin,
-      email: p.pendaftar.email,
-      noHp: p.pendaftar.noHp,
-      unitNama: p.unit.nama,
+      nama: p.pendaftar?.nama ?? "-",
+      instansi: p.pendaftar?.asalInstansi ?? "-",
+      jurusan: p.pendaftar?.jurusan ?? null,
+      jenisKelamin: p.pendaftar?.jenisKelamin ?? null,
+      email: p.pendaftar?.email ?? "",
+      noHp: p.pendaftar?.noHp ?? "",
+      unitNama: p.unit?.nama ?? "-",
       tanggalMulai: p.tanggalMulai.toISOString(),
       tanggalSelesai: p.tanggalSelesai.toISOString(),
       progress,
@@ -180,7 +196,7 @@ export default async function MentorPesertaPage() {
       iconBg: "bg-navy-50 text-navy-600",
       chip: "bg-navy-50 text-navy-600",
       chipText: "Peserta",
-      sub: `di unit ${session.user.unitNama}`,
+      sub: `di unit ${session.user.unitNama ?? "-"}`,
     },
     {
       key: "kehadiran",
@@ -221,7 +237,7 @@ export default async function MentorPesertaPage() {
             <div className="flex items-center gap-2 text-navy-200">
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider">
-                Panel Mentor &middot; {session.user.unitNama}
+                Panel Mentor &middot; {session.user.unitNama ?? "Unit"}
               </span>
             </div>
             <h1 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
