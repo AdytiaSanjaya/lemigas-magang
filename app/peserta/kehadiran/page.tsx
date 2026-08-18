@@ -45,27 +45,33 @@ export default async function KehadiranPage({
   const userId = session.user.id;
   const today = toUtcDate(todayString());
 
-  const [records, total, attToday, monthSummary] = await Promise.all([
-    prisma.attendance.findMany({
-      where: { userId, date: { gte, lt } },
-      orderBy: { date: "desc" },
-      skip: (page - 1) * PER_PAGE,
-      take: PER_PAGE,
-    }),
-    prisma.attendance.count({ where: { userId, date: { gte, lt } } }),
-    prisma.attendance.findUnique({
-      where: { userId_date: { userId, date: today } },
-    }),
-    prisma.attendance.groupBy({
-      by: ["status"],
-      where: { userId, date: { gte, lt } },
-      _count: { _all: true },
-    }),
+  // Query kehadiran dibungkus catch agar halaman tetap render (dengan data
+  // kosong) bila terjadi error koneksi/query Prisma — tidak crash 500.
+  const [records, total, attToday, monthSummary, streak] = await Promise.all([
+    prisma.attendance
+      .findMany({
+        where: { userId, date: { gte, lt } },
+        orderBy: { date: "desc" },
+        skip: (page - 1) * PER_PAGE,
+        take: PER_PAGE,
+      })
+      .catch(() => []),
+    prisma.attendance.count({ where: { userId, date: { gte, lt } } }).catch(() => 0),
+    prisma.attendance
+      .findUnique({ where: { userId_date: { userId, date: today } } })
+      .catch(() => null),
+    prisma.attendance
+      .groupBy({
+        by: ["status"],
+        where: { userId, date: { gte, lt } },
+        _count: { _all: true },
+      })
+      .catch(() => []),
+    countStreak(userId).catch(() => 0),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const hadirCount = monthSummary.find((s) => s.status === "HADIR")?._count._all ?? 0;
-  const streak = await countStreak(userId);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

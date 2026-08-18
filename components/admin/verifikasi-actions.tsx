@@ -16,7 +16,6 @@ export default function VerifikasiActiva({
     status: string;
     berkasCV: string;
     berkasSurat?: string | null;
-    cvUrl?: string | null;
     email: string;
   };
   mentors: Mentor[];
@@ -67,12 +66,9 @@ export default function VerifikasiActiva({
     router.refresh();
   }
 
-  // CV baru disimpan sebagai data URL di database; untuk rekaman lama (path
-  // "/berkas/<nama>") tetap dilayani via route berkas.
-  const cvHref =
-    pendaftar.cvUrl?.startsWith("data:")
-      ? pendaftar.cvUrl
-      : `/api/berkas/${pendaftar.berkasCV.split("/").pop()}`;
+  // Preview CV via route API khusus (Content-Type: application/pdf, inline)
+  // agar PDF terbuka langsung & stabil di browser.
+  const cvHref = `/api/berkas/cv?id=${pendaftar.id}`;
 
   return (
     <>

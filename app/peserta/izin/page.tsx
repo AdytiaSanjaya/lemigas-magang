@@ -38,15 +38,19 @@ export default async function IzinPage({
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 
   const userId = session.user.id;
+  // Fallback data kosong agar halaman tetap render bila query error atau
+  // record izin belum ada (tidak crash 500).
   const [records, total, pendingCount] = await Promise.all([
-    prisma.leaveRequest.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * PER_PAGE,
-      take: PER_PAGE,
-    }),
-    prisma.leaveRequest.count({ where: { userId } }),
-    prisma.leaveRequest.count({ where: { userId, status: "PENDING" } }),
+    prisma.leaveRequest
+      .findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * PER_PAGE,
+        take: PER_PAGE,
+      })
+      .catch(() => []),
+    prisma.leaveRequest.count({ where: { userId } }).catch(() => 0),
+    prisma.leaveRequest.count({ where: { userId, status: "PENDING" } }).catch(() => 0),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
