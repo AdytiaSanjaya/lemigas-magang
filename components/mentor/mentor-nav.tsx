@@ -21,6 +21,7 @@ export default function MentorNav() {
           <Link
             key={item.href}
             href={item.href}
+            prefetch
             className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               active
                 ? "bg-navy-50 text-navy-700"
