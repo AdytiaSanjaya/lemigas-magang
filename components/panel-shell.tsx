@@ -16,7 +16,7 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
   return (
     <div className="min-h-[100dvh] bg-slate-50">
       {/* Header mobile */}
-      <header className="sticky top-0 z-40 flex w-full max-w-full items-center justify-between gap-3 overflow-hidden border-b border-slate-200 bg-white px-3 py-2 box-border lg:hidden">
+      <header className="sticky top-0 z-40 flex w-full max-w-full items-center gap-3 overflow-hidden border-b border-slate-200 bg-white px-3 py-2 box-border lg:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -26,22 +26,22 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
         >
           <Menu size={20} aria-hidden="true" />
         </button>
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
           <Image
             src="/logo-lemigas.png"
             alt="Logo LEMIGAS"
             width={28}
             height={28}
-            className="h-7 w-7 object-contain"
+            className="h-7 w-7 shrink-0 object-contain"
           />
-          <div className="leading-tight">
-            <div className="text-sm font-extrabold uppercase tracking-[0.08em] text-navy-800">
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-sm font-extrabold uppercase tracking-[0.08em] text-navy-800">
               LEMIGAS{" "}
               <span className="bg-gradient-to-r from-navy-600 to-amber-500 bg-clip-text text-transparent">
                 MAGANG
               </span>
             </div>
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <div className="truncate text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               {roleLabel}
             </div>
           </div>

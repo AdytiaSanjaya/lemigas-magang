@@ -112,7 +112,7 @@ export default async function IzinPage({
               )}
             </div>
 
-            <div className="w-full max-w-full overflow-x-auto rounded-xl border border-border">
+            <div className="w-full overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-[500px] text-left text-sm">
                 <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
