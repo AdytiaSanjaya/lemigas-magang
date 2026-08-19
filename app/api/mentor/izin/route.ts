@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { reviewIzinSchema } from "@/lib/validation/presensi";
@@ -68,6 +69,11 @@ export async function PATCH(req: NextRequest) {
       diprosesOlehId: session.user.id,
     },
   });
+
+  // Revalidasi cache halaman peserta agar status pengajuan terbaru langsung
+  // tampil di Riwayat Izin dan Dashboard tanpa menunggu TTL / hard-reload.
+  revalidatePath("/peserta/izin");
+  revalidatePath("/peserta/dashboard");
 
   return NextResponse.json({
     message:

@@ -19,7 +19,7 @@ export const getPesertaByEmail = cache(async (email: string | null) => {
       tanggalSelesai: true,
       unit: { select: { nama: true } },
       mentor: { select: { nama: true } },
-      pendaftar: { select: { email: true } },
+      pendaftar: { select: { email: true, nama: true } },
     },
   });
 });

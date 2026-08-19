@@ -227,7 +227,7 @@ export default async function PesertaDashboardPage() {
               </span>
             </div>
             <h1 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
-              {session.user.name}
+              {peserta.pendaftar?.nama ?? session.user.name}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-navy-100">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15">

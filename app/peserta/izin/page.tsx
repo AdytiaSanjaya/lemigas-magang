@@ -1,6 +1,6 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession } from "@/lib/peserta";
+import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
 import { formatTanggal } from "@/lib/format";
 import IzinForm from "@/components/peserta/izin-form";
 import StatusBadge from "@/components/ui/status-badge";
@@ -37,7 +37,11 @@ export default async function IzinPage({
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 
-  const userId = session.user.id;
+  // Resolve User.id ASLI dari email session (NextAuth) — session.user.id untuk
+  // akun Google adalah Google sub, bukan primary key Prisma, sehingga query
+  // LeaveRequest harus memakai User.id hasil resolver agar match dengan data
+  // yang tersimpan saat pengajuan dibuat.
+  const userId = (await getUserIdBySession(session)) ?? "";
   // Fallback data kosong agar halaman tetap render bila query error atau
   // record izin belum ada (tidak crash 500).
   const [records, total, pendingCount] = await Promise.all([
