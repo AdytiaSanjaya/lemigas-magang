@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
@@ -14,6 +15,16 @@ import {
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
+
+// Revalidasi cache Next.js setelah data presensi berubah (check-in/out) agar
+// Dashboard & Riwayat Kehadiran peserta, Dashboard admin, dan panel mentor
+// merender ulang data terbaru tanpa menunggu TTL cache / hard-reload manual.
+function revalidatePresensi() {
+  revalidatePath("/peserta/dashboard");
+  revalidatePath("/peserta/kehadiran");
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/mentor/peserta");
+}
 
 // Check-in / check-out presensi harian peserta.
 // Endpoint ini hanya untuk role PENDAFTAR yang tercatat sebagai peserta aktif.
@@ -118,6 +129,7 @@ export async function POST(req: NextRequest) {
         const record = await prisma.attendance.create({
           data: { userId, date, checkIn: now, latitude, longitude },
         });
+        revalidatePresensi();
         return NextResponse.json(
           { message: "Check-in berhasil. Selamat bekerja!", record },
           { status: 201 }
@@ -162,6 +174,7 @@ export async function POST(req: NextRequest) {
       where: { id: existing.id },
       data: { checkOut: now, latitude, longitude },
     });
+    revalidatePresensi();
     return NextResponse.json({ message: "Check-out berhasil. Sampai jumpa!", record });
   } catch (err) {
     // Selalu kembalikan JSON error (bukan unhandled error) agar klien tidak
