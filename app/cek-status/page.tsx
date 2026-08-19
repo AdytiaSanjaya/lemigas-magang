@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SearchCheck, Hash, Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { SearchCheck, Hash, Mail, ArrowRight, Loader2, CheckCircle2, HelpCircle } from "lucide-react";
 import { cekStatusSchema } from "@/lib/validation/cek-status";
 import { formatTanggal } from "@/lib/format";
 import StatusBadge from "@/components/ui/status-badge";
+import LupaKodeModal from "@/components/cek-status/lupa-kode-modal";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 
@@ -26,6 +27,7 @@ export default function CekStatusPage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<StatusData | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [lupaKodeOpen, setLupaKodeOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -109,6 +111,16 @@ export default function CekStatusPage() {
                 </span>
               </label>
               {errors.noPendaftaran && <p className="mt-1.5 text-xs text-red-600">{errors.noPendaftaran}</p>}
+              <div className="mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setLupaKodeOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 transition hover:text-blue-700 hover:underline"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                  Lupa Kode Pendaftaran?
+                </button>
+              </div>
             </div>
 
             <div className="mt-4">
@@ -265,6 +277,8 @@ export default function CekStatusPage() {
       </section>
 
       <SiteFooter />
+
+      {lupaKodeOpen && <LupaKodeModal onClose={() => setLupaKodeOpen(false)} />}
     </main>
   );
 }
