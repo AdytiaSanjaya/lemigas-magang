@@ -133,7 +133,16 @@ export default function CheckInWidget({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, latitude, longitude, accuracy }),
       });
-      const data = await res.json();
+      // Baca body JSON dengan aman: bila server mengembalikan body non-JSON
+      // (mis. error page 500), tampilkan pesan error yang informatif, bukan
+      // "Gagal terhubung ke server".
+      const data: {
+        error?: string;
+        message?: string;
+        record?: { checkIn?: string | null; checkOut?: string | null };
+      } = await res.json().catch(() => ({
+        error: `Terjadi kesalahan server (HTTP ${res.status}). Coba lagi.`,
+      }));
       if (!res.ok) {
         setNotice({ ok: false, text: data.error ?? "Terjadi kesalahan." });
         setLoading(null);
