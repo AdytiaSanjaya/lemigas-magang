@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Kartu ringkasan statistik */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((card) => {
           const style = CARD_STYLES[card.key];
           const Icon = style.icon;

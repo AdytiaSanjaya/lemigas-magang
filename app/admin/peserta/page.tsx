@@ -76,7 +76,8 @@ export default async function AdminPesertaPage({
       </form>
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-3">Nama</th>
@@ -121,7 +122,8 @@ export default async function AdminPesertaPage({
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       <div className="mt-4">
