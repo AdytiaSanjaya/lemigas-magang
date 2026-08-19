@@ -172,8 +172,8 @@ export default function IzinForm() {
           <CalendarDays className="h-4 w-4 text-navy-500" aria-hidden="true" />
           Rentang Tanggal
         </span>
-        <div className="mt-2 flex w-full flex-col gap-4 sm:flex-row">
-          <div className="w-full sm:flex-1">
+        <div className="mt-2 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="w-full">
             <label className="block text-xs font-medium text-slate-500">
               Tanggal Mulai
               <input
@@ -191,7 +191,7 @@ export default function IzinForm() {
               <p className="mt-1 text-xs text-rose-600">{errors.startDate}</p>
             )}
           </div>
-          <div className="w-full sm:flex-1">
+          <div className="w-full">
             <label className="block text-xs font-medium text-slate-500">
               Tanggal Selesai
               <input
@@ -305,7 +305,7 @@ export default function IzinForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-navy-600 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-navy-700 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-navy-600 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-navy-700 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>

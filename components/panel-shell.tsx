@@ -100,7 +100,7 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
       </div>
 
       {/* Konten utama */}
-      <main className="w-full min-w-0 overflow-x-hidden p-4 md:p-6 lg:py-8 lg:pl-80 lg:pr-8">
+      <main className="w-full min-w-0 max-w-full overflow-x-hidden p-3 sm:p-6 lg:py-8 lg:pl-80 lg:pr-8">
         {children}
       </main>
     </div>
