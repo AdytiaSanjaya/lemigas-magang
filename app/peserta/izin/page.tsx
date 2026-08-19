@@ -112,21 +112,21 @@ export default async function IzinPage({
               )}
             </div>
 
-            <div className="w-full overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[500px] text-left text-sm">
+            <div className="w-full max-w-full overflow-x-auto rounded-xl border border-border shadow-sm">
+              <table className="w-full min-w-[500px] text-sm text-left">
                 <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-5 py-3">Jenis</th>
-                    <th className="px-5 py-3">Tanggal</th>
-                    <th className="px-5 py-3">Alasan</th>
-                    <th className="px-5 py-3">Lampiran</th>
-                    <th className="px-5 py-3">Status</th>
+                    <th className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">Jenis</th>
+                    <th className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">Tanggal</th>
+                    <th className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">Alasan</th>
+                    <th className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">Lampiran</th>
+                    <th className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {records.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-5 py-12 text-center">
+                      <td colSpan={5} className="px-3 py-12 sm:px-4 text-center">
                         <div className="mx-auto flex max-w-xs flex-col items-center">
                           <Inbox className="h-8 w-8 text-slate-300" aria-hidden="true" />
                           <p className="mt-2 text-sm text-slate-400">
@@ -138,7 +138,7 @@ export default async function IzinPage({
                   ) : (
                     records.map((r) => (
                       <tr key={r.id} className="align-top transition-colors hover:bg-slate-50/60">
-                        <td className="px-5 py-3">
+                        <td className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold ${
                               r.type === "SAKIT"
@@ -149,14 +149,14 @@ export default async function IzinPage({
                             {r.type === "SAKIT" ? "Sakit" : "Izin"}
                           </span>
                         </td>
-                        <td className="px-5 py-3 text-slate-700">
+                        <td className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap text-slate-700">
                           {formatTanggal(r.startDate)} &ndash; {formatTanggal(r.endDate)}
                           <div className="mt-0.5 text-xs text-slate-400">
                             diajukan {r.createdAt.toLocaleDateString("id-ID")}
                           </div>
                         </td>
-                        <td className="max-w-[220px] px-5 py-3 text-slate-600">
-                          <span className="line-clamp-2">{r.reason}</span>
+                        <td className="max-w-[200px] px-3 py-3 sm:px-4 sm:py-3 text-slate-600">
+                          <span className="block truncate">{r.reason}</span>
                           {r.catatanReview && (
                             <div className="mt-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-500">
                               <span className="font-medium text-slate-600">Catatan mentor:</span>{" "}
@@ -164,7 +164,7 @@ export default async function IzinPage({
                             </div>
                           )}
                         </td>
-                        <td className="px-5 py-3">
+                        <td className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">
                           {r.attachmentUrl ? (
                             <a
                               href={r.attachmentUrl}
@@ -179,7 +179,7 @@ export default async function IzinPage({
                             <span className="text-xs text-slate-300">-</span>
                           )}
                         </td>
-                        <td className="px-5 py-3">
+                        <td className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">
                           <StatusBadge status={r.status} />
                         </td>
                       </tr>
