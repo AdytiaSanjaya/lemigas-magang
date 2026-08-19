@@ -1,6 +1,6 @@
 import { requireMentor } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { todayString, toUtcDate } from "@/lib/dates";
+import { todayStringWib, toUtcDate } from "@/lib/dates";
 import Link from "next/link";
 import PesertaTable from "@/components/mentor/peserta-table";
 import {
@@ -68,7 +68,7 @@ export default async function MentorPesertaPage() {
     })
     .catch(() => []);
   const userIds = users.map((u) => u.id);
-  const today = toUtcDate(todayString());
+  const today = toUtcDate(todayStringWib());
 
   // Query pendukung dibungkus catch agar halaman tetap render (tabel kosong)
   // bila terjadi error query atau mentor belum memiliki peserta bimbingan.
@@ -101,7 +101,7 @@ export default async function MentorPesertaPage() {
         .findMany({
           where: {
             userId: { in: userIds },
-            date: { gte: toUtcDate(todayString(new Date(Date.now() - 29 * DAY_MS))) },
+            date: { gte: toUtcDate(todayStringWib(new Date(Date.now() - 29 * DAY_MS))) },
           },
           select: {
             id: true,

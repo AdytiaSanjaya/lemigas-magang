@@ -11,6 +11,24 @@ export function todayString(now = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Tanggal kalender hari ini di zona waktu Asia/Jakarta (WIB, UTC+7) -> "YYYY-MM-DD".
+ * Serverless (Vercel) umumnya berjalan di UTC; tanpa koreksi ini, antara pukul
+ * 00:00–06:59 WIB tanggal kalender bisa bergeser sehari sehingga presensi hari
+ * ini tidak terdeteksi. Dipakai bersama oleh POST & GET presensi agar selalu
+ * sinkron.
+ */
+export function todayStringWib(now = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
 /** "YYYY-MM-DD" -> Date UTC tengah malam. */
 export function toUtcDate(dateStr: string): Date {
   return new Date(`${dateStr}T00:00:00.000Z`);

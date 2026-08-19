@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { izinSchema } from "@/lib/validation/presensi";
-import { getPesertaBySession } from "@/lib/peserta";
+import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
 import { toUtcDate } from "@/lib/dates";
 import { validateUploadFile } from "@/lib/security";
 
@@ -56,10 +56,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Resolve User.id ASLI dari email session (NextAuth) agar FK LeaveRequest_userId_fkey
+  // valid — session.user.id untuk akun Google adalah Google sub, bukan primary key Prisma.
+  const userId = await getUserIdBySession(session);
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Data pengguna tidak ditemukan di database." },
+      { status: 404 }
+    );
+  }
+
   // Cegah tumpang-tindih dengan pengajuan yang masih aktif.
   const overlap = await prisma.leaveRequest.findFirst({
     where: {
-      userId: session.user.id,
+      userId,
       status: { in: ["PENDING", "APPROVED"] },
       startDate: { lte: endDate },
       endDate: { gte: startDate },
@@ -86,7 +96,7 @@ export async function POST(req: NextRequest) {
 
   const record = await prisma.leaveRequest.create({
     data: {
-      userId: session.user.id,
+      userId,
       type: parsed.data.type as "IZIN" | "SAKIT",
       startDate,
       endDate,

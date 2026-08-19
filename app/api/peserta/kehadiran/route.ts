@@ -4,8 +4,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { kehadiranSchema } from "@/lib/validation/presensi";
-import { getPesertaBySession } from "@/lib/peserta";
-import { todayString, toUtcDate } from "@/lib/dates";
+import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { todayStringWib, toUtcDate } from "@/lib/dates";
 import {
   KANTOR_LEMIGAS,
   ABSEN_RADIUS_METERS,
@@ -96,23 +96,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const date = toUtcDate(todayString());
+    const date = toUtcDate(todayStringWib());
 
-    // Cari record User asli di database berdasarkan email session (NextAuth).
+    // Cari User.id ASLI di database berdasarkan email session (NextAuth).
     // `session.user.id` bisa berupa Google `sub` (bukan primary key Prisma),
     // sehingga tidak boleh dipakai langsung sebagai FK `Attendance_userId_fkey`
-    // (menyebabkan error P2003). Ambil User.id yang sah dari Supabase.
-    const account = await prisma.user.findUnique({
-      where: { email: (session.user.email ?? "").toLowerCase().trim() },
-      select: { id: true },
-    });
-    if (!account) {
+    // (menyebabkan error P2003). Gunakan User.id yang sah dari Supabase.
+    const userId = await getUserIdBySession(session);
+    if (!userId) {
       return NextResponse.json(
         { error: "Data pengguna tidak ditemukan di database." },
         { status: 404 }
       );
     }
-    const userId = account.id;
 
     const existing = await prisma.attendance.findUnique({
       where: { userId_date: { userId, date } },

@@ -1,7 +1,7 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession } from "@/lib/peserta";
-import { todayString, toUtcDate, utcDateString, monthRange, formatWaktu } from "@/lib/dates";
+import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { todayStringWib, toUtcDate, utcDateString, monthRange, formatWaktu } from "@/lib/dates";
 import CheckInWidget from "@/components/peserta/check-in-widget";
 import AttendanceFilter from "@/components/peserta/attendance-filter";
 import StatusBadge from "@/components/ui/status-badge";
@@ -39,11 +39,14 @@ export default async function KehadiranPage({
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
   const month = /^\d{4}-\d{2}$/.test(params.month ?? "")
     ? (params.month as string)
-    : todayString().slice(0, 7);
+    : todayStringWib().slice(0, 7);
   const { gte, lt } = monthRange(month);
 
-  const userId = session.user.id;
-  const today = toUtcDate(todayString());
+  // Resolve User.id ASLI dari email session (NextAuth) agar query kehadiran
+  // match persis dengan data yang disimpan saat check-in (untuk akun Google,
+  // session.user.id adalah Google sub, bukan primary key Prisma).
+  const userId = (await getUserIdBySession(session)) ?? "";
+  const today = toUtcDate(todayStringWib());
 
   // Query kehadiran dibungkus catch agar halaman tetap render (dengan data
   // kosong) bila terjadi error koneksi/query Prisma — tidak crash 500.

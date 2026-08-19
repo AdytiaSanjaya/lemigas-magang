@@ -1,7 +1,7 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession } from "@/lib/peserta";
-import { todayString, toUtcDate, utcDateString, businessDaysRemaining, formatWaktu } from "@/lib/dates";
+import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { todayStringWib, toUtcDate, utcDateString, businessDaysRemaining, formatWaktu } from "@/lib/dates";
 import { formatTanggal } from "@/lib/format";
 import RealtimeClock from "@/components/peserta/realtime-clock";
 import StatusBadge from "@/components/ui/status-badge";
@@ -51,8 +51,13 @@ export default async function PesertaDashboardPage() {
   }
 
   const now = new Date();
-  const today = toUtcDate(todayString());
+  const today = toUtcDate(todayStringWib());
   const todayKey = utcDateString(today);
+
+  // Resolve User.id ASLI dari email session (NextAuth) agar query presensi/izin
+  // match persis dengan data yang disimpan saat create (untuk akun Google,
+  // session.user.id adalah Google sub, bukan primary key Prisma).
+  const userId = (await getUserIdBySession(session)) ?? "";
 
   // Query dibungkus catch + fallback agar halaman tetap render bila error DB.
   const [
@@ -64,25 +69,25 @@ export default async function PesertaDashboardPage() {
     recentAttendance,
     recentIzin,
   ] = await Promise.all([
-    prisma.attendance.count({ where: { userId: session.user.id } }).catch(() => 0),
+    prisma.attendance.count({ where: { userId } }).catch(() => 0),
     prisma.attendance
       .count({
         where: {
-          userId: session.user.id,
+          userId,
           date: { gte: toUtcDate(todayKey.slice(0, 7) + "-01") },
         },
       })
       .catch(() => 0),
     prisma.attendance
       .findUnique({
-        where: { userId_date: { userId: session.user.id, date: today } },
+        where: { userId_date: { userId, date: today } },
         select: { checkIn: true, checkOut: true },
       })
       .catch(() => null),
     prisma.leaveRequest
       .findFirst({
         where: {
-          userId: session.user.id,
+          userId,
           status: "APPROVED",
           startDate: { lte: today },
           endDate: { gte: today },
@@ -92,11 +97,11 @@ export default async function PesertaDashboardPage() {
       })
       .catch(() => null),
     prisma.leaveRequest
-      .count({ where: { userId: session.user.id, status: "PENDING" } })
+      .count({ where: { userId, status: "PENDING" } })
       .catch(() => 0),
     prisma.attendance
       .findMany({
-        where: { userId: session.user.id },
+        where: { userId },
         orderBy: { date: "desc" },
         take: 6,
         select: { id: true, date: true, checkIn: true, checkOut: true, status: true },
@@ -104,7 +109,7 @@ export default async function PesertaDashboardPage() {
       .catch(() => []),
     prisma.leaveRequest
       .findMany({
-        where: { userId: session.user.id },
+        where: { userId },
         orderBy: { createdAt: "desc" },
         take: 4,
         select: { id: true, type: true, startDate: true, endDate: true, reason: true, status: true },

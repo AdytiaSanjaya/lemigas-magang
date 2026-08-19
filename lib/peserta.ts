@@ -30,3 +30,21 @@ export const getPesertaByEmail = cache(async (email: string | null) => {
 export async function getPesertaBySession(session: Session | null) {
   return getPesertaByEmail(session?.user?.email ?? null);
 }
+
+// Ambil User.id ASLI dari database berdasarkan email session (NextAuth).
+// `session.user.id` untuk akun Google OAuth berisi Google `sub` (bukan primary
+// key Prisma), sehingga TIDAK boleh dipakai sebagai FK (Attendance, LeaveRequest).
+// Seluruh query presensi/izin harus memakai User.id hasil resolver ini agar
+// match persis dengan data yang disimpan saat create.
+export const getUserIdByEmail = cache(async (email: string | null) => {
+  if (!email) return null;
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase().trim() },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+});
+
+export async function getUserIdBySession(session: Session | null) {
+  return getUserIdByEmail(session?.user?.email ?? null);
+}
