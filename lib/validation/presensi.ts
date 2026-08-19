@@ -13,6 +13,8 @@ export const kehadiranSchema = z.object({
     .number()
     .min(COORD_BOUNDS.lon.min, "Longitude tidak valid")
     .max(COORD_BOUNDS.lon.max, "Longitude tidak valid"),
+  // Akurasi lokasi browser (meter). Opsional: tidak dikirim = dianggap akurat.
+  accuracy: z.number().min(0, "Akurasi tidak valid").optional(),
 });
 
 export type KehadiranInput = z.infer<typeof kehadiranSchema>;

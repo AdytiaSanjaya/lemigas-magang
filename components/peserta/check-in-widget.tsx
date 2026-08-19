@@ -6,7 +6,10 @@ import RealtimeClock from "@/components/peserta/realtime-clock";
 import {
   KANTOR_LEMIGAS,
   ABSEN_RADIUS_METERS,
+  ACCURACY_TOLERANCE_METERS,
   haversineMeters,
+  adjustedJarakMeters,
+  formatJarakMeters,
 } from "@/lib/geo";
 import { LogIn, LogOut, Loader2, CheckCircle2, CircleAlert } from "lucide-react";
 
@@ -44,6 +47,10 @@ export default function CheckInWidget({
   const [state, setState] = useState<KehadiranState>(initialState);
   const [loading, setLoading] = useState<"CHECK_IN" | "CHECK_OUT" | null>(null);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const [locInfo, setLocInfo] = useState<{
+    jarak: number;
+    accuracy: number | null;
+  } | null>(null);
 
   const status = state.checkedOut
     ? "done"
@@ -70,14 +77,17 @@ export default function CheckInWidget({
   async function act(action: "CHECK_IN" | "CHECK_OUT") {
     setLoading(action);
     setNotice(null);
+    setLocInfo(null);
     try {
       // 1) Ambil koordinat GPS pengguna.
       let latitude: number;
       let longitude: number;
+      let accuracy: number;
       try {
         const pos = await getCurrentPosition();
         latitude = pos.coords.latitude;
         longitude = pos.coords.longitude;
+        accuracy = pos.coords.accuracy ?? 0;
       } catch (geoErr) {
         const denied =
           !!geoErr &&
@@ -95,14 +105,21 @@ export default function CheckInWidget({
         return;
       }
 
-      // 2) Validasi radius: maksimal 1000 meter (1 km) dari kantor LEMIGAS.
+      // 2) Validasi radius: maksimal 3000 meter (3 km) dari kantor LEMIGAS.
+      //    Deviasi akurasi browser (> 500 m) dikurangi dari jarak Haversine
+      //    agar pengguna yang berada di area kantor tidak terblokir.
       const jarak = haversineMeters(
         latitude,
         longitude,
         KANTOR_LEMIGAS.latitude,
         KANTOR_LEMIGAS.longitude
       );
-      if (jarak > ABSEN_RADIUS_METERS) {
+      const jarakEfektif = adjustedJarakMeters(jarak, accuracy);
+      setLocInfo({
+        jarak: jarakEfektif,
+        accuracy: accuracy > ACCURACY_TOLERANCE_METERS ? accuracy : null,
+      });
+      if (jarakEfektif > ABSEN_RADIUS_METERS) {
         setNotice({
           ok: false,
           text: "Anda berada di luar radius kantor LEMIGAS.",
@@ -114,7 +131,7 @@ export default function CheckInWidget({
       const res = await fetch("/api/peserta/kehadiran", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, latitude, longitude }),
+        body: JSON.stringify({ action, latitude, longitude, accuracy }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -250,6 +267,22 @@ export default function CheckInWidget({
             )}
             {notice.text}
           </div>
+        )}
+
+        {locInfo && (
+          <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+            Jarak terdeteksi:{" "}
+            <span className="font-semibold text-slate-700">
+              {formatJarakMeters(locInfo.jarak)}
+            </span>{" "}
+            dari LEMIGAS (Maks: {formatJarakMeters(ABSEN_RADIUS_METERS)})
+            {locInfo.accuracy !== null && (
+              <span className="mt-0.5 block text-slate-400">
+                Akurasi GPS ±{formatJarakMeters(locInfo.accuracy)} — deviasi sudah
+                dikompensasi.
+              </span>
+            )}
+          </p>
         )}
       </div>
     </div>

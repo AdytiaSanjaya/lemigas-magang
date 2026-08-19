@@ -8,6 +8,7 @@ import {
   KANTOR_LEMIGAS,
   ABSEN_RADIUS_METERS,
   haversineMeters,
+  adjustedJarakMeters,
 } from "@/lib/geo";
 
 export const runtime = "nodejs";
@@ -57,17 +58,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { action, latitude, longitude } = parsed.data;
+  const { action, latitude, longitude, accuracy } = parsed.data;
 
-  // Validasi radius lokasi: presensi hanya sah bila peserta berada dalam
-  // radius maksimal 1000 meter (1 km) dari kantor LEMIGAS.
+  // Validasi radius lokasi: presensi hanya sah bila jarak efektif dari kantor
+  // LEMIGAS tidak melebihi radius maksimal 3000 meter (3 km). Deviasi akurasi
+  // browser (> 500 m) dikompensasi agar pengguna di area kantor tidak terblokir.
   const jarak = haversineMeters(
     latitude,
     longitude,
     KANTOR_LEMIGAS.latitude,
     KANTOR_LEMIGAS.longitude
   );
-  if (jarak > ABSEN_RADIUS_METERS) {
+  const jarakEfektif = adjustedJarakMeters(jarak, accuracy ?? 0);
+  if (jarakEfektif > ABSEN_RADIUS_METERS) {
     return NextResponse.json(
       { error: "Anda berada di luar radius kantor LEMIGAS." },
       { status: 422 }
