@@ -131,7 +131,7 @@ export default function IzinForm() {
       {/* Jenis pengajuan */}
       <div>
         <span className="text-sm font-medium text-slate-700">Jenis Pengajuan</span>
-        <div className="mt-2 grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-2 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           {(
             [
               { value: "IZIN", label: "Izin", desc: "Keperluan pribadi / dinas" },
@@ -172,7 +172,7 @@ export default function IzinForm() {
           <CalendarDays className="h-4 w-4 text-navy-500" aria-hidden="true" />
           Rentang Tanggal
         </span>
-        <div className="mt-2 grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-2 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="w-full">
             <label className="block text-xs font-medium text-slate-500">
               Tanggal Mulai
