@@ -7,7 +7,9 @@ export const KANTOR_LEMIGAS = {
 };
 
 // Radius maksimum jarak presensi dari kantor LEMIGAS (meter).
-export const ABSEN_RADIUS_METERS = 200;
+// 1000 m (1 km) untuk mengakomodasi deviasi/ketidakakuratan lokasi dari
+// Wi-Fi/IP browser laptop Windows (golokasi berbasis jaringan, bukan GPS chip).
+export const ABSEN_RADIUS_METERS = 1000;
 
 export function haversineMeters(
   lat1: number,

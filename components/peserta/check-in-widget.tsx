@@ -95,7 +95,7 @@ export default function CheckInWidget({
         return;
       }
 
-      // 2) Validasi radius: maksimal 200 meter dari kantor LEMIGAS.
+      // 2) Validasi radius: maksimal 1000 meter (1 km) dari kantor LEMIGAS.
       const jarak = haversineMeters(
         latitude,
         longitude,

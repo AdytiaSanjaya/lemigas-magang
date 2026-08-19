@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   const { action, latitude, longitude } = parsed.data;
 
   // Validasi radius lokasi: presensi hanya sah bila peserta berada dalam
-  // radius maksimal 200 meter dari kantor LEMIGAS.
+  // radius maksimal 1000 meter (1 km) dari kantor LEMIGAS.
   const jarak = haversineMeters(
     latitude,
     longitude,
