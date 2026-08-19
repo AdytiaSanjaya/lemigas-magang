@@ -71,7 +71,7 @@ export default async function IzinPage({
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 overflow-x-hidden">
+    <div className="mx-auto w-full max-w-full space-y-6 overflow-x-hidden p-3 sm:p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Izin / Sakit</h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -82,7 +82,7 @@ export default async function IzinPage({
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Formulir */}
         <section className="lg:col-span-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+          <div className="w-full rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-6">
             <div className="mb-5 flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-50 text-navy-600">
                 <ClipboardPenLine className="h-4.5 w-4.5" aria-hidden="true" />
@@ -98,7 +98,7 @@ export default async function IzinPage({
 
         {/* Riwayat */}
         <section className="lg:col-span-3">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
               <div>
                 <h2 className="text-sm font-semibold text-slate-800">Riwayat Pengajuan</h2>
@@ -112,8 +112,8 @@ export default async function IzinPage({
               )}
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="w-full overflow-x-auto rounded-lg">
+              <table className="w-full min-w-[600px] text-left text-sm">
                 <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-5 py-3">Jenis</th>

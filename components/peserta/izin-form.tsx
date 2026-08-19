@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
+  "mt-1.5 block w-full box-border rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
 
 export default function IzinForm() {
   const router = useRouter();
@@ -131,7 +131,7 @@ export default function IzinForm() {
       {/* Jenis pengajuan */}
       <div>
         <span className="text-sm font-medium text-slate-700">Jenis Pengajuan</span>
-        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-2 flex w-full flex-col gap-2">
           {(
             [
               { value: "IZIN", label: "Izin", desc: "Keperluan pribadi / dinas" },
@@ -146,7 +146,7 @@ export default function IzinForm() {
                 setErrors((p) => ({ ...p, type: "" }));
               }}
               aria-pressed={type === opt.value}
-              className={`rounded-xl border-2 px-4 py-3 text-left transition-all duration-200 ${
+              className={`w-full rounded-xl border-2 px-4 py-3 text-left transition-all duration-200 ${
                 type === opt.value
                   ? "border-navy-600 bg-navy-50"
                   : "border-slate-200 bg-white hover:border-slate-300"
@@ -172,8 +172,8 @@ export default function IzinForm() {
           <CalendarDays className="h-4 w-4 text-navy-500" aria-hidden="true" />
           Rentang Tanggal
         </span>
-        <div className="mt-2 flex flex-col gap-4 sm:flex-row">
-          <div className="flex-1">
+        <div className="mt-2 flex w-full flex-col gap-4 sm:flex-row">
+          <div className="w-full sm:flex-1">
             <label className="block text-xs font-medium text-slate-500">
               Tanggal Mulai
               <input
@@ -191,7 +191,7 @@ export default function IzinForm() {
               <p className="mt-1 text-xs text-rose-600">{errors.startDate}</p>
             )}
           </div>
-          <div className="flex-1">
+          <div className="w-full sm:flex-1">
             <label className="block text-xs font-medium text-slate-500">
               Tanggal Selesai
               <input
@@ -277,7 +277,7 @@ export default function IzinForm() {
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            className={`mt-2 flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-all ${
+            className={`mt-2 flex min-h-[120px] w-full box-border cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-all ${
               dragging
                 ? "border-navy-500 bg-navy-50"
                 : "border-slate-200 bg-slate-50/70 hover:border-navy-400/60 hover:bg-navy-50/40"
