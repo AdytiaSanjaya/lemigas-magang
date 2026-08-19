@@ -16,7 +16,7 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
   return (
     <div className="min-h-[100dvh] bg-slate-50">
       {/* Header mobile */}
-      <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <header className="sticky top-0 z-40 flex w-full max-w-full items-center justify-between gap-3 overflow-hidden border-b border-slate-200 bg-white px-3 py-2 box-border lg:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -100,7 +100,7 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
       </div>
 
       {/* Konten utama */}
-      <main className="w-full min-w-0 max-w-full overflow-x-hidden p-3 sm:p-6 lg:py-8 lg:pl-80 lg:pr-8">
+      <main className="w-full max-w-full overflow-x-hidden p-3 box-border sm:p-6 lg:py-8 lg:pl-80 lg:pr-8 flex-1">
         {children}
       </main>
     </div>
