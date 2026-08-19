@@ -7,7 +7,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url: koneksi runtime (query) di Vercel — pakai connection pooler
+  // (Supabase PgBouncer / Neon / Supavisor) agar jumlah koneksi terkendali
+  // saat banyak request serverless berjalan bersamaan.
+  url = env("DATABASE_URL")
+  // directUrl: koneksi langsung ke Postgres — dipakai Prisma CLI untuk
+  // migrasi/introspection yang butuh koneksi non-pooling (mis. Prisma Migrate).
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
