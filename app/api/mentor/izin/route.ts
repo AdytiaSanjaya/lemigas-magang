@@ -42,12 +42,16 @@ export async function PATCH(req: NextRequest) {
   }
 
   // Hanya mentor pembimbing dari peserta tersebut yang boleh memproses.
-  const pemohon = await prisma.user.findUnique({ where: { id: izin.userId } });
+  const pemohon = await prisma.user.findUnique({
+    where: { id: izin.userId },
+    select: { email: true },
+  });
   if (!pemohon) {
     return NextResponse.json({ error: "Pemohon tidak ditemukan." }, { status: 404 });
   }
   const peserta = await prisma.peserta.findFirst({
     where: { pendaftar: { email: pemohon.email.toLowerCase().trim() } },
+    select: { id: true, mentorId: true },
   });
   if (!peserta || peserta.mentorId !== session.user.id) {
     return NextResponse.json(

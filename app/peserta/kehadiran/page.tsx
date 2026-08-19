@@ -54,11 +54,15 @@ export default async function KehadiranPage({
         orderBy: { date: "desc" },
         skip: (page - 1) * PER_PAGE,
         take: PER_PAGE,
+        select: { id: true, date: true, checkIn: true, checkOut: true, status: true },
       })
       .catch(() => []),
     prisma.attendance.count({ where: { userId, date: { gte, lt } } }).catch(() => 0),
     prisma.attendance
-      .findUnique({ where: { userId_date: { userId, date: today } } })
+      .findUnique({
+        where: { userId_date: { userId, date: today } },
+        select: { checkIn: true, checkOut: true },
+      })
       .catch(() => null),
     prisma.attendance
       .groupBy({

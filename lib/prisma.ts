@@ -1,12 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 
-// Connection pooling Prisma: gunakan satu instance client yang dipakai bersama
-// (singleton) di seluruh modul dan reuse lintas request pada serverless instance
-// yang sama (Vercel). Instance disimpan di globalThis agar koneksi database tidak
-// membengkak saat banyak pengguna mengakses secara bersamaan.
-//
-// Untuk production berskala besar, kombinasikan dengan PgBouncer/Neon/Supabase
-// (pooler URL) pada DATABASE_URL agar pool tidak melampaui batas koneksi DB.
+// Singleton PrismaClient (lihat .agents/skills/lemigas-guardrail.md):
+// satu instance client dipakai bersama seluruh modul dan di-cache di globalThis
+// agar koneksi Supabase/Postgres di Vercel tidak membengkak saat banyak request
+// serverless berjalan bersamaan. Mencegah kebocoran koneksi & jeda saat pindah
+// menu. Di production gunakan connection pooling (Supabase pooler / PgBouncer /
+// Neon) lewat DATABASE_URL agar jumlah koneksi tetap terkendali.
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -17,4 +16,8 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 
-globalForPrisma.prisma = prisma;
+// Cache instance di globalThis agar hot-reload dev / reuse request serverless
+// tidak membuat instance PrismaClient baru berulang kali.
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

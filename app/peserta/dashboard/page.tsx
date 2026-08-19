@@ -74,7 +74,10 @@ export default async function PesertaDashboardPage() {
       })
       .catch(() => 0),
     prisma.attendance
-      .findUnique({ where: { userId_date: { userId: session.user.id, date: today } } })
+      .findUnique({
+        where: { userId_date: { userId: session.user.id, date: today } },
+        select: { checkIn: true, checkOut: true },
+      })
       .catch(() => null),
     prisma.leaveRequest
       .findFirst({
@@ -85,6 +88,7 @@ export default async function PesertaDashboardPage() {
           endDate: { gte: today },
         },
         orderBy: { createdAt: "desc" },
+        select: { type: true },
       })
       .catch(() => null),
     prisma.leaveRequest
@@ -95,6 +99,7 @@ export default async function PesertaDashboardPage() {
         where: { userId: session.user.id },
         orderBy: { date: "desc" },
         take: 6,
+        select: { id: true, date: true, checkIn: true, checkOut: true, status: true },
       })
       .catch(() => []),
     prisma.leaveRequest
@@ -102,6 +107,7 @@ export default async function PesertaDashboardPage() {
         where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
         take: 4,
+        select: { id: true, type: true, startDate: true, endDate: true, reason: true, status: true },
       })
       .catch(() => []),
   ]);

@@ -38,7 +38,19 @@ export default async function MentorPesertaPage() {
   const peserta = await prisma.peserta
     .findMany({
       where: { mentorId: session.user.id },
-      include: { pendaftar: true, unit: true },
+      include: {
+        pendaftar: {
+          select: {
+            nama: true,
+            asalInstansi: true,
+            jurusan: true,
+            jenisKelamin: true,
+            email: true,
+            noHp: true,
+          },
+        },
+        unit: { select: { nama: true } },
+      },
       orderBy: { createdAt: "desc" },
     })
     .catch(() => []);

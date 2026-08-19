@@ -26,7 +26,7 @@ export default async function MentorIzinPage() {
   const requests = await prisma.leaveRequest
     .findMany({
       where: { user: { email: { in: emails } } },
-      include: { user: true },
+      include: { user: { select: { nama: true, email: true } } },
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     })
     .catch(() => []);

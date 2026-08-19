@@ -40,8 +40,13 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Rentang tanggal tidak valid." }, { status: 422 });
   }
 
-  const unit = await prisma.unit.findUnique({ where: { id: unitId } });
-  const mentor = mentorId ? await prisma.user.findUnique({ where: { id: mentorId } }) : null;
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { aktif: true },
+  });
+  const mentor = mentorId
+    ? await prisma.user.findUnique({ where: { id: mentorId }, select: { role: true } })
+    : null;
   if (!unit || !unit.aktif) return NextResponse.json({ error: "Unit tidak tersedia." }, { status: 422 });
   if (mentorId && (!mentor || mentor.role !== "MENTOR")) {
     return NextResponse.json({ error: "Mentor tidak valid." }, { status: 422 });
@@ -82,7 +87,11 @@ export async function GET(req: NextRequest) {
   const [items, total] = await Promise.all([
     prisma.peserta.findMany({
       where,
-      include: { pendaftar: true, unit: true, mentor: { select: { nama: true } } },
+      include: {
+        pendaftar: { select: { nama: true, asalInstansi: true, email: true } },
+        unit: { select: { nama: true } },
+        mentor: { select: { id: true, nama: true } },
+      },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,

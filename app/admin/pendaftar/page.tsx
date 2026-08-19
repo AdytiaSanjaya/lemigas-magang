@@ -41,7 +41,7 @@ export default async function AdminPendaftarPage({
     prisma.pendaftar
       .findMany({
         where,
-        include: { unitMinat: true },
+        include: { unitMinat: { select: { id: true, nama: true } } },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
@@ -50,9 +50,15 @@ export default async function AdminPendaftarPage({
     prisma.pendaftar.count({ where }).catch(() => 0),
   ]);
 
-  const units = await prisma.unit.findMany({ orderBy: { nama: "asc" } }).catch(() => []);
+  const units = await prisma.unit
+    .findMany({ orderBy: { nama: "asc" }, select: { id: true, nama: true } })
+    .catch(() => []);
   const mentors = await prisma.user
-    .findMany({ where: { role: "MENTOR" }, orderBy: { nama: "asc" } })
+    .findMany({
+      where: { role: "MENTOR" },
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true, email: true },
+    })
     .catch(() => []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

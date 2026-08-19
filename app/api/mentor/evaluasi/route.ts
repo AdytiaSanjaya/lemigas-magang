@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 
   const peserta = await prisma.peserta.findUnique({
     where: { id: parsed.data.pesertaId },
+    select: { id: true, mentorId: true },
   });
   if (!peserta) {
     return NextResponse.json({ error: "Peserta tidak ditemukan." }, { status: 404 });

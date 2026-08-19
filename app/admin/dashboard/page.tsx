@@ -88,7 +88,7 @@ export default async function AdminDashboardPage() {
         prisma.pendaftar.count({ where: { status: "DITERIMA" } }),
         prisma.pendaftar.count({ where: { status: "DITOLAK" } }),
         prisma.peserta.count(),
-        prisma.unit.findMany({ orderBy: { nama: "asc" } }),
+        prisma.unit.findMany({ orderBy: { nama: "asc" }, select: { id: true, nama: true } }),
       ]);
     data = {
       totalPendaftar,

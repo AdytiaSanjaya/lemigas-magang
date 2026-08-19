@@ -47,6 +47,17 @@ export default async function IzinPage({
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PER_PAGE,
         take: PER_PAGE,
+        select: {
+          id: true,
+          type: true,
+          startDate: true,
+          endDate: true,
+          createdAt: true,
+          reason: true,
+          catatanReview: true,
+          attachmentUrl: true,
+          status: true,
+        },
       })
       .catch(() => []),
     prisma.leaveRequest.count({ where: { userId } }).catch(() => 0),
