@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const inputClass =
-  "mt-1.5 block w-full box-border rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
+  "mt-1.5 block w-full max-w-full box-border rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition outline-none focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20";
 
 export default function IzinForm() {
   const router = useRouter();
@@ -131,7 +131,7 @@ export default function IzinForm() {
       {/* Jenis pengajuan */}
       <div>
         <span className="text-sm font-medium text-slate-700">Jenis Pengajuan</span>
-        <div className="mt-2 flex w-full flex-col gap-2">
+        <div className="mt-2 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           {(
             [
               { value: "IZIN", label: "Izin", desc: "Keperluan pribadi / dinas" },
@@ -277,7 +277,7 @@ export default function IzinForm() {
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            className={`mt-2 flex min-h-[120px] w-full box-border cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-all ${
+            className={`mt-2 flex min-h-[120px] w-full max-w-full box-border cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-all ${
               dragging
                 ? "border-navy-500 bg-navy-50"
                 : "border-slate-200 bg-slate-50/70 hover:border-navy-400/60 hover:bg-navy-50/40"
