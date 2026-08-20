@@ -95,7 +95,7 @@ export default async function IzinPage({
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Formulir */}
-        <section className="w-full max-w-full lg:col-span-2">
+        <section className="w-full min-w-0 max-w-full lg:col-span-2">
           <div className="w-full max-w-full rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm box-border overflow-hidden">
             <div className="mb-5 flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-50 text-navy-600">
@@ -111,7 +111,7 @@ export default async function IzinPage({
         </section>
 
         {/* Riwayat */}
-        <section className="w-full max-w-full lg:col-span-3">
+        <section className="w-full min-w-0 max-w-full lg:col-span-3">
           <div className="w-full max-w-full rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm box-border overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
               <div>

@@ -292,10 +292,10 @@ export default function IzinForm() {
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy-500 shadow-sm ring-1 ring-slate-200">
               <UploadCloud className="h-5 w-5" aria-hidden="true" />
             </span>
-            <p className="mt-2.5 text-sm font-medium text-slate-700">
+            <p className="mt-2.5 break-words text-sm font-medium text-slate-700">
               Seret berkas ke sini atau <span className="text-navy-600 underline">pilih file</span>
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 break-words text-xs text-slate-400">
               Surat dokter, keterangan, atau bukti pendukung lainnya.
             </p>
           </label>
