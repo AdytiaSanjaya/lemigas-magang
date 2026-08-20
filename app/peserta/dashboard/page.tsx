@@ -56,8 +56,14 @@ export default async function PesertaDashboardPage() {
 
   // Resolve User.id ASLI dari email session (NextAuth) agar query presensi/izin
   // match persis dengan data yang disimpan saat create (untuk akun Google,
-  // session.user.id adalah Google sub, bukan primary key Prisma).
-  const userId = (await getUserIdBySession(session)) ?? "";
+  // session.user.id adalah Google sub, bukan primary key Prisma). Dibungkus
+  // try-catch: jika gagal, fallback ke userId kosong (statistik tampil nol).
+  let userId = "";
+  try {
+    userId = (await getUserIdBySession(session)) ?? "";
+  } catch {
+    userId = "";
+  }
 
   // Query dibungkus catch + fallback agar halaman tetap render bila error DB.
   const [

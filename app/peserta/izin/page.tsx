@@ -31,7 +31,15 @@ export default async function IzinPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const session = await requirePeserta();
-  const peserta = await getPesertaBySession(session);
+
+  // Query profil peserta dibungkus try-catch: bila koneksi Supabase timeout /
+  // error, halaman tetap render (fallback "Belum Peserta Aktif") alih-alih 500.
+  let peserta: Awaited<ReturnType<typeof getPesertaBySession>> = null;
+  try {
+    peserta = await getPesertaBySession(session);
+  } catch {
+    peserta = null;
+  }
   if (!peserta) return <NotParticipant />;
 
   const params = await searchParams;
@@ -40,8 +48,14 @@ export default async function IzinPage({
   // Resolve User.id ASLI dari email session (NextAuth) — session.user.id untuk
   // akun Google adalah Google sub, bukan primary key Prisma, sehingga query
   // LeaveRequest harus memakai User.id hasil resolver agar match dengan data
-  // yang tersimpan saat pengajuan dibuat.
-  const userId = (await getUserIdBySession(session)) ?? "";
+  // yang tersimpan saat pengajuan dibuat. Dibungkus try-catch: jika gagal,
+  // fallback ke userId kosong (riwayat tampil kosong).
+  let userId = "";
+  try {
+    userId = (await getUserIdBySession(session)) ?? "";
+  } catch {
+    userId = "";
+  }
   // Fallback data kosong agar halaman tetap render bila query error atau
   // record izin belum ada (tidak crash 500).
   const [records, total, pendingCount] = await Promise.all([
@@ -112,7 +126,7 @@ export default async function IzinPage({
               )}
             </div>
 
-            <div className="w-full min-w-0 overflow-x-auto rounded-xl border border-border shadow-sm">
+            <div className="w-full max-w-full min-w-0 overflow-x-auto rounded-xl border border-border shadow-sm">
               <table className="w-full min-w-[500px] text-sm text-left">
                 <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>

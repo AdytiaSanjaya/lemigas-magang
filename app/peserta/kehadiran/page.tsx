@@ -32,7 +32,15 @@ export default async function KehadiranPage({
   searchParams: Promise<{ page?: string; month?: string }>;
 }) {
   const session = await requirePeserta();
-  const peserta = await getPesertaBySession(session);
+
+  // Query profil peserta dibungkus try-catch: bila koneksi Supabase timeout /
+  // error, halaman tetap render (fallback "Belum Peserta Aktif") alih-alih 500.
+  let peserta: Awaited<ReturnType<typeof getPesertaBySession>> = null;
+  try {
+    peserta = await getPesertaBySession(session);
+  } catch {
+    peserta = null;
+  }
   if (!peserta) return <NotParticipant />;
 
   const params = await searchParams;
@@ -44,8 +52,14 @@ export default async function KehadiranPage({
 
   // Resolve User.id ASLI dari email session (NextAuth) agar query kehadiran
   // match persis dengan data yang disimpan saat check-in (untuk akun Google,
-  // session.user.id adalah Google sub, bukan primary key Prisma).
-  const userId = (await getUserIdBySession(session)) ?? "";
+  // session.user.id adalah Google sub, bukan primary key Prisma). Dibungkus
+  // try-catch: jika gagal, fallback ke userId kosong (riwayat tampil kosong).
+  let userId = "";
+  try {
+    userId = (await getUserIdBySession(session)) ?? "";
+  } catch {
+    userId = "";
+  }
   const today = toUtcDate(todayStringWib());
 
   // Query kehadiran dibungkus catch agar halaman tetap render (dengan data
@@ -117,7 +131,7 @@ export default async function KehadiranPage({
               <CalendarCheck2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
               Ringkasan {new Date(`${month}-01T00:00:00Z`).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div className="mt-3 grid w-full max-w-full grid-cols-3 gap-2 text-center box-border sm:gap-4">
               <div className="rounded-xl bg-emerald-50 py-3">
                 <div className="text-xl font-bold text-emerald-700">{hadirCount}</div>
                 <div className="text-[11px] font-medium text-emerald-600">Hadir</div>
@@ -152,8 +166,8 @@ export default async function KehadiranPage({
           <AttendanceFilter />
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="w-full max-w-full overflow-x-auto rounded-xl border border-border">
+          <table className="w-full min-w-[500px] text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-5 py-3">Tanggal</th>
