@@ -12,9 +12,8 @@ import SignOutButton from "@/components/sign-out-button";
 const ROLE_PENDAFTAR = "PENDAFTAR";
 
 export default function SiteHeader() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const role = session?.user?.role;
-  const isLoading = status === "loading";
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const name = session?.user?.name?.trim() ?? "";
@@ -92,19 +91,7 @@ export default function SiteHeader() {
             Cek Status
           </Link>
 
-          {isLoading ? (
-            /* Placeholder berukuran sama persis dengan tombol "Daftar Magang
-               Sekarang" dan "Masuk" (teks transparan) agar layout tidak
-               melompat saat status session terkonfirmasi. */
-            <div className="flex items-center" aria-hidden="true">
-              <span className="flex select-none items-center justify-center rounded-lg bg-white/10 px-5 py-2 font-semibold text-transparent animate-pulse">
-                Daftar Magang Sekarang
-              </span>
-              <span className="ml-1 flex select-none items-center justify-center rounded-lg border border-white/15 px-4 py-2 font-medium text-transparent animate-pulse">
-                Masuk
-              </span>
-            </div>
-          ) : session?.user ? (
+          {session?.user ? (
             <>
               {rolePanelLink && (
                 <Link
@@ -165,16 +152,7 @@ export default function SiteHeader() {
               Cek Status
             </Link>
 
-            {isLoading ? (
-              <div className="flex flex-col gap-2 border-t border-white/10 pt-3" aria-hidden="true">
-                <span className="flex select-none items-center justify-center rounded-lg bg-white/10 px-5 py-2.5 font-semibold text-transparent animate-pulse">
-                  Daftar Magang Sekarang
-                </span>
-                <span className="flex select-none items-center justify-center rounded-lg border border-white/15 px-5 py-2.5 font-medium text-transparent animate-pulse">
-                  Masuk
-                </span>
-              </div>
-            ) : session?.user ? (
+            {session?.user ? (
               <>
                 {rolePanelLink && (
                   <Link
