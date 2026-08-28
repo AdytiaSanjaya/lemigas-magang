@@ -5,6 +5,8 @@ import PanelShell from "@/components/panel-shell";
 import { signOut } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {
