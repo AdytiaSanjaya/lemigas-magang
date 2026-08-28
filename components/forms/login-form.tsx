@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
@@ -21,7 +20,6 @@ function safeCallbackUrl(): string | null {
 }
 
 export default function LoginForm() {
-  const router = useRouter();
   const [form, setForm] = useState<LoginInput>({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<LoginInput>>({});
   const [loading, setLoading] = useState(false);
@@ -63,17 +61,14 @@ export default function LoginForm() {
 
     // Setelah login, arahkan ke callbackUrl (mis. dari portal peserta) atau ke
     // dashboard sesuai role. getSession() memastikan role yang dibaca sudah baru.
+    // Menggunakan window.location.replace() alih-alih router.push() + router.refresh()
+    // untuk melakukan hard navigasi yang melewati Client-Side Router Cache sepenuhnya,
+    // mencegah race condition yang menyebabkan data stale (angka 0) pada kartu ringkasan.
     const callbackUrl = safeCallbackUrl();
-    if (callbackUrl) {
-      router.push(callbackUrl);
-      router.refresh();
-      return;
-    }
     const fresh = await getSession();
     const role = (fresh?.user as { role?: string } | undefined)?.role ?? "";
-    const target = ROLE_HOME[role] ?? "/peserta/dashboard";
-    router.push(target);
-    router.refresh();
+    const target = callbackUrl ?? ROLE_HOME[role] ?? "/peserta/dashboard";
+    window.location.replace(target);
   }
 
   return (
