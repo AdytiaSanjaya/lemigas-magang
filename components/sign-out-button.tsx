@@ -17,7 +17,8 @@ export default function SignOutButton({
       disabled={loading}
       onClick={async () => {
         setLoading(true);
-        await signOut({ callbackUrl: "/" });
+        await signOut({ redirect: false });
+        window.location.href = "/";
       }}
       className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >

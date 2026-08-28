@@ -1,10 +1,10 @@
 import { requirePeserta } from "@/lib/rbac";
-import { signOut } from "@/lib/auth";
 import { getPesertaBySession } from "@/lib/peserta";
 import PesertaNav from "@/components/peserta/peserta-nav";
 import SidebarBrand from "@/components/sidebar-brand";
 import PanelShell from "@/components/panel-shell";
-import { LogOut, Building2, UserRound } from "lucide-react";
+import SidebarLogoutButton from "@/components/sidebar-logout-button";
+import { Building2, UserRound } from "lucide-react";
 import { formatTanggal } from "@/lib/format";
 
 export default async function PesertaLayout({
@@ -71,20 +71,7 @@ export default async function PesertaLayout({
             </div>
           </div>
         </div>
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/login" });
-          }}
-        >
-          <button
-            type="submit"
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
-          >
-            <LogOut size={16} />
-            Keluar
-          </button>
-        </form>
+        <SidebarLogoutButton />
       </div>
     </>
   );

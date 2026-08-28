@@ -1,9 +1,9 @@
 import { requireMentor } from "@/lib/rbac";
-import { signOut } from "@/lib/auth";
 import MentorNav from "@/components/mentor/mentor-nav";
 import SidebarBrand from "@/components/sidebar-brand";
 import PanelShell from "@/components/panel-shell";
-import { LogOut, Building2 } from "lucide-react";
+import SidebarLogoutButton from "@/components/sidebar-logout-button";
+import { Building2 } from "lucide-react";
 
 export default async function MentorLayout({
   children,
@@ -43,20 +43,7 @@ export default async function MentorLayout({
             <div className="truncate text-xs text-slate-400">{session.user.email}</div>
           </div>
         </div>
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/login" });
-          }}
-        >
-          <button
-            type="submit"
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
-          >
-            <LogOut size={16} />
-            Keluar
-          </button>
-        </form>
+        <SidebarLogoutButton />
       </div>
     </>
   );
