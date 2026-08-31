@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 // Tanda "G" resmi Google (logo/merk dagang Google), digambar inline agar tidak
@@ -35,16 +34,11 @@ export default function GoogleSignInButton({
 }: {
   callbackUrl?: string;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
     setLoading(true);
-    const res = await signIn("google", { callbackUrl, redirect: false });
-    if (!res?.error) {
-      router.push(callbackUrl);
-      router.refresh();
-    }
+    await signIn("google", { callbackUrl });
     setLoading(false);
   }
 
