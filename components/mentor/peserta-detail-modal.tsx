@@ -31,7 +31,11 @@ function fmtDate(iso: string): string {
 
 function fmtWaktu(iso: string | null): string {
   if (!iso) return "-";
-  return new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function initials(nama: string): string {

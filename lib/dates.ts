@@ -66,10 +66,14 @@ export function businessDaysRemaining(end: Date, now = new Date()): number {
   return count;
 }
 
-/** Format jam untuk display (lokale id-ID). */
+/** Format jam untuk display (WIB). */
 export function formatWaktu(d: Date | null | undefined): string {
   if (!d) return "-";
-  return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /** Format tanggal lengkap untuk display (lokale id-ID). */

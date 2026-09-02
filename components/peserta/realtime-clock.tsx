@@ -24,12 +24,14 @@ export default function RealtimeClock({
   const dateSize = size === "lg" ? "text-sm" : size === "sm" ? "text-[11px]" : "text-xs";
 
   const time = now?.toLocaleTimeString("id-ID", {
+    timeZone: "Asia/Jakarta",
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
   });
   const date = now?.toLocaleDateString("id-ID", {
+    timeZone: "Asia/Jakarta",
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -37,7 +39,7 @@ export default function RealtimeClock({
   });
 
   return (
-    <div className={className}>
+    <div className={`text-center ${className}`}>
       <div className={`font-mono font-semibold tracking-tight tabular-nums ${timeSize}`}>
         {time ?? "--:--:--"}
       </div>

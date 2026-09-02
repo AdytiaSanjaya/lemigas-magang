@@ -53,7 +53,11 @@ function initials(nama: string): string {
 
 function formatWaktu(iso: string | null): string {
   if (!iso) return "-";
-  return new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {

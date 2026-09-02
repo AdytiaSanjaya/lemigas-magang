@@ -173,7 +173,11 @@ export default function CheckInWidget({
 
   const fmt = (iso: string | null) =>
     iso
-      ? new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      ? new Date(iso).toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "-";
 
   return (

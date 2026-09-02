@@ -12,7 +12,7 @@ import {
   Briefcase,
   CheckCircle2,
   Clock,
-  Sparkles,
+  IdCard,
   ClipboardPenLine,
   Building2,
 } from "lucide-react";
@@ -227,7 +227,7 @@ export default async function PesertaDashboardPage() {
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2 text-navy-200">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              <IdCard className="h-4 w-4" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Selamat datang kembali
               </span>
@@ -250,10 +250,10 @@ export default async function PesertaDashboardPage() {
               </span>
             </div>
           </div>
-          <div className="md:text-right">
+          <div className="flex justify-center md:justify-end">
             <div className="inline-flex flex-col items-center rounded-2xl bg-white/10 px-6 py-4 ring-1 ring-white/15 backdrop-blur-sm">
               <RealtimeClock size="lg" />
-              <div className="mt-2 flex items-center gap-2 text-xs text-navy-100">
+              <div className="mt-2 flex items-center justify-center gap-2 text-center text-xs text-navy-100">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
                 {statusHariIni.label}
                 {izinPending > 0 && <span className="rounded-full bg-amber-400/20 px-2 py-0.5 font-semibold text-amber-200">{izinPending} izin menunggu</span>}
