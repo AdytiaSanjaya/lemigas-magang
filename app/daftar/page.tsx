@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import PendaftaranForm from "@/components/forms/pendaftaran-form";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
+import ActiveParticipantBlockToast from "@/components/ui/active-participant-block-toast";
 
 export default async function DaftarPage() {
   const session = await auth();
@@ -16,6 +17,30 @@ export default async function DaftarPage() {
   // Role panel (Admin/Mentor) tidak memakai formulir pendaftaran peserta.
   if (session.user.role !== ROLE_PENDAFTAR) {
     redirect(session.user.role === "ADMIN" ? "/admin/dashboard" : "/mentor/peserta");
+  }
+
+  // Cegah pendaftar aktif mengakses ulang formulir: jika email sudah tercatat
+  // memiliki data Peserta (magang aktif), tampilkan notifikasi lalu redirect.
+  const email = session.user.email?.toLowerCase().trim();
+  if (email) {
+    const existingActive = await prisma.peserta
+      .findFirst({
+        where: { pendaftar: { email } },
+        select: { id: true },
+      })
+      .catch(() => null);
+
+    if (existingActive) {
+      return (
+        <main className="flex min-h-screen flex-col bg-zinc-50">
+          <SiteHeader />
+          <section className="flex flex-1 items-center justify-center px-6 py-14 sm:py-16">
+            <ActiveParticipantBlockToast redirectUrl="/peserta/dashboard" />
+          </section>
+          <SiteFooter />
+        </main>
+      );
+    }
   }
 
   const units = await prisma.unit.findMany({
