@@ -8,7 +8,6 @@ import {
   CalendarCheck2,
   ClipboardCheck,
   Building2,
-  Sparkles,
   ChevronRight,
 } from "lucide-react";
 import type { PesertaRow, StatusHariIni } from "@/components/mentor/peserta-types";
@@ -247,7 +246,7 @@ export default async function MentorPesertaPage() {
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2 text-navy-200">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              <Users className="h-4 w-4" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Panel Mentor &middot; {session.user.unitNama ?? "Unit"}
               </span>
