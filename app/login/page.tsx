@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { auth, isGoogleAuthEnabled } from "@/lib/auth";
-import LoginForm from "@/components/forms/login-form";
 import GoogleSignInButton from "@/components/forms/google-sign-in-button";
 import LembagasLogo from "@/components/lemigas-logo";
 
@@ -79,16 +78,9 @@ export default async function LoginPage({
 
         <div className="mt-8">
           {isGoogleAuthEnabled ? (
-            <>
-              <GoogleSignInButton callbackUrl={safeCallbackUrl(callbackUrl) ?? "/peserta/dashboard"} />
-              <div className="my-6 flex items-center gap-3 text-xs text-zinc-400">
-                <span className="h-px flex-1 bg-zinc-200" aria-hidden="true" />
-                atau masuk dengan kredensial
-                <span className="h-px flex-1 bg-zinc-200" aria-hidden="true" />
-              </div>
-            </>
+            <GoogleSignInButton callbackUrl={safeCallbackUrl(callbackUrl) ?? "/peserta/dashboard"} />
           ) : null}
-          <LoginForm />
+          {/* Credential login form di-hide khusus alur pendaftar magang. */}
         </div>
 
         <p className="mt-8 text-center text-xs text-zinc-400">

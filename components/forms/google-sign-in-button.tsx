@@ -50,7 +50,7 @@ export default function GoogleSignInButton({
       className="flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white py-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
     >
       <GoogleMark />
-      {loading ? "Menghubungkan ke Google..." : "Masuk dengan Google"}
+      {loading ? "Menghubungkan ke Google..." : "Daftar / Masuk dengan Google"}
     </button>
   );
 }
