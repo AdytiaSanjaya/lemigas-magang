@@ -29,9 +29,10 @@ async function main() {
   const unitRows = await prisma.unit.findMany();
   const unitIdByNama = new Map(unitRows.map((u) => [u.nama, u.id]));
 
-  // --- User: Admin & Mentor (semua password: Magang123) ---
+  // --- User: Admin & Mentor ---
   console.log("Membuat user admin & mentor ...");
-  const passwordHash = await bcrypt.hash("Magang123", 10);
+  const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || "Magang123";
+  const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
   await prisma.user.create({
     data: { nama: "Admin LEMIGAS", email: "admin@lemigas.example", passwordHash, role: "ADMIN" },
@@ -114,9 +115,10 @@ async function main() {
   });
 
   console.log("\nSeed selesai ✔");
-  console.log("  ▪ Admin :  admin@lemigas.example / Magang123");
-  console.log("  ▪ Mentor:  mentor.lab@lemigas.example  / Magang123");
-  console.log("  ▪ Mentor:  mentor.litbang@lemigas.example / Magang123");
+  console.log("  ▪ Admin :  admin@lemigas.example");
+  console.log("  ▪ Mentor:  mentor.lab@lemigas.example");
+  console.log("  ▪ Mentor:  mentor.litbang@lemigas.example");
+  console.log("  (Gunakan password dari env DEFAULT_ADMIN_PASSWORD)");
 }
 
 main()
