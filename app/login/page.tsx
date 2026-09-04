@@ -39,6 +39,7 @@ export default async function LoginPage({
   }
 
   const resolvedCallback = safeCallbackUrl(callbackUrl) ?? "/peserta/dashboard";
+  const isRegistrationFlow = resolvedCallback.startsWith("/daftar");
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-navy-900 via-slate-800 to-navy-950 p-4">
@@ -70,6 +71,7 @@ export default async function LoginPage({
         <LoginRoleSelector
           callbackUrl={resolvedCallback}
           isGoogleEnabled={isGoogleAuthEnabled}
+          mode={isRegistrationFlow ? "registration" : "gateway"}
         />
 
         <p className="mt-8 text-center text-xs text-slate-400">
