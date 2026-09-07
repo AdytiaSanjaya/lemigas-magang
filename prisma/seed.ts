@@ -31,7 +31,10 @@ async function main() {
 
   // --- User: Admin & Mentor ---
   console.log("Membuat user admin & mentor ...");
-  const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || "Magang123";
+  const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+  if (!defaultPassword) {
+    throw new Error("DEFAULT_ADMIN_PASSWORD belum diset di environment. Seed dibatalkan.");
+  }
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
   await prisma.user.create({
