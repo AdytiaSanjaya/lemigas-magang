@@ -137,7 +137,7 @@ export default async function HomePage() {
 
           <h1 className="mx-auto mt-6 max-w-4xl animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
             Portal Pendaftaran &amp; Manajemen Magang/PKL{" "}
-            <span className="bg-gradient-to-r from-sky-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               LEMIGAS
             </span>
           </h1>

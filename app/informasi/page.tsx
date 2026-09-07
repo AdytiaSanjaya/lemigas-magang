@@ -198,7 +198,7 @@ export default async function InformasiPage() {
 
               <h1 className="mt-5 animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
                 Informasi Program{" "}
-                <span className="bg-gradient-to-r from-sky-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
+                <span className="text-amber-400">
                   Magang &amp; PKL
                 </span>
               </h1>
