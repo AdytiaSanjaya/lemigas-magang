@@ -5,7 +5,6 @@ import {
   CalendarClock,
   FlaskConical,
   Mountain,
-  Wrench,
   Laptop,
   Building2,
   Send,
@@ -91,35 +90,28 @@ const durasiProgram = [
 
 const unitKerja = [
   {
-    title: "Eksplorasi & Eksploitasi Minyak dan Gas Bumi",
+    title: "Pusat Riset & Pengembangan",
     icon: Mountain,
     scope:
       "Kegiatan pengkajian potensi, survei, dan teknologi produksi migas guna mendukung ketahanan energi nasional.",
     jurusan: ["Geologi", "Geofisika", "Teknik Perminyakan", "Teknik Kimia"],
   },
   {
-    title: "Aplikasi & Pengolahan Hasil Pengujian",
+    title: "Laboratorium Pengujian Migas",
     icon: FlaskConical,
     scope:
-      "Laboratorium pengujian mutu BBM, pelumas, dan gas alam: analisis sampel, pengolahan data, serta penyusunan laporan hasil uji.",
-    jurusan: ["Kimia", "Teknik Kimia"],
+      "Pengujian mutu BBM, pelumas, dan gas alam serta pemeliharaan peralatan laboratorium dan instrumentasi pengujian agar beroperasi sesuai standar mutu.",
+    jurusan: ["Kimia", "Teknik Kimia", "Teknik Mesin", "Teknik Elektro", "Instrumentasi"],
   },
   {
-    title: "Sarana & Prasarana Pengujian",
-    icon: Wrench,
-    scope:
-      "Pemeliharaan peralatan laboratorium dan instrumentasi pengujian agar beroperasi sesuai standar mutu.",
-    jurusan: ["Teknik Mesin", "Teknik Elektro", "Instrumentasi"],
-  },
-  {
-    title: "Teknologi Informasi & Manajemen Sistem",
+    title: "SPBE & Teknologi Migas",
     icon: Laptop,
     scope:
       "Pengembangan sistem informasi, software engineering, serta pengelolaan jaringan dan infrastruktur TIK.",
     jurusan: ["Sistem Informasi", "Teknik Informatika"],
   },
   {
-    title: "Administrasi & Tata Usaha",
+    title: "Bagian SDM & Umum",
     icon: Building2,
     scope:
       "Pengelolaan surat-menyurat, dokumentasi, tata kelola arsip, dan dukungan administrasi perkantoran.",
