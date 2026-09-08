@@ -19,7 +19,7 @@ const CARD_STYLES = {
     icon: Users,
     iconBg: "bg-sky-50 text-sky-600 ring-1 ring-inset ring-sky-100",
     glow: "shadow-[0_10px_24px_-10px_rgba(14,165,233,0.5)]",
-    grad: "bg-gradient-to-br from-white via-sky-50/60 to-sky-100/50",
+    grad: "bg-white",
     chip: "bg-sky-50 text-sky-600",
     dot: "bg-sky-500",
   },
@@ -27,7 +27,7 @@ const CARD_STYLES = {
     icon: Clock,
     iconBg: "bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100",
     glow: "shadow-[0_10px_24px_-10px_rgba(245,158,11,0.5)]",
-    grad: "bg-gradient-to-br from-white via-amber-50/60 to-amber-100/50",
+    grad: "bg-white",
     chip: "bg-amber-50 text-amber-600",
     dot: "bg-amber-500",
   },
@@ -35,7 +35,7 @@ const CARD_STYLES = {
     icon: CheckCircle2,
     iconBg: "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100",
     glow: "shadow-[0_10px_24px_-10px_rgba(16,185,129,0.5)]",
-    grad: "bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/50",
+    grad: "bg-white",
     chip: "bg-emerald-50 text-emerald-600",
     dot: "bg-emerald-500",
   },
@@ -43,7 +43,7 @@ const CARD_STYLES = {
     icon: XCircle,
     iconBg: "bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100",
     glow: "shadow-[0_10px_24px_-10px_rgba(244,63,94,0.5)]",
-    grad: "bg-gradient-to-br from-white via-rose-50/60 to-rose-100/50",
+    grad: "bg-white",
     chip: "bg-rose-50 text-rose-600",
     dot: "bg-rose-500",
   },
@@ -51,7 +51,7 @@ const CARD_STYLES = {
     icon: GraduationCap,
     iconBg: "bg-navy-50 text-navy-600 ring-1 ring-inset ring-navy-100",
     glow: "shadow-[0_10px_24px_-10px_rgba(30,76,143,0.5)]",
-    grad: "bg-gradient-to-br from-white via-navy-50/60 to-navy-100/50",
+    grad: "bg-white",
     chip: "bg-navy-50 text-navy-600",
     dot: "bg-navy-500",
   },
@@ -120,7 +120,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Banner header gradien (Corporate Deep Navy) */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700 p-6 shadow-md sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-navy-900 p-6 shadow-md sm:p-8">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sky-400/15 blur-3xl"

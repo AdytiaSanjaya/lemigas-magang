@@ -1,18 +1,18 @@
 import { Loader2 } from "lucide-react";
 
 const CARD_COLORS = [
-  "from-white via-sky-50/60 to-sky-100/50",
-  "from-white via-amber-50/60 to-amber-100/50",
-  "from-white via-emerald-50/60 to-emerald-100/50",
-  "from-white via-rose-50/60 to-rose-100/50",
-  "from-white via-navy-50/60 to-navy-100/50",
+  "bg-white",
+  "bg-white",
+  "bg-white",
+  "bg-white",
+  "bg-white",
 ] as const;
 
 export default function DashboardLoading() {
   return (
     <div className="space-y-6" role="status" aria-label="Memuat dashboard">
       {/* Banner skeleton */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700 p-6 shadow-md sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-navy-900 p-6 shadow-md sm:p-8">
         <div className="space-y-3">
           <div className="h-5 w-48 rounded-full bg-white/10 animate-pulse" />
           <div className="h-7 w-56 rounded-lg bg-white/10 animate-pulse" />
@@ -25,7 +25,7 @@ export default function DashboardLoading() {
         {CARD_COLORS.map((grad, i) => (
           <div
             key={i}
-            className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br ${grad} p-5 shadow-sm`}
+            className={`relative overflow-hidden rounded-2xl border border-slate-200/80 ${grad} p-5 shadow-sm`}
           >
             <div className="flex items-start justify-between">
               <div className="h-12 w-12 animate-pulse rounded-xl bg-slate-200/70" />

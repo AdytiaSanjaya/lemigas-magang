@@ -100,7 +100,7 @@ export default function PesertaPenilaianModal({
         className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative overflow-hidden bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-6 py-5 text-white">
+        <div className="relative overflow-hidden bg-navy-900 px-6 py-5 text-white">
           <div
             className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-navy-400/20 blur-2xl"
             aria-hidden="true"

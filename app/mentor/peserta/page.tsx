@@ -234,7 +234,7 @@ export default async function MentorPesertaPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       {/* Header */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-6 py-7 text-white shadow-lg shadow-navy-900/10 md:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-navy-900 px-6 py-7 text-white shadow-lg shadow-navy-900/10 md:px-8">
         <div
           className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-navy-400/20 blur-3xl"
           aria-hidden="true"

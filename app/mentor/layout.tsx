@@ -33,7 +33,7 @@ export default async function MentorLayout({
 
       <div className="mt-auto p-4">
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-navy-500 to-navy-700 text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy-700 text-sm font-semibold text-white">
             {initials}
           </div>
           <div className="min-w-0 flex-1 leading-tight">

@@ -36,7 +36,7 @@ export default function SiteFooter() {
               <span className="flex flex-col leading-tight">
                 <span className="text-lg font-extrabold uppercase tracking-[0.14em] text-white">
                   LEMIGAS{" "}
-                  <span className="bg-gradient-to-r from-sky-300 to-amber-300 bg-clip-text text-transparent">
+                  <span className="text-amber-400">
                     MAGANG
                   </span>
                 </span>
@@ -86,7 +86,7 @@ export default function SiteFooter() {
             <ul className="mt-4 space-y-3">
               {developers.map((dev) => (
                 <li key={dev.name} className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-xs font-bold text-navy-900">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
                     {dev.initial}
                   </span>
                   <span className="text-sm text-slate-300">{dev.name}</span>

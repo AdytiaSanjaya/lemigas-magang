@@ -1,7 +1,7 @@
 export default function PesertaLoading() {
   return (
     <div className="animate-pulse space-y-5" role="status" aria-label="Memuat halaman peserta">
-      <div className="h-28 rounded-3xl border border-navy-100 bg-gradient-to-br from-navy-600 to-navy-800 p-5">
+      <div className="h-28 rounded-3xl border border-navy-100 bg-navy-800 p-5">
         <div className="h-5 w-48 rounded-lg bg-white/20" />
         <div className="mt-3 h-3.5 w-32 rounded bg-white/20" />
       </div>

@@ -200,7 +200,7 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-navy-500 to-navy-700 text-sm font-bold text-white">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-700 text-sm font-bold text-white">
                               {initials(p.nama)}
                             </div>
                             <span
@@ -244,7 +244,7 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
                           <div className="w-28 shrink-0">
                             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                               <div
-                                className="h-full rounded-full bg-gradient-to-r from-navy-500 to-navy-700 transition-all duration-500"
+                                className="h-full rounded-full bg-navy-600 transition-all duration-500"
                                 style={{ width: `${p.progress}%` }}
                               />
                             </div>

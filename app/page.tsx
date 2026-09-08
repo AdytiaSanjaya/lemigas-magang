@@ -115,7 +115,7 @@ export default async function HomePage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-navy-600 text-white">
+      <section className="relative overflow-hidden bg-navy-900 text-white">
         <div
           className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl"
           aria-hidden="true"
@@ -154,7 +154,7 @@ export default async function HomePage() {
           >
             <Link
               href={daftarHref}
-              className="rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 px-7 py-3.5 text-sm font-semibold text-navy-900 shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-cyan-200"
+              className="rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
             >
               Daftar Magang Sekarang
             </Link>
@@ -185,7 +185,7 @@ export default async function HomePage() {
       {/* Tentang program / narasi resmi */}
       <section className="bg-slate-50">
         <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-          <div className="relative overflow-hidden rounded-3xl border border-navy-100 bg-gradient-to-br from-white via-navy-50/40 to-sky-50/40 p-8 shadow-sm sm:p-12">
+          <div className="relative overflow-hidden rounded-3xl border border-navy-100 bg-white p-8 shadow-sm sm:p-12">
             <div
               className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-sky-200/40 blur-3xl"
               aria-hidden="true"
@@ -266,7 +266,7 @@ export default async function HomePage() {
               href={feature.href === "/daftar" ? daftarHref : feature.href}
               className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-navy-800 to-navy-600 text-sky-300 shadow-md shadow-navy-800/20 transition group-hover:from-sky-400 group-hover:to-cyan-300 group-hover:text-navy-900">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md transition group-hover:bg-sky-500 group-hover:text-white">
                 {feature.icon}
               </div>
               <h3 className="mt-5 text-lg font-semibold text-navy-900">
@@ -298,11 +298,11 @@ export default async function HomePage() {
               <div key={step.title} className="relative text-center">
                 {index < steps.length - 1 && (
                   <div
-                    className="absolute top-7 left-[calc(50%+40px)] hidden h-0.5 bg-gradient-to-r from-sky-400/60 to-amber-300/60 lg:block lg:w-[calc(100%-80px)]"
+                    className="absolute top-7 left-[calc(50%+40px)] hidden h-0.5 bg-sky-300/60 lg:block lg:w-[calc(100%-80px)]"
                     aria-hidden="true"
                   />
                 )}
-                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-lg font-bold text-navy-900 shadow-lg shadow-sky-500/30 ring-4 ring-white/10">
+                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-lg font-bold text-white shadow-lg ring-4 ring-white/10">
                   {index + 1}
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-white">
@@ -318,7 +318,7 @@ export default async function HomePage() {
           <div className="mt-12 text-center">
             <Link
               href={daftarHref}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 px-7 py-3.5 text-sm font-semibold text-navy-900 shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-cyan-200"
+              className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
             >
               Mulai Pendaftaran
               <svg
@@ -340,7 +340,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA penutup */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy-50 via-white to-sky-50">
+      <section className="relative overflow-hidden bg-white">
         <div
           className="pointer-events-none absolute -top-24 right-1/4 h-56 w-56 rounded-full bg-sky-200/40 blur-3xl"
           aria-hidden="true"
@@ -356,7 +356,7 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href={daftarHref}
-              className="rounded-xl bg-gradient-to-r from-navy-800 to-navy-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-navy-800/20 transition hover:-translate-y-0.5 hover:from-navy-700 hover:to-navy-500"
+              className="rounded-xl bg-navy-800 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-navy-700"
             >
               Daftar Magang Sekarang
             </Link>

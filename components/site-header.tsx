@@ -49,9 +49,9 @@ export default function SiteHeader() {
             />
           </div>
           <span className="flex flex-col whitespace-nowrap leading-tight">
-            <span className="text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base sm:tracking-[0.14em]">
+              <span className="text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base sm:tracking-[0.14em]">
               LEMIGAS{" "}
-              <span className="bg-gradient-to-r from-sky-300 to-amber-300 bg-clip-text text-transparent">
+              <span className="text-amber-400">
                 MAGANG
               </span>
             </span>
@@ -96,7 +96,7 @@ export default function SiteHeader() {
               {rolePanelLink && (
                 <Link
                   href={rolePanelLink.href}
-                  className="ml-2 hidden rounded-lg bg-gradient-to-r from-sky-400 to-cyan-300 px-5 py-2 font-semibold text-navy-900 shadow-md shadow-sky-500/20 transition hover:from-sky-300 hover:to-cyan-200 lg:block"
+                  className="ml-2 hidden rounded-lg bg-sky-500 px-5 py-2 font-semibold text-white shadow-md transition hover:bg-sky-600 lg:block"
                 >
                   {rolePanelLink.label}
                 </Link>
@@ -104,7 +104,7 @@ export default function SiteHeader() {
 
               {/* Status user yang sedang login: inisial + nama + tombol keluar. */}
               <div className="ml-2 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1 pl-1 pr-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-xs font-bold text-navy-900 sm:h-8 sm:w-8">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white sm:h-8 sm:w-8">
                   {initial}
                 </span>
                 <span className="hidden max-w-[6.5rem] truncate text-xs font-semibold text-slate-200 xl:block">
@@ -118,7 +118,7 @@ export default function SiteHeader() {
               {/* Tombol masuk tetap tampil jelas di kanan atas. */}
               <Link
                 href="/login?callbackUrl=/daftar"
-                className="rounded-lg bg-gradient-to-r from-sky-400 to-cyan-300 px-5 py-2 font-semibold text-navy-900 shadow-md shadow-sky-500/20 transition hover:from-sky-300 hover:to-cyan-200"
+                className="rounded-lg bg-sky-500 px-5 py-2 font-semibold text-white shadow-md transition hover:bg-sky-600"
               >
                 Daftar Magang Sekarang
               </Link>
@@ -158,13 +158,13 @@ export default function SiteHeader() {
                   <Link
                     href={rolePanelLink.href}
                     onClick={closeMenu}
-                    className="mt-1 rounded-lg bg-gradient-to-r from-sky-400 to-cyan-300 px-3 py-2.5 text-center font-semibold text-navy-900 shadow-md shadow-sky-500/20 transition hover:from-sky-300 hover:to-cyan-200"
+                    className="mt-1 rounded-lg bg-sky-500 px-3 py-2.5 text-center font-semibold text-white shadow-md transition hover:bg-sky-600"
                   >
                     {rolePanelLink.label}
                   </Link>
                 )}
                 <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-2 py-2">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-xs font-bold text-navy-900">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
                     {initial}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-200">
@@ -178,7 +178,7 @@ export default function SiteHeader() {
                 <Link
                   href="/login?callbackUrl=/daftar"
                   onClick={closeMenu}
-                  className="rounded-lg bg-gradient-to-r from-sky-400 to-cyan-300 px-5 py-2.5 text-center font-semibold text-navy-900 shadow-md shadow-sky-500/20 transition hover:from-sky-300 hover:to-cyan-200"
+                  className="rounded-lg bg-sky-500 px-5 py-2.5 text-center font-semibold text-white shadow-md transition hover:bg-sky-600"
                 >
                   Daftar Magang Sekarang
                 </Link>

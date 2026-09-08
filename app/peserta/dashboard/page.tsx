@@ -215,7 +215,7 @@ export default async function PesertaDashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Hero header */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-700 via-navy-800 to-navy-950 px-6 py-8 text-white shadow-lg shadow-navy-900/10 md:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-navy-900 px-6 py-8 text-white shadow-lg shadow-navy-900/10 md:px-8">
         <div
           className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-navy-400/20 blur-3xl"
           aria-hidden="true"
@@ -304,7 +304,7 @@ export default async function PesertaDashboardPage() {
         </div>
         <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-navy-500 to-navy-700 transition-all duration-700"
+            className="h-full rounded-full bg-navy-600 transition-all duration-700"
             style={{ width: `${progress}%` }}
           />
         </div>

@@ -37,7 +37,7 @@ export default function PanelShell({ sidebar, roleLabel, children }: PanelShellP
           <div className="min-w-0 leading-tight">
             <div className="truncate text-sm font-extrabold uppercase tracking-[0.08em] text-navy-800">
               LEMIGAS{" "}
-              <span className="bg-gradient-to-r from-navy-600 to-amber-500 bg-clip-text text-transparent">
+              <span className="text-amber-500">
                 MAGANG
               </span>
             </div>

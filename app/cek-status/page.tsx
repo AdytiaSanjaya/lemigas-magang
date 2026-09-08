@@ -166,9 +166,9 @@ export default function CekStatusPage() {
         {/* Hasil */}
         {data && (
           data.status === "DITERIMA" || data.status === "PESERTA_AKTIF" ? (
-            <div className="mt-6 animate-fade-in-up overflow-hidden rounded-2xl bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950 shadow-xl shadow-navy-900/20 ring-1 ring-navy-700/60 motion-reduce:animate-none">
+            <div className="mt-6 animate-fade-in-up overflow-hidden rounded-2xl bg-navy-900 shadow-xl shadow-navy-900/20 ring-1 ring-navy-700/60 motion-reduce:animate-none">
               <div
-                className="h-1.5 bg-gradient-to-r from-amber-300 via-sky-300 to-amber-300"
+                className="h-1.5 bg-amber-400"
                 aria-hidden="true"
               />
 
@@ -183,7 +183,7 @@ export default function CekStatusPage() {
                 />
 
                 <div className="relative">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 via-amber-300 to-amber-400 shadow-lg shadow-amber-500/30 ring-4 ring-amber-300/20">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-400 shadow-lg ring-4 ring-amber-300/20">
                     <CheckCircle2 className="h-8 w-8 text-navy-900" aria-hidden="true" />
                   </div>
 
@@ -225,7 +225,7 @@ export default function CekStatusPage() {
 
                   <Link
                     href="/peserta/dashboard"
-                    className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 px-6 py-3.5 text-sm font-bold text-navy-900 shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-cyan-200 active:translate-y-0 sm:w-auto"
+                    className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600 active:translate-y-0 sm:w-auto"
                   >
                     Login ke Portal Peserta
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />

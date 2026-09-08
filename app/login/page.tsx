@@ -42,7 +42,7 @@ export default async function LoginPage({
   const isRegistrationFlow = resolvedCallback.startsWith("/daftar");
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-navy-900 via-slate-800 to-navy-950 p-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 p-4">
       {/* Decorative blurs */}
       <div
         aria-hidden="true"

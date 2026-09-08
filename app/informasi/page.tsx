@@ -173,7 +173,7 @@ export default async function InformasiPage() {
       <SiteHeader />
 
       {/* Hero / Split Layout */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-navy-600 text-white">
+      <section className="relative overflow-hidden bg-navy-900 text-white">
         <div
           className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl"
           aria-hidden="true"
@@ -213,7 +213,7 @@ export default async function InformasiPage() {
               <div className="mt-8 flex animate-fade-in-up flex-wrap items-center gap-4">
                 <Link
                   href="/daftar"
-                  className="inline-flex items-center rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 px-7 py-3.5 text-sm font-semibold text-navy-900 shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-cyan-200"
+                  className="inline-flex items-center rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
                 >
                   Daftar Magang Sekarang
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
@@ -236,7 +236,7 @@ export default async function InformasiPage() {
                     key={feature.title}
                     className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur transition hover:border-sky-300/40 hover:bg-white/10 sm:p-7"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400/20 to-cyan-300/20 text-sky-300 ring-1 ring-sky-300/20">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 ring-1 ring-sky-300/20">
                       <Icon className="h-6 w-6" aria-hidden="true" />
                     </div>
                     <div>
@@ -289,7 +289,7 @@ export default async function InformasiPage() {
           {/* Kategori Peserta */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-navy-800 to-navy-600 text-sky-300 shadow-md shadow-navy-800/20">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
                 <Users className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -313,7 +313,7 @@ export default async function InformasiPage() {
           {/* Dokumen Wajib */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-navy-800 to-navy-600 text-sky-300 shadow-md shadow-navy-800/20">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
                 <FileStack className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -361,7 +361,7 @@ export default async function InformasiPage() {
           {/* Durasi Program */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-navy-800 to-navy-600 text-sky-300 shadow-md shadow-navy-800/20">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
                 <CalendarClock className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -370,7 +370,7 @@ export default async function InformasiPage() {
             </div>
 
             <div className="mt-6 flex items-end gap-2.5">
-              <span className="bg-gradient-to-r from-navy-800 to-navy-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent">
+              <span className="text-navy-800 text-4xl font-extrabold tracking-tight">
                 1&ndash;6
               </span>
               <span className="pb-1 text-sm font-semibold text-slate-500">
@@ -426,7 +426,7 @@ export default async function InformasiPage() {
                   key={unit.title}
                   className="group flex flex-col rounded-2xl border border-slate-200 bg-slate-50/40 p-6 shadow-sm transition hover:-translate-y-1 hover:border-sky-200 hover:bg-white hover:shadow-xl hover:shadow-sky-100 sm:p-7"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-navy-800 to-navy-600 text-sky-300 shadow-md shadow-navy-800/20 transition group-hover:from-sky-400 group-hover:to-cyan-300 group-hover:text-navy-900">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md transition group-hover:bg-sky-500 group-hover:text-white">
                     <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="mt-5 text-base font-semibold leading-snug text-navy-900">
@@ -485,14 +485,14 @@ export default async function InformasiPage() {
 
           <ol className="relative mx-auto mt-12 max-w-3xl space-y-8">
             <div
-              className="absolute top-2 bottom-2 left-6 w-px -translate-x-1/2 bg-gradient-to-b from-sky-400/60 via-white/20 to-amber-300/60"
+              className="absolute top-2 bottom-2 left-6 w-px -translate-x-1/2 bg-sky-300/60"
               aria-hidden="true"
             />
             {tahapanSeleksi.map((step, index) => {
               const Icon = step.icon;
               return (
                 <li key={step.title} className="relative flex items-start gap-5">
-                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-300 text-navy-900 shadow-lg shadow-sky-500/30 ring-4 ring-white/10">
+                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-navy-900 shadow-lg ring-4 ring-white/10">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur sm:p-6">
@@ -576,7 +576,7 @@ export default async function InformasiPage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/daftar"
-              className="inline-flex items-center rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 px-7 py-3.5 text-sm font-semibold text-navy-900 shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-cyan-200"
+              className="inline-flex items-center rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
             >
               Daftar Magang Sekarang
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
