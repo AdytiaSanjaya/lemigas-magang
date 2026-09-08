@@ -234,18 +234,18 @@ export default async function MentorPesertaPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       {/* Header */}
-      <section className="relative overflow-hidden rounded-3xl bg-navy-900 px-6 py-7 text-white shadow-lg shadow-navy-900/10 md:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-blue-950 px-6 py-7 text-white shadow-lg shadow-blue-950/10 md:px-8">
         <div
-          className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-navy-400/20 blur-3xl"
+          className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-navy-300/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-slate-800/50 blur-3xl"
           aria-hidden="true"
         />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-navy-200">
+            <div className="flex items-center gap-2 text-slate-300">
               <Users className="h-4 w-4" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Panel Mentor &middot; {session.user.unitNama ?? "Unit"}
@@ -254,7 +254,7 @@ export default async function MentorPesertaPage() {
             <h1 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
               Peserta Bimbingan
             </h1>
-            <p className="mt-1.5 max-w-xl text-sm text-navy-100/90">
+            <p className="mt-1.5 max-w-xl text-sm text-slate-300">
               Pantau kehadiran, progres masa magang, dan berikan penilaian untuk peserta
               yang Anda bimbing.
             </p>
@@ -265,15 +265,15 @@ export default async function MentorPesertaPage() {
               href="/mentor/izin"
               className="group inline-flex shrink-0 items-center gap-3 rounded-2xl bg-white/10 px-5 py-3 ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-white/20"
             >
-              <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400/20 text-amber-300">
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-400/20 text-yellow-400">
                 <ClipboardCheck className="h-4.5 w-4.5" aria-hidden="true" />
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[10px] font-bold text-navy-900">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-slate-900">
                   {pendingIzin}
                 </span>
               </span>
               <span className="text-left leading-tight">
                 <span className="block text-sm font-semibold">Izin menunggu persetujuan</span>
-                <span className="block text-xs text-navy-100">
+                <span className="block text-xs text-slate-300">
                   Tinjau sekarang <ChevronRight className="inline h-3 w-3" aria-hidden="true" />
                 </span>
               </span>

@@ -69,6 +69,8 @@ Buka [http://localhost:3000](http://localhost:3000).
 | Admin  | `admin@lemigas.example`      | `Magang123`|
 | Mentor | `mentor.lab@lemigas.example` | `Magang123`|
 | Mentor | `mentor.litbang@lemigas.example` | `Magang123`|
+| Mentor | `mentor.sdm@lemigas.example` | `Magang123`|
+| Mentor | `mentor.spbe@lemigas.example` | `Magang123`|
 
 ## Script umum
 

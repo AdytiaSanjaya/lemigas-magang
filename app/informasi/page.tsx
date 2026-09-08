@@ -173,17 +173,17 @@ export default async function InformasiPage() {
       <SiteHeader />
 
       {/* Hero / Split Layout */}
-      <section className="relative overflow-hidden bg-navy-900 text-white">
+      <section className="relative overflow-hidden bg-blue-950 text-white">
         <div
-          className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl"
+          className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-navy-900/60 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-blue-950/60 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl"
+          className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400/5 blur-3xl"
           aria-hidden="true"
         />
 
@@ -191,14 +191,14 @@ export default async function InformasiPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Sisi kiri: judul, penjelasan, dan CTA */}
             <div className="max-w-xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-100 backdrop-blur">
-                <Info className="h-3.5 w-3.5 text-sky-300" aria-hidden="true" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200 backdrop-blur">
+                <Info className="h-3.5 w-3.5 text-yellow-400" aria-hidden="true" />
                 Balai Besar Pengujian Minyak dan Gas Bumi
               </span>
 
               <h1 className="mt-5 animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
                 Informasi Program{" "}
-                <span className="text-amber-400">
+                <span className="text-yellow-400">
                   Magang &amp; PKL
                 </span>
               </h1>
@@ -213,14 +213,14 @@ export default async function InformasiPage() {
               <div className="mt-8 flex animate-fade-in-up flex-wrap items-center gap-4">
                 <Link
                   href="/daftar"
-                  className="inline-flex items-center rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
+                  className="inline-flex items-center rounded-xl bg-yellow-400 px-7 py-3.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-500"
                 >
                   Daftar Magang Sekarang
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/cek-status"
-                  className="inline-flex items-center rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-sky-300/60 hover:bg-white/10"
+                  className="inline-flex items-center rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-yellow-400/50 hover:bg-white/10"
                 >
                   Cek Status Pendaftaran
                 </Link>
@@ -234,9 +234,9 @@ export default async function InformasiPage() {
                 return (
                   <article
                     key={feature.title}
-                    className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur transition hover:border-sky-300/40 hover:bg-white/10 sm:p-7"
+                    className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur transition hover:border-yellow-400/30 hover:bg-white/10 sm:p-7"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 ring-1 ring-sky-300/20">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/15">
                       <Icon className="h-6 w-6" aria-hidden="true" />
                     </div>
                     <div>
@@ -289,7 +289,7 @@ export default async function InformasiPage() {
           {/* Kategori Peserta */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md">
                 <Users className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -313,7 +313,7 @@ export default async function InformasiPage() {
           {/* Dokumen Wajib */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md">
                 <FileStack className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -361,7 +361,7 @@ export default async function InformasiPage() {
           {/* Durasi Program */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md">
                 <CalendarClock className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
@@ -426,7 +426,7 @@ export default async function InformasiPage() {
                   key={unit.title}
                   className="group flex flex-col rounded-2xl border border-slate-200 bg-slate-50/40 p-6 shadow-sm transition hover:-translate-y-1 hover:border-sky-200 hover:bg-white hover:shadow-xl hover:shadow-sky-100 sm:p-7"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md transition group-hover:bg-sky-500 group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md transition group-hover:bg-yellow-400 group-hover:text-slate-900">
                     <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="mt-5 text-base font-semibold leading-snug text-navy-900">
@@ -458,20 +458,20 @@ export default async function InformasiPage() {
       </section>
 
       {/* Alur & Tahapan Seleksi */}
-      <section className="relative overflow-hidden bg-navy-900 text-white">
+      <section className="relative overflow-hidden bg-blue-950 text-white">
         <div
-          className="pointer-events-none absolute -top-32 -right-24 h-96 w-96 rounded-full bg-sky-400/10 blur-3xl"
+          className="pointer-events-none absolute -top-32 -right-24 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-blue-950/60 blur-3xl"
           aria-hidden="true"
         />
 
         <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-20">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-100">
-              <FileSignature className="h-3.5 w-3.5 text-sky-300" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200">
+              <FileSignature className="h-3.5 w-3.5 text-yellow-400" aria-hidden="true" />
               Proses Seleksi
             </span>
             <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -485,18 +485,18 @@ export default async function InformasiPage() {
 
           <ol className="relative mx-auto mt-12 max-w-3xl space-y-8">
             <div
-              className="absolute top-2 bottom-2 left-6 w-px -translate-x-1/2 bg-sky-300/60"
+              className="absolute top-2 bottom-2 left-6 w-px -translate-x-1/2 bg-yellow-400/40"
               aria-hidden="true"
             />
             {tahapanSeleksi.map((step, index) => {
               const Icon = step.icon;
               return (
                 <li key={step.title} className="relative flex items-start gap-5">
-                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-navy-900 shadow-lg ring-4 ring-white/10">
+                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-slate-900 shadow-lg ring-4 ring-white/10">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur sm:p-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-sky-300">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-yellow-400">
                       Tahap {index + 1}
                     </p>
                     <h3 className="mt-1 text-base font-semibold text-white">
@@ -548,26 +548,26 @@ export default async function InformasiPage() {
       )}
 
       {/* Call to Action */}
-      <section className="relative overflow-hidden bg-navy-950 text-white">
+      <section className="relative overflow-hidden bg-blue-950 text-white">
         <div
-          className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl"
+          className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-300/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl"
           aria-hidden="true"
         />
 
         <div className="relative mx-auto max-w-6xl px-6 py-16 text-center sm:py-20">
-          <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-100 backdrop-blur">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-yellow-200 backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-400" />
             Pendaftaran Terbuka
           </span>
 
           <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
             Sudah Siap Bergabung dengan LEMIGAS?
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
             Daftarkan diri Anda secara daring dan pantau perkembangan status
             lamaran melalui portal resmi. Jadilah bagian dari generasi muda
             yang berkontribusi untuk kemajuan industri migas nasional.
@@ -576,14 +576,14 @@ export default async function InformasiPage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/daftar"
-              className="inline-flex items-center rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
+              className="inline-flex items-center rounded-xl bg-yellow-400 px-7 py-3.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-500"
             >
               Daftar Magang Sekarang
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
               href="/cek-status"
-              className="inline-flex items-center rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-sky-300/60 hover:bg-white/10"
+              className="inline-flex items-center rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-yellow-400/50 hover:bg-white/10"
             >
               Cek Status Pendaftaran
             </Link>

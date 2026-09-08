@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Mentor = { id: string; nama: string; email: string };
+type Mentor = { id: string; nama: string; email: string; unitId?: string | null };
 
 export default function VerifikasiActiva({
   pendaftar,
@@ -17,6 +17,7 @@ export default function VerifikasiActiva({
     berkasCV: string;
     berkasSurat?: string | null;
     email: string;
+    unitMinatId?: string | null;
   };
   mentors: Mentor[];
 }) {
@@ -140,9 +141,11 @@ export default function VerifikasiActiva({
                     <select value={mentorId} onChange={(e) => setMentorId(e.target.value)}
                       className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                       <option value="">-- Pilih Mentor (opsional) --</option>
-                      {mentors.map((m) => (
-                        <option key={m.id} value={m.id}>{m.nama}</option>
-                      ))}
+                      {mentors
+                        .filter((m) => !m.unitId || !pendaftar.unitMinatId || m.unitId === pendaftar.unitMinatId)
+                        .map((m) => (
+                          <option key={m.id} value={m.id}>{m.nama}</option>
+                        ))}
                     </select>
                   </div>
                 </>

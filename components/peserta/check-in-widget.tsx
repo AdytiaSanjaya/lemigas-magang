@@ -183,13 +183,13 @@ export default function CheckInWidget({
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* Header berwarna dengan jam */}
-      <div className="relative overflow-hidden bg-navy-900 px-6 py-7 text-white">
+      <div className="relative overflow-hidden bg-blue-950 px-6 py-7 text-white">
         <div
-          className="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-navy-400/20 blur-2xl"
+          className="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-yellow-400/10 blur-2xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-navy-300/10 blur-2xl"
+          className="pointer-events-none absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-slate-800/50 blur-2xl"
           aria-hidden="true"
         />
         <div className="relative flex items-start justify-between gap-4">
@@ -199,7 +199,7 @@ export default function CheckInWidget({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-navy-100">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
                 Jam Kerja Real-time
               </span>
             </div>

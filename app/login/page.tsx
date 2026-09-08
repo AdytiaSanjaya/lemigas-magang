@@ -42,25 +42,25 @@ export default async function LoginPage({
   const isRegistrationFlow = resolvedCallback.startsWith("/daftar");
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 p-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-blue-950 p-4">
       {/* Decorative blurs */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl"
+        className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl"
+        className="pointer-events-none absolute bottom-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-yellow-400/5 blur-3xl"
       />
 
       {/* Back link */}
       <Link
         href="/"
-        className="absolute left-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-slate-700/50 bg-slate-800/60 px-4 py-2 text-xs font-medium text-slate-200 backdrop-blur-md transition-all hover:bg-slate-800 hover:text-white"
+        className="absolute left-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-slate-200 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         Kembali ke Beranda

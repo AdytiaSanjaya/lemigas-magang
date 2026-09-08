@@ -9,13 +9,13 @@ const developers = [
 
 export default function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden bg-navy-950 text-slate-300">
+    <footer className="relative overflow-hidden border-t-4 border-yellow-400 bg-slate-950 text-slate-300">
       <div
-        className="pointer-events-none absolute -top-40 -right-24 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl"
+        className="pointer-events-none absolute -top-40 -right-24 h-96 w-96 rounded-full bg-yellow-400/5 blur-3xl"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-amber-400/5 blur-3xl"
         aria-hidden="true"
       />
 
@@ -24,7 +24,7 @@ export default function SiteFooter() {
           {/* Brand & deskripsi */}
           <div className="lg:col-span-4">
             <Link href="/" className="group flex items-center gap-3">
-              <div className="relative shrink-0 overflow-hidden rounded-xl ring-1 ring-white/15 transition group-hover:ring-sky-300/60">
+              <div className="relative shrink-0 overflow-hidden rounded-xl ring-1 ring-white/15 transition group-hover:ring-yellow-400/40">
                 <Image
                   src="/logo-lemigas.png"
                   alt="Logo LEMIGAS"
@@ -36,7 +36,7 @@ export default function SiteFooter() {
               <span className="flex flex-col leading-tight">
                 <span className="text-lg font-extrabold uppercase tracking-[0.14em] text-white">
                   LEMIGAS{" "}
-                  <span className="text-amber-400">
+                  <span className="text-yellow-400">
                     MAGANG
                   </span>
                 </span>
@@ -69,7 +69,7 @@ export default function SiteFooter() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-slate-400 transition hover:text-sky-300"
+                    className="text-slate-400 transition hover:text-yellow-400"
                   >
                     {item.label}
                   </Link>
@@ -86,7 +86,7 @@ export default function SiteFooter() {
             <ul className="mt-4 space-y-3">
               {developers.map((dev) => (
                 <li key={dev.name} className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-slate-900">
                     {dev.initial}
                   </span>
                   <span className="text-sm text-slate-300">{dev.name}</span>

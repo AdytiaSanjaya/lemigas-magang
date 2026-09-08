@@ -31,14 +31,14 @@ export default function SiteHeader() {
   const closeMenu = () => setMobileOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-navy-900/95 shadow-lg shadow-navy-950/30 backdrop-blur">
+    <header className="sticky top-0 z-50 border-y-4 border-yellow-400 bg-white shadow-md backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
         <Link
           href="/"
           onClick={closeMenu}
           className="group flex min-w-0 items-center gap-2.5 sm:gap-3"
         >
-          <div className="relative shrink-0 overflow-hidden rounded-xl ring-1 ring-white/15 transition group-hover:ring-sky-300/60">
+          <div className="relative shrink-0 overflow-hidden rounded-xl ring-1 ring-slate-200 transition group-hover:ring-yellow-400/60">
             <Image
               src="/logo-lemigas.png"
               alt="Logo LEMIGAS"
@@ -49,13 +49,13 @@ export default function SiteHeader() {
             />
           </div>
           <span className="flex flex-col whitespace-nowrap leading-tight">
-              <span className="text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base sm:tracking-[0.14em]">
+              <span className="text-sm font-extrabold uppercase tracking-[0.08em] text-slate-900 sm:text-base sm:tracking-[0.14em]">
               LEMIGAS{" "}
-              <span className="text-amber-400">
+              <span className="text-slate-900">
                 MAGANG
               </span>
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 sm:text-[11px] sm:tracking-[0.22em]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700 sm:text-[11px] sm:tracking-[0.22em]">
               Balai Besar Migas
             </span>
           </span>
@@ -67,7 +67,7 @@ export default function SiteHeader() {
           onClick={() => setMobileOpen((v) => !v)}
           aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
           aria-expanded={mobileOpen}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white md:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 md:hidden"
         >
           {mobileOpen ? (
             <X className="h-6 w-6" aria-hidden="true" />
@@ -80,13 +80,13 @@ export default function SiteHeader() {
         <nav className="hidden items-center gap-1 text-sm md:flex">
           <Link
             href="/informasi"
-            className="rounded-lg px-3 py-2 font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
           >
             Info Program
           </Link>
           <Link
             href="/cek-status"
-            className="rounded-lg px-3 py-2 font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
           >
             Cek Status
           </Link>
@@ -96,35 +96,35 @@ export default function SiteHeader() {
               {rolePanelLink && (
                 <Link
                   href={rolePanelLink.href}
-                  className="ml-2 hidden rounded-lg bg-sky-500 px-5 py-2 font-semibold text-white shadow-md transition hover:bg-sky-600 lg:block"
+                  className="ml-2 hidden rounded-lg bg-slate-900 px-5 py-2 font-semibold text-white shadow-md transition hover:bg-slate-800 lg:block"
                 >
                   {rolePanelLink.label}
                 </Link>
               )}
 
               {/* Status user yang sedang login: inisial + nama + tombol keluar. */}
-              <div className="ml-2 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1 pl-1 pr-3">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white sm:h-8 sm:w-8">
+              <div className="ml-2 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 py-1 pl-1 pr-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white sm:h-8 sm:w-8">
                   {initial}
                 </span>
-                <span className="hidden max-w-[6.5rem] truncate text-xs font-semibold text-slate-200 xl:block">
+                <span className="hidden max-w-[6.5rem] truncate text-xs font-semibold text-slate-800 xl:block">
                   {name || session.user.email}
                 </span>
               </div>
-              <SignOutButton className="ml-1 border border-white/15 text-slate-300 hover:bg-white/10 hover:text-white" />
+              <SignOutButton className="ml-1 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900" />
             </>
           ) : (
             <>
               {/* Tombol masuk tetap tampil jelas di kanan atas. */}
               <Link
                 href="/login?callbackUrl=/daftar"
-                className="rounded-lg bg-sky-500 px-5 py-2 font-semibold text-white shadow-md transition hover:bg-sky-600"
+                className="rounded-lg bg-yellow-400 px-5 py-2 font-semibold text-slate-900 shadow-md transition hover:bg-yellow-500"
               >
                 Daftar Magang Sekarang
               </Link>
               <Link
                 href="/login"
-                className="ml-1 inline-flex items-center rounded-lg border border-white/25 px-4 py-2 font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
+                className="ml-1 inline-flex items-center rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
               >
                 Masuk
               </Link>
@@ -135,19 +135,19 @@ export default function SiteHeader() {
 
       {/* Dropdown menu mobile. */}
       {mobileOpen && (
-        <div className="border-t border-white/10 bg-navy-900/95 backdrop-blur md:hidden">
+        <div className="border-t border-slate-200 bg-white backdrop-blur md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 sm:px-6">
             <Link
               href="/informasi"
               onClick={closeMenu}
-              className="rounded-lg px-3 py-2.5 font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
+              className="rounded-lg px-3 py-2.5 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
             >
               Info Program
             </Link>
             <Link
               href="/cek-status"
               onClick={closeMenu}
-              className="rounded-lg px-3 py-2.5 font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
+              className="rounded-lg px-3 py-2.5 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
             >
               Cek Status
             </Link>
@@ -158,34 +158,34 @@ export default function SiteHeader() {
                   <Link
                     href={rolePanelLink.href}
                     onClick={closeMenu}
-                    className="mt-1 rounded-lg bg-sky-500 px-3 py-2.5 text-center font-semibold text-white shadow-md transition hover:bg-sky-600"
+                    className="mt-1 rounded-lg bg-yellow-400 px-3 py-2.5 text-center font-semibold text-slate-900 shadow-md transition hover:bg-yellow-500"
                   >
                     {rolePanelLink.label}
                   </Link>
                 )}
-                <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-2 py-2">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
+                <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
                     {initial}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-200">
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">
                     {name || session.user.email}
                   </span>
-                  <SignOutButton className="border border-white/15 text-slate-300 hover:bg-white/10 hover:text-white" />
+                  <SignOutButton className="border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900" />
                 </div>
               </>
             ) : (
-              <div className="mt-1 flex flex-col gap-2 border-t border-white/10 pt-3">
+              <div className="mt-1 flex flex-col gap-2 border-t border-slate-200 pt-3">
                 <Link
                   href="/login?callbackUrl=/daftar"
                   onClick={closeMenu}
-                  className="rounded-lg bg-sky-500 px-5 py-2.5 text-center font-semibold text-white shadow-md transition hover:bg-sky-600"
+                  className="rounded-lg bg-yellow-400 px-5 py-2.5 text-center font-semibold text-slate-900 shadow-md transition hover:bg-yellow-500"
                 >
                   Daftar Magang Sekarang
                 </Link>
                 <Link
                   href="/login"
                   onClick={closeMenu}
-                  className="rounded-lg border border-white/25 px-5 py-2.5 text-center font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-lg border border-slate-200 px-5 py-2.5 text-center font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
                 >
                   Masuk
                 </Link>

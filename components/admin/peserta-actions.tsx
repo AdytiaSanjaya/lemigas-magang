@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Unit = { id: string; nama: string };
-type Mentor = { id: string; nama: string };
+type Mentor = { id: string; nama: string; unitId?: string | null };
 
 type PesertaProps = {
   id: string;
@@ -106,7 +106,14 @@ export default function PesertaActions({
                 <label className="block text-sm font-medium text-slate-700">Unit Penempatan</label>
                 <select
                   value={form.unitId}
-                  onChange={(e) => setForm((p) => ({ ...p, unitId: e.target.value }))}
+                  onChange={(e) => {
+                    const newUnitId = e.target.value;
+                    setForm((p) => {
+                      const currentMentor = mentors.find((m) => m.id === p.mentorId);
+                      const resetMentor = currentMentor && currentMentor.unitId && currentMentor.unitId !== newUnitId ? "" : p.mentorId;
+                      return { ...p, unitId: newUnitId, mentorId: resetMentor };
+                    });
+                  }}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 >
                   {units.map((u) => <option key={u.id} value={u.id}>{u.nama}</option>)}
@@ -132,7 +139,9 @@ export default function PesertaActions({
                   onChange={(e) => setForm((p) => ({ ...p, mentorId: e.target.value }))}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                   <option value="">Tanpa Mentor</option>
-                  {mentors.map((m) => <option key={m.id} value={m.id}>{m.nama}</option>)}
+                  {mentors
+                    .filter((m) => !m.unitId || m.unitId === form.unitId)
+                    .map((m) => <option key={m.id} value={m.id}>{m.nama}</option>)}
                 </select>
               </div>
               <div>

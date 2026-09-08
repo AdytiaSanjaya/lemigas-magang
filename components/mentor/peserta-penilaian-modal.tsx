@@ -100,9 +100,9 @@ export default function PesertaPenilaianModal({
         className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative overflow-hidden bg-navy-900 px-6 py-5 text-white">
+        <div className="relative overflow-hidden bg-blue-950 px-6 py-5 text-white">
           <div
-            className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-navy-400/20 blur-2xl"
+            className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-yellow-400/10 blur-2xl"
             aria-hidden="true"
           />
           <div className="relative flex items-center gap-4">
@@ -111,10 +111,10 @@ export default function PesertaPenilaianModal({
             </span>
             <div className="min-w-0">
               <h3 className="flex items-center gap-2 text-base font-bold tracking-tight">
-                <Star className="h-4 w-4 text-amber-300" aria-hidden="true" />
+                <Star className="h-4 w-4 text-yellow-400" aria-hidden="true" />
                 Berikan Penilaian
               </h3>
-              <p className="truncate text-sm text-navy-100">{peserta.nama}</p>
+              <p className="truncate text-sm text-slate-300">{peserta.nama}</p>
             </div>
           </div>
         </div>

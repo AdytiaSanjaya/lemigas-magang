@@ -115,29 +115,29 @@ export default async function HomePage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-navy-900 text-white">
+      <section className="relative overflow-hidden bg-blue-950 text-white">
         <div
-          className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl"
+          className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-navy-900/60 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-blue-950/60 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/10 blur-3xl"
+          className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400/5 blur-3xl"
           aria-hidden="true"
         />
 
         <div className="relative mx-auto max-w-6xl px-6 py-24 text-center lg:py-32">
-          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-100 backdrop-blur">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
+          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200 backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-400" />
             Balai Besar Pengujian Minyak dan Gas Bumi
           </span>
 
           <h1 className="mx-auto mt-6 max-w-4xl animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
             Portal Pendaftaran &amp; Manajemen Magang/PKL{" "}
-            <span className="text-amber-400">
+            <span className="text-yellow-400">
               LEMIGAS
             </span>
           </h1>
@@ -154,13 +154,13 @@ export default async function HomePage() {
           >
             <Link
               href={daftarHref}
-              className="rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
+              className="rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
             >
               Daftar Magang Sekarang
             </Link>
             <Link
               href="/cek-status"
-              className="rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-sky-300/60 hover:bg-white/10"
+              className="rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-yellow-400/50 hover:bg-white/10"
             >
               Cek Status Lamaran
             </Link>
@@ -196,7 +196,7 @@ export default async function HomePage() {
             />
 
             <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full bg-navy-800 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-sky-200">
+              <span className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -266,7 +266,7 @@ export default async function HomePage() {
               href={feature.href === "/daftar" ? daftarHref : feature.href}
               className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-800 text-sky-300 shadow-md transition group-hover:bg-sky-500 group-hover:text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md transition group-hover:bg-yellow-400 group-hover:text-slate-900">
                 {feature.icon}
               </div>
               <h3 className="mt-5 text-lg font-semibold text-navy-900">
@@ -281,7 +281,7 @@ export default async function HomePage() {
       </section>
 
       {/* Alur pendaftaran */}
-      <section className="border-y border-white/10 bg-navy-900">
+      <section className="border-y border-white/10 bg-blue-950">
         <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white sm:text-3xl">
@@ -298,11 +298,11 @@ export default async function HomePage() {
               <div key={step.title} className="relative text-center">
                 {index < steps.length - 1 && (
                   <div
-                    className="absolute top-7 left-[calc(50%+40px)] hidden h-0.5 bg-sky-300/60 lg:block lg:w-[calc(100%-80px)]"
+                    className="absolute top-7 left-[calc(50%+40px)] hidden h-0.5 bg-yellow-400/40 lg:block lg:w-[calc(100%-80px)]"
                     aria-hidden="true"
                   />
                 )}
-                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-lg font-bold text-white shadow-lg ring-4 ring-white/10">
+                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-yellow-400 text-lg font-bold text-slate-900 shadow-lg ring-4 ring-white/10">
                   {index + 1}
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-white">
@@ -318,7 +318,7 @@ export default async function HomePage() {
           <div className="mt-12 text-center">
             <Link
               href={daftarHref}
-              className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-sky-600"
+              className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 px-7 py-3.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-500"
             >
               Mulai Pendaftaran
               <svg
@@ -356,13 +356,13 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href={daftarHref}
-              className="rounded-xl bg-navy-800 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-navy-700"
+              className="rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
             >
               Daftar Magang Sekarang
             </Link>
             <Link
               href="/cek-status"
-              className="rounded-xl border border-navy-200 bg-white px-7 py-3.5 text-sm font-semibold text-navy-800 shadow-sm transition hover:border-sky-300 hover:text-sky-700"
+              className="rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-yellow-400 hover:text-slate-900"
             >
               Cek Status Lamaran
             </Link>

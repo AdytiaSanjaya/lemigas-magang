@@ -12,7 +12,7 @@ export default function DashboardLoading() {
   return (
     <div className="space-y-6" role="status" aria-label="Memuat dashboard">
       {/* Banner skeleton */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-navy-900 p-6 shadow-md sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-blue-950 p-6 shadow-md sm:p-8">
         <div className="space-y-3">
           <div className="h-5 w-48 rounded-full bg-white/10 animate-pulse" />
           <div className="h-7 w-56 rounded-lg bg-white/10 animate-pulse" />

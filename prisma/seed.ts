@@ -51,13 +51,33 @@ async function main() {
     },
   });
 
-  await prisma.user.create({
+  const mentorLitbang = await prisma.user.create({
     data: {
       nama: "Budi Santoso (Mentor Litbang)",
       email: "mentor.litbang@lemigas.example",
       passwordHash,
       role: "MENTOR",
       unitId: unitIdByNama.get("Pusat Riset & Pengembangan") ?? null,
+    },
+  });
+
+  const mentorSdm = await prisma.user.create({
+    data: {
+      nama: "Siti Aminah (Mentor SDM)",
+      email: "mentor.sdm@lemigas.example",
+      passwordHash,
+      role: "MENTOR",
+      unitId: unitIdByNama.get("Bagian SDM & Umum") ?? null,
+    },
+  });
+
+  const mentorSpbe = await prisma.user.create({
+    data: {
+      nama: "Rudi Hartono (Mentor SPBE)",
+      email: "mentor.spbe@lemigas.example",
+      passwordHash,
+      role: "MENTOR",
+      unitId: unitIdByNama.get("SPBE & Teknologi Migas") ?? null,
     },
   });
 
@@ -73,6 +93,8 @@ async function main() {
     { nama: "Sari Puspita", asal: "Politeknik Negeri Bandung", jurusan: "Teknik Pengolahan Migas", noHp: "081234560002", email: "sari.p@mail.com", unitNama: "SPBE & Teknologi Migas", status: "DITERIMA" },
     { nama: "Rizky Pratama", asal: "Universitas Gadjah Mada", jurusan: "Geofisika", noHp: "081234560003", email: "rizky.p@mail.com", unitNama: "Pusat Riset & Pengembangan", status: "DITOLAK" },
     { nama: "Lina Marlina", asal: "STT Migas Balikpapan", jurusan: "Teknik Keselamatan", noHp: "081234560004", email: "lina.m@mail.com", unitNama: "Laboratorium Pengujian Migas", status: "MENUNGGU" },
+    { nama: "Mahyadi", asal: "Universitas Trisakti", jurusan: "Manajemen SDM", noHp: "081234560005", email: "mahyadi@mail.com", unitNama: "Bagian SDM & Umum", status: "DITERIMA" },
+    { nama: "Ucup Yanto", asal: "Politeknik Astra", jurusan: "Teknik Informatika", noHp: "081234560006", email: "ucup.y@mail.com", unitNama: "Bagian SDM & Umum", status: "DITERIMA" },
   ];
 
   let seq = 1;
@@ -98,7 +120,15 @@ async function main() {
                   unitId: unitIdByNama.get(s.unitNama) ?? unitRows[0].id,
                   tanggalMulai: new Date(now.getTime() + 7 * 86400000),
                   tanggalSelesai: new Date(now.getTime() + 97 * 86400000),
-                  mentorId: s.unitNama === "Laboratorium Pengujian Migas" ? mentorLab.id : null,
+                  mentorId: (() => {
+                    const mentorMap: Record<string, string> = {
+                      "Laboratorium Pengujian Migas": mentorLab.id,
+                      "Pusat Riset & Pengembangan": mentorLitbang.id,
+                      "Bagian SDM & Umum": mentorSdm.id,
+                      "SPBE & Teknologi Migas": mentorSpbe.id,
+                    };
+                    return mentorMap[s.unitNama] ?? null;
+                  })(),
                 },
               },
             }
@@ -121,6 +151,8 @@ async function main() {
   console.log("  ▪ Admin :  admin@lemigas.example");
   console.log("  ▪ Mentor:  mentor.lab@lemigas.example");
   console.log("  ▪ Mentor:  mentor.litbang@lemigas.example");
+  console.log("  ▪ Mentor:  mentor.sdm@lemigas.example");
+  console.log("  ▪ Mentor:  mentor.spbe@lemigas.example");
   console.log("  (Gunakan password dari env DEFAULT_ADMIN_PASSWORD)");
 }
 

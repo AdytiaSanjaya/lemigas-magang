@@ -92,9 +92,9 @@ export default function PesertaDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative overflow-hidden bg-navy-900 px-6 py-6 text-white">
+        <div className="relative overflow-hidden bg-blue-950 px-6 py-6 text-white">
           <div
-            className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-navy-400/20 blur-2xl"
+            className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-yellow-400/10 blur-2xl"
             aria-hidden="true"
           />
           <div className="relative flex items-start justify-between gap-4">
@@ -104,7 +104,7 @@ export default function PesertaDetailModal({
               </div>
               <div>
                 <h3 className="text-lg font-bold tracking-tight">{peserta.nama}</h3>
-                <p className="mt-0.5 flex items-center gap-1.5 text-sm text-navy-100">
+                <p className="mt-0.5 flex items-center gap-1.5 text-sm text-slate-300">
                   <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {peserta.instansi}
                   {peserta.jurusan && <span>&middot; {peserta.jurusan}</span>}

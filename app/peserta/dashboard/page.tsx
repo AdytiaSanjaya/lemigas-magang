@@ -215,18 +215,18 @@ export default async function PesertaDashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Hero header */}
-      <section className="relative overflow-hidden rounded-3xl bg-navy-900 px-6 py-8 text-white shadow-lg shadow-navy-900/10 md:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-blue-950 px-6 py-8 text-white shadow-lg shadow-blue-950/10 md:px-8">
         <div
-          className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-navy-400/20 blur-3xl"
+          className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full bg-yellow-400/10 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-navy-300/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-slate-800/50 blur-3xl"
           aria-hidden="true"
         />
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-navy-200">
+            <div className="flex items-center gap-2 text-slate-300">
               <IdCard className="h-4 w-4" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Selamat datang kembali
@@ -235,7 +235,7 @@ export default async function PesertaDashboardPage() {
             <h1 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
               {peserta.pendaftar?.nama ?? session.user.name}
             </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-navy-100">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-200">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/15">
                 <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
                 {peserta.unit?.nama ?? "-"}
@@ -253,10 +253,10 @@ export default async function PesertaDashboardPage() {
           <div className="flex justify-center md:justify-end">
             <div className="inline-flex flex-col items-center rounded-2xl bg-white/10 px-6 py-4 ring-1 ring-white/15 backdrop-blur-sm">
               <RealtimeClock size="lg" />
-              <div className="mt-2 flex items-center justify-center gap-2 text-center text-xs text-navy-100">
+              <div className="mt-2 flex items-center justify-center gap-2 text-center text-xs text-slate-300">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
                 {statusHariIni.label}
-                {izinPending > 0 && <span className="rounded-full bg-amber-400/20 px-2 py-0.5 font-semibold text-amber-200">{izinPending} izin menunggu</span>}
+                {izinPending > 0 && <span className="rounded-full bg-yellow-400/20 px-2 py-0.5 font-semibold text-yellow-300">{izinPending} izin menunggu</span>}
               </div>
             </div>
           </div>

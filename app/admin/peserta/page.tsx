@@ -50,7 +50,7 @@ export default async function AdminPesertaPage({
     .findMany({
       where: { role: "MENTOR" },
       orderBy: { nama: "asc" },
-      select: { id: true, nama: true },
+      select: { id: true, nama: true, unitId: true },
     })
     .catch(() => []);
 
@@ -115,7 +115,7 @@ export default async function AdminPesertaPage({
                         catatan: p.catatan,
                       }}
                       units={units.map((u) => ({ id: u.id, nama: u.nama }))}
-                      mentors={mentors.map((m) => ({ id: m.id, nama: m.nama }))}
+                      mentors={mentors.map((m) => ({ id: m.id, nama: m.nama, unitId: m.unitId }))}
                     />
                   </td>
                 </tr>

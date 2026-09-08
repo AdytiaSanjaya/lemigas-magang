@@ -57,7 +57,7 @@ export default async function AdminPendaftarPage({
     .findMany({
       where: { role: "MENTOR" },
       orderBy: { nama: "asc" },
-      select: { id: true, nama: true, email: true },
+      select: { id: true, nama: true, email: true, unitId: true },
     })
     .catch(() => []);
 
@@ -143,6 +143,7 @@ export default async function AdminPendaftarPage({
                         berkasCV: p.berkasCV,
                         berkasSurat: p.berkasSurat,
                         email: p.email,
+                        unitMinatId: p.unitMinatId,
                       }}
                       mentors={mentors}
                     />

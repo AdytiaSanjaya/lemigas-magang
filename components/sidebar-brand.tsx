@@ -21,9 +21,9 @@ export default function SidebarBrand({ role }: { role: SidebarRole }) {
   const badge = ROLE_BADGE[role];
 
   return (
-    <div className="relative overflow-hidden bg-navy-900 px-5 py-7">
+    <div className="relative overflow-hidden bg-blue-950 px-5 py-7">
       <div
-        className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-navy-500/30 blur-2xl"
+        className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-yellow-400/10 blur-2xl"
         aria-hidden="true"
       />
       <div className="relative flex items-center gap-3">
@@ -42,11 +42,11 @@ export default function SidebarBrand({ role }: { role: SidebarRole }) {
         <div className="min-w-0 leading-tight">
           <div className="truncate text-[15px] font-extrabold uppercase tracking-[0.08em] text-white">
             LEMIGAS{" "}
-            <span className="text-amber-400">
+            <span className="text-yellow-400">
               MAGANG
             </span>
           </div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-navy-100/80">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             Balai Besar Migas
           </div>
           <span
