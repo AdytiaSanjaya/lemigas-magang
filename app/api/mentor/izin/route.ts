@@ -70,10 +70,12 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
-  // Revalidasi cache halaman peserta agar status pengajuan terbaru langsung
-  // tampil di Riwayat Izin dan Dashboard tanpa menunggu TTL / hard-reload.
+  // Revalidasi cache halaman peserta & mentor agar status pengajuan terbaru
+  // langsung tampil di Riwayat Izin, Dashboard, dan tabel Persetujuan Izin
+  // tanpa menunggu TTL / hard-reload manual.
   revalidatePath("/peserta/izin");
   revalidatePath("/peserta/dashboard");
+  revalidatePath("/mentor/izin");
 
   return NextResponse.json({
     message:

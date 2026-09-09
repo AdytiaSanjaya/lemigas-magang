@@ -16,20 +16,33 @@ export default async function MentorIzinPage() {
   const bimbingan = await prisma.peserta
     .findMany({
       where: { mentorId: session.user.id },
-      select: { pendaftar: { select: { email: true } } },
+      select: { pendaftar: { select: { email: true, nama: true } } },
     })
     .catch(() => []);
-  const emails = bimbingan
-    .map((p) => p.pendaftar?.email ?? "")
-    .filter(Boolean);
+  const emailToNama = new Map<string, string>(
+    bimbingan
+      .map((p) => [p.pendaftar?.email?.toLowerCase() ?? "", p.pendaftar?.nama ?? ""] as [string, string])
+      .filter(([e]) => Boolean(e))
+  );
+  const emails = [...emailToNama.keys()];
 
-  const requests = await prisma.leaveRequest
+  // Ambil data izin + email pemohon (untuk filter & join).
+  const raw = await prisma.leaveRequest
     .findMany({
       where: { user: { email: { in: emails } } },
-      include: { user: { select: { nama: true, email: true } } },
+      include: { user: { select: { email: true } } },
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     })
     .catch(() => []);
+
+  // Gabungkan: nama resmi dari Pendaftar (bukan dari Google OAuth / User).
+  const requests = raw.map((r) => ({
+    ...r,
+    user: {
+      ...r.user,
+      nama: emailToNama.get(r.user?.email?.toLowerCase() ?? "") ?? r.user?.email ?? "-",
+    },
+  }));
 
   const pending = requests.filter((r) => r.status === "PENDING");
 

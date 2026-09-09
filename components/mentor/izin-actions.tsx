@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Loader2, ClipboardCheck } from "lucide-react";
+import { revalidateMentorIzin } from "@/app/mentor/izin/actions";
 
 interface IzinRecord {
   id: string;
@@ -48,6 +49,7 @@ export default function IzinActions({ izin }: { izin: IzinRecord }) {
       }
       setOpen(false);
       setLoading(false);
+      await revalidateMentorIzin();
       router.refresh();
     } catch {
       setError("Gagal terhubung ke server.");
