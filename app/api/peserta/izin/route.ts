@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { izinSchema } from "@/lib/validation/presensi";
@@ -104,6 +105,10 @@ export async function POST(req: NextRequest) {
       attachmentUrl,
     },
   });
+
+  revalidatePath("/peserta/izin");
+  revalidatePath("/peserta/dashboard");
+  revalidatePath("/mentor/izin");
 
   return NextResponse.json(
     { message: "Pengajuan berhasil dikirim dan menunggu persetujuan mentor.", record },

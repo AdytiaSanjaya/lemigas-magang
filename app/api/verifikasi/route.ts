@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { verifikasiSchema } from "@/lib/validation/verifikasi";
@@ -114,6 +115,12 @@ export async function PATCH(req: NextRequest) {
     status,
     catatan: catatan ?? undefined,
   });
+
+  // Revalidasi cache agar dashboard & daftar pendaftar langsung sinkron.
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/pendaftar");
+  revalidatePath("/admin/peserta");
+  revalidatePath("/mentor/dashboard");
 
   return NextResponse.json({ message: "Status pendaftar diperbarui." });
 }

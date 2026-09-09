@@ -8,7 +8,7 @@ const ADMIN_NAME = "Admin LEMIGAS";
 
 export async function POST() {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "MENTOR")) {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

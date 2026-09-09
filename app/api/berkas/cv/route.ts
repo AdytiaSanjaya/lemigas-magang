@@ -59,14 +59,23 @@ export async function GET(req: NextRequest) {
   }
 
   let source: string | null = null;
+  let pendaftarEmail: string | null = null;
   try {
     const pendaftar = await prisma.pendaftar.findUnique({
       where: { id },
-      select: { berkasCV: true, cvUrl: true },
+      select: { berkasCV: true, cvUrl: true, email: true },
     });
     source = pendaftar?.cvUrl ?? pendaftar?.berkasCV ?? null;
+    pendaftarEmail = pendaftar?.email ?? null;
   } catch {
     source = null;
+  }
+
+  const userRole = session.user.role as string;
+  const isOwner = pendaftarEmail && session.user.email === pendaftarEmail;
+  const isPrivileged = userRole === "ADMIN" || userRole === "MENTOR";
+  if (!isOwner && !isPrivileged) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   // Fallback: CV tidak tersedia di database.

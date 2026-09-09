@@ -103,32 +103,62 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // Isi token JWT hanya dari data yang diteruskan (TANPA query database),
     // agar flow OAuth tidak timeout di fungsi serverless.
     async jwt({ token, user, account }) {
-      if (!user) return token; // refresh token: biarkan data lama tetap ada.
+      if (user) {
+        const isGoogle = account?.provider === "google";
+        token.email = user.email ?? token.email ?? "";
+        token.name = user.name ?? token.name ?? "";
 
-      const isGoogle = account?.provider === "google";
-      token.email = user.email ?? token.email ?? "";
-      token.name = user.name ?? token.name ?? "";
-
-      if (isGoogle) {
-        // Login Google hanya untuk pendaftar/peserta magang, jadi role selalu
-        // PENDAFTAR. id = sub Google karena tidak ada query DB untuk mengambil
-        // primary key Prisma.
-        token.uid = token.sub;
-        token.role = ROLE_PENDAFTAR;
-        token.unitId = null;
-        token.unitNama = null;
-      } else {
-        // Credentials: authorize sudah menyediakan id/role/unit lengkap.
-        token.uid = user.id;
-        token.role = (user as { role?: string }).role ?? "GUEST";
-        token.unitId = (user as { unitId?: string }).unitId ?? null;
-        token.unitNama = (user as { unitNama?: string }).unitNama ?? null;
+        if (isGoogle) {
+          token.uid = token.sub;
+          token.role = ROLE_PENDAFTAR;
+          token.unitId = null;
+          token.unitNama = null;
+        } else {
+          token.uid = user.id;
+          token.role = (user as { role?: string }).role ?? "GUEST";
+          token.unitId = (user as { unitId?: string }).unitId ?? null;
+          token.unitNama = (user as { unitNama?: string }).unitNama ?? null;
+        }
+        return token;
       }
+
+      // Token refresh: revalidate against database (SEC-03 zombie session, SEC-04 role sync)
+      const uid = token.uid as string | undefined;
+      if (!uid) return token;
+
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: uid },
+          select: { isAktif: true, role: true, unitId: true, unit: { select: { nama: true } } },
+        });
+
+        if (!dbUser || !dbUser.isAktif) {
+          token.role = "FORCE_SIGNOUT";
+          return token;
+        }
+
+        if (token.role !== dbUser.role) {
+          token.role = dbUser.role;
+        }
+        token.unitId = dbUser.unitId ?? null;
+        token.unitNama = dbUser.unit?.nama ?? null;
+      } catch {
+        // On DB error, preserve existing token to avoid locking out users
+      }
+
       return token;
     },
     // Salin data token ke session tanpa interaksi DB.
     session({ session, token }) {
       if (session.user) {
+        // SEC-03: Force sign-out if user was deactivated or session invalidated
+        if (token.role === "FORCE_SIGNOUT") {
+          session.user.id = "";
+          session.user.role = "GUEST";
+          (session as unknown as Record<string, unknown>).forceSignOut = true;
+          return session;
+        }
+
         session.user.id = (token.uid as string | undefined) ?? token.sub ?? "";
         session.user.role = (token.role as string | undefined) ?? "GUEST";
         session.user.unitId = (token.unitId as string | null) ?? null;

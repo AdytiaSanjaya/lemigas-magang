@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
@@ -63,6 +64,11 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/peserta");
+  revalidatePath("/mentor/dashboard");
+  revalidatePath("/mentor/peserta");
+
   return NextResponse.json({ message: "Peserta diperbarui.", id: updated.id });
 }
 
@@ -121,6 +127,10 @@ export async function DELETE(req: NextRequest) {
       data: { status: "MENUNGGU" },
     });
   });
+
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/peserta");
+  revalidatePath("/admin/pendaftar");
 
   return NextResponse.json({ message: "Peserta dihapus, status pendaftar dikembalikan ke Menunggu." });
 }

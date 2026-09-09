@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { evaluasiSchema } from "@/lib/validation/evaluasi";
+import { getUserIdBySession } from "@/lib/peserta";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -42,6 +44,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Resolve User.id ASLI dari database (bukan session.user.id mentah dari Google OAuth).
+  const internalUserId = await getUserIdBySession(session);
+  if (!internalUserId) {
+    return NextResponse.json(
+      { error: "Data pengguna tidak ditemukan di database." },
+      { status: 404 }
+    );
+  }
+
   const record = await prisma.evaluasi.create({
     data: {
       pesertaId: peserta.id,
@@ -49,9 +60,12 @@ export async function POST(req: NextRequest) {
       keaktifan: parsed.data.keaktifan,
       kinerja: parsed.data.kinerja,
       catatan: parsed.data.catatan ?? null,
-      dinilaiOlehId: session.user.id,
+      dinilaiOlehId: internalUserId,
     },
   });
+
+  revalidatePath("/mentor/dashboard");
+  revalidatePath("/admin/dashboard");
 
   return NextResponse.json({ message: "Penilaian berhasil disimpan.", record });
 }
