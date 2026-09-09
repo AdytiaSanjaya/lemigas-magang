@@ -12,6 +12,7 @@ import {
   formatJarakMeters,
 } from "@/lib/geo";
 import { LogIn, LogOut, Loader2, CheckCircle2, CircleAlert } from "lucide-react";
+import { revalidatePresensi } from "@/app/peserta/kehadiran/actions";
 
 export interface KehadiranState {
   checkedIn: boolean;
@@ -164,6 +165,7 @@ export default function CheckInWidget({
               checkOutTime: data.record?.checkOut ?? null,
             }
       );
+      await revalidatePresensi();
       router.refresh();
     } catch {
       setNotice({ ok: false, text: "Gagal terhubung ke server. Coba lagi." });
