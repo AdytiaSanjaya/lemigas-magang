@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { SessionProvider, useSession, signOut } from "next-auth/react";
+
+const AUTH_ROUTES = ["/login", "/register", "/api/auth"];
 
 function ForceSignOutGuard({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const isAuthPage = AUTH_ROUTES.some((r) => pathname.startsWith(r));
 
   useEffect(() => {
-    if ((session as unknown as Record<string, unknown>)?.forceSignOut) {
+    if (!isAuthPage && (session as unknown as Record<string, unknown>)?.forceSignOut) {
       signOut({ callbackUrl: "/login" });
     }
-  }, [session]);
+  }, [session, isAuthPage]);
 
   return <>{children}</>;
 }
