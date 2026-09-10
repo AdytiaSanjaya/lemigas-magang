@@ -100,8 +100,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    // Isi token JWT hanya dari data yang diteruskan (TANPA query database),
-    // agar flow OAuth tidak timeout di fungsi serverless.
+    // Isi token JWT dari data user saat login pertama.
+    // Untuk Google OAuth, query DB berdasarkan email untuk mendapatkan
+    // ID database yang benar (bukan Google sub yang tidak cocok dengan PK).
     async jwt({ token, user, account }) {
       if (user) {
         const isGoogle = account?.provider === "google";
@@ -109,6 +110,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name ?? token.name ?? "";
 
         if (isGoogle) {
+          // Google OAuth: cari user di DB berdasarkan email untuk mendapatkan
+          // ID database (Prisma cuid), bukan Google sub. Ini mencegah
+          // FORCE_SIGNOUT palsu saat token refresh.
+          const email = (user.email ?? "").toLowerCase().trim();
+          if (email) {
+            try {
+              const dbUser = await prisma.user.findUnique({
+                where: { email },
+                select: { id: true, role: true, unitId: true, unit: { select: { nama: true } } },
+              });
+              if (dbUser) {
+                token.uid = dbUser.id;
+                token.role = dbUser.role;
+                token.unitId = dbUser.unitId ?? null;
+                token.unitNama = dbUser.unit?.nama ?? null;
+                return token;
+              }
+            } catch {
+              // Fallback ke Google sub jika DB gagal
+            }
+          }
+          // Fallback: gunakan Google sub (akan di-revalidate di token refresh)
           token.uid = token.sub;
           token.role = ROLE_PENDAFTAR;
           token.unitId = null;
@@ -127,10 +150,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!uid) return token;
 
       try {
-        const dbUser = await prisma.user.findUnique({
+        let dbUser = await prisma.user.findUnique({
           where: { id: uid },
           select: { isAktif: true, role: true, unitId: true, unit: { select: { nama: true } } },
         });
+
+        // Fallback: jika user dipindahkan atau ID berubah, coba cari berdasarkan email
+        // untuk mencegah FORCE_SIGNOUT palsu.
+        if (!dbUser && token.email) {
+          dbUser = await prisma.user.findUnique({
+            where: { email: token.email as string },
+            select: { isAktif: true, role: true, unitId: true, unit: { select: { nama: true } } },
+          });
+        }
 
         if (!dbUser || !dbUser.isAktif) {
           token.role = "FORCE_SIGNOUT";

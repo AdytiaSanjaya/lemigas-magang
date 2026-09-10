@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
-import { GraduationCap, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { IdCard, ArrowLeft, Loader2 } from "lucide-react";
 import LembagasLogo from "@/components/lemigas-logo";
 import LoginForm from "@/components/forms/login-form";
 
@@ -121,7 +122,14 @@ export default function LoginRoleSelector({
             {googleLoading ? (
               <Loader2 className="h-7 w-7 animate-spin" />
             ) : (
-              <GraduationCap className="h-7 w-7" />
+              <Image
+                src="/google.png"
+                alt="Google"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
             )}
           </div>
           <h2 className="text-lg font-bold text-slate-900">Peserta Magang</h2>
@@ -156,7 +164,7 @@ export default function LoginRoleSelector({
                 : "bg-blue-50 text-blue-600 group-hover:bg-blue-100"
             }`}
           >
-            <ShieldCheck className="h-7 w-7" />
+            <IdCard className="h-7 w-7" />
           </div>
           <h2 className="text-lg font-bold text-slate-900">Admin / Mentor</h2>
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500">

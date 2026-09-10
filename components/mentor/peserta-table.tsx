@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import Image from "next/image";
 import {
   Search,
   Filter,
   MoreHorizontal,
   Eye,
   Star,
-  MessageCircle,
-  Mail,
   Users,
   Inbox,
   X,
@@ -66,6 +66,17 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
   const [detail, setDetail] = useState<PesertaRow | null>(null);
   const [penilaian, setPenilaian] = useState<PesertaRow | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{
+    top: number;
+    right: number;
+    dropUp: boolean;
+  } | null>(null);
+  const triggerRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  const setTriggerRef = useCallback((id: string, el: HTMLButtonElement | null) => {
+    if (el) triggerRefs.current.set(id, el);
+    else triggerRefs.current.delete(id);
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -87,12 +98,41 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
   const absenCount = peserta.filter((p) => p.statusHariIni === "BELUM ABSEN").length;
 
   function toggleMenu(id: string) {
-    setMenuOpen((cur) => (cur === id ? null : id));
+    if (menuOpen === id) {
+      setMenuOpen(null);
+      setMenuPos(null);
+    } else {
+      const btn = triggerRefs.current.get(id);
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        const MENU_HEIGHT = 260; // perkiraan tinggi dropdown (px)
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropUp = spaceBelow < MENU_HEIGHT;
+        setMenuPos({
+          top: dropUp ? rect.top - MENU_HEIGHT - 6 : rect.bottom + 6,
+          right: window.innerWidth - rect.right,
+          dropUp,
+        });
+      }
+      setMenuOpen(id);
+    }
   }
 
   function closeMenu() {
     setMenuOpen(null);
+    setMenuPos(null);
   }
+
+  // Tutup menu jika user scroll (dropdown position menjadi stale).
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onScroll() {
+      setMenuOpen(null);
+      setMenuPos(null);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [menuOpen]);
 
   return (
     <div className="space-y-5">
@@ -281,6 +321,7 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
                         <div className="relative flex justify-end">
                           <button
                             type="button"
+                            ref={(el) => setTriggerRef(p.id, el)}
                             onClick={() => toggleMenu(p.id)}
                             className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all hover:border-navy-300 hover:bg-navy-50 hover:text-navy-700 active:scale-[0.97]"
                             aria-expanded={menuOpen === p.id}
@@ -289,78 +330,6 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
                             <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
                             Aksi
                           </button>
-
-                          {menuOpen === p.id && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-30"
-                                onClick={closeMenu}
-                                aria-hidden="true"
-                              />
-                              <div
-                                role="menu"
-                                className="absolute right-0 top-full z-40 mt-1.5 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white py-1.5 shadow-xl"
-                              >
-                                <div className="border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                                  {p.nama}
-                                </div>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    closeMenu();
-                                    setDetail(p);
-                                  }}
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-navy-50 hover:text-navy-700"
-                                >
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-navy-50 text-navy-600">
-                                    <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                                  </span>
-                                  Detail &amp; Presensi
-                                </button>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    closeMenu();
-                                    setPenilaian(p);
-                                  }}
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-amber-50 hover:text-amber-700"
-                                >
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-                                    <Star className="h-3.5 w-3.5" aria-hidden="true" />
-                                  </span>
-                                  Berikan Penilaian
-                                </button>
-                                <div className="my-1 border-t border-slate-100" />
-                                <div className="px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                                  Hubungi
-                                </div>
-                                <a
-                                  href={`https://wa.me/${p.noHp.replace(/\D/g, "")}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  role="menuitem"
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
-                                >
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                                    <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
-                                  </span>
-                                  WhatsApp
-                                </a>
-                                <a
-                                  href={`mailto:${p.email}`}
-                                  role="menuitem"
-                                  className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
-                                >
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
-                                    <Mail className="h-3.5 w-3.5" aria-hidden="true" />
-                                  </span>
-                                  Email
-                                </a>
-                              </div>
-                            </>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -376,6 +345,106 @@ export default function PesertaTable({ peserta }: { peserta: PesertaRow[] }) {
       {penilaian && (
         <PesertaPenilaianModal peserta={penilaian} onClose={() => setPenilaian(null)} />
       )}
+
+      {/* Portal: dropdown menu dirender di luar hierarki DOM tabel agar tidak
+          terpotong oleh overflow-hidden / overflow-x-auto pada container tabel. */}
+      {menuOpen &&
+        menuPos &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-[60]" onClick={closeMenu} aria-hidden="true" />
+            <div
+              role="menu"
+              style={{ top: menuPos.top, right: menuPos.right }}
+              className={`fixed z-[61] w-64 overflow-hidden border border-slate-200 bg-white py-1.5 shadow-xl ${
+                menuPos.dropUp
+                  ? "rounded-2xl rounded-br-lg"
+                  : "rounded-2xl rounded-tl-lg"
+              }`}
+            >
+              {(() => {
+                const p = filtered.find((x) => x.id === menuOpen);
+                if (!p) return null;
+                return (
+                  <>
+                    <div className="border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      {p.nama}
+                    </div>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        closeMenu();
+                        setDetail(p);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-navy-50 hover:text-navy-700"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-navy-50 text-navy-600">
+                        <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      Detail &amp; Presensi
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        closeMenu();
+                        setPenilaian(p);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-amber-50 hover:text-amber-700"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                        <Star className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      Berikan Penilaian
+                    </button>
+                    <div className="my-1 border-t border-slate-100" />
+                    <div className="px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      Hubungi
+                    </div>
+                    <a
+                      href={`https://wa.me/${p.noHp.replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      role="menuitem"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <Image
+                          src="/whatsappicon.jpg"
+                          alt="WhatsApp"
+                          width={20}
+                          height={20}
+                          className="rounded-sm object-contain"
+                          priority={false}
+                        />
+                      </span>
+                      WhatsApp
+                    </a>
+                    <a
+                      href={`mailto:${p.email}`}
+                      role="menuitem"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                        <Image
+                          src="/gmail.png"
+                          alt="Email"
+                          width={20}
+                          height={20}
+                          className="rounded-sm object-contain"
+                          priority={false}
+                        />
+                      </span>
+                      Email
+                    </a>
+                  </>
+                );
+              })()}
+            </div>
+          </>,
+          document.body
+        )}
     </div>
   );
 }

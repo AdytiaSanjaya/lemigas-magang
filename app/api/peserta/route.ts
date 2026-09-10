@@ -113,20 +113,38 @@ export async function DELETE(req: NextRequest) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const body = (await req.json()) as { pesertaId?: string };
-  if (!body.pesertaId) {
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Body tidak valid." }, { status: 400 });
+  }
+
+  const { pesertaId } = body as { pesertaId?: string };
+  if (!pesertaId) {
     return NextResponse.json({ error: "pesertaId wajib." }, { status: 422 });
   }
 
-  await prisma.$transaction(async (tx) => {
-    const peserta = await tx.peserta.findUnique({ where: { id: body.pesertaId } });
-    if (!peserta) throw new Error("not_found");
-    await tx.peserta.delete({ where: { id: body.pesertaId } });
-    await tx.pendaftar.update({
-      where: { id: peserta.pendaftarId },
-      data: { status: "MENUNGGU" },
+  try {
+    await prisma.$transaction(async (tx) => {
+      const peserta = await tx.peserta.findUnique({ where: { id: pesertaId } });
+      if (!peserta) {
+        throw new Error("PESERTA_NOT_FOUND");
+      }
+      await tx.peserta.delete({ where: { id: pesertaId } });
+      await tx.pendaftar.update({
+        where: { id: peserta.pendaftarId },
+        data: { status: "MENUNGGU" },
+      });
     });
-  });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "PESERTA_NOT_FOUND") {
+      return NextResponse.json({ error: "Peserta tidak ditemukan." }, { status: 404 });
+    }
+    return NextResponse.json({ error: "Gagal menghapus peserta." }, { status: 500 });
+  }
 
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/peserta");

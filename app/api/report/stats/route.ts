@@ -29,6 +29,10 @@ export async function GET(req: NextRequest) {
     ...(unitId ? { where: { unitMinatId: unitId } } : {}),
   });
 
+  // Hitung peserta aktif dari tabel Peserta (sumber kebenaran) agar
+  // konsisten dengan kartu metrik di dashboard.
+  const totalPesertaAktif = await prisma.peserta.count();
+
   // 2) Per unit.
   const unitCounts = await prisma.pendaftar.groupBy({
     by: ["unitMinatId"],
@@ -68,6 +72,21 @@ export async function GET(req: NextRequest) {
     if (monthBuckets[key]) monthBuckets[key][r.status] += 1;
   }
 
+  // Hitung peserta aktif per bulan dari tabel Peserta berdasarkan tanggalMulai,
+  // bukan dari status pendaftar. Ini memastikan grafik menunjukkan kapan peserta
+  // benar-benar mulai aktif.
+  const pesertaAktifRows = await prisma.peserta.findMany({
+    where: {
+      tanggalMulai: { gte: sixMonthsAgo },
+      ...(unitId ? { unitId } : {}),
+    },
+    select: { tanggalMulai: true },
+  });
+  for (const p of pesertaAktifRows) {
+    const key = `${p.tanggalMulai.getFullYear()}-${p.tanggalMulai.getMonth()}`;
+    if (monthBuckets[key]) monthBuckets[key].PESERTA_AKTIF += 1;
+  }
+
   const perBulan = Object.keys(monthBuckets).map((key) => {
     const [y, m] = key.split("-").map(Number);
     const b = monthBuckets[key];
@@ -80,10 +99,15 @@ export async function GET(req: NextRequest) {
     };
   });
 
-  const perStatus = ["MENUNGGU", "DITERIMA", "DITOLAK", "PESERTA_AKTIF"].map((s) => ({
-    status: s,
-    jumlah: statusGroup.find((g) => g.status === s)?._count._all ?? 0,
-  }));
+  // Gabungkan perStatus: hitung DITERIMA asli, kurangi yang sudah jadi peserta
+  // aktif agar tidak ada double-counting.
+  const diterimaCount = statusGroup.find((g) => g.status === "DITERIMA")?._count._all ?? 0;
+  const perStatus = [
+    { status: "MENUNGGU", jumlah: statusGroup.find((g) => g.status === "MENUNGGU")?._count._all ?? 0 },
+    { status: "DITERIMA", jumlah: Math.max(0, diterimaCount - totalPesertaAktif) },
+    { status: "DITOLAK", jumlah: statusGroup.find((g) => g.status === "DITOLAK")?._count._all ?? 0 },
+    { status: "PESERTA_AKTIF", jumlah: totalPesertaAktif },
+  ];
 
   return NextResponse.json({ perBulan, perUnit, perStatus });
 }

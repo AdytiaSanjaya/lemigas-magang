@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { requireMentor } from "@/lib/rbac";
 import MentorNav from "@/components/mentor/mentor-nav";
 import SidebarBrand from "@/components/sidebar-brand";

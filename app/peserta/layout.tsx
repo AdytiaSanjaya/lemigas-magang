@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { requirePeserta } from "@/lib/rbac";
 import { getPesertaBySession } from "@/lib/peserta";
 import PesertaNav from "@/components/peserta/peserta-nav";
