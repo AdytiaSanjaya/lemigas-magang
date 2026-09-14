@@ -62,18 +62,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Data tidak valid." }, { status: 400 });
   }
 
-  // Tangkap tipe pendaftaran (INDIVIDUAL/GROUP) beserta anggota kelompok (JSON string).
-  const applicationType = String(form.get("applicationType") ?? "INDIVIDUAL");
-  let groupMembers: { name: string; identifier: string; major: string }[] | undefined;
-  const groupMembersRaw = form.get("groupMembers");
-  if (groupMembersRaw) {
-    try {
-      groupMembers = JSON.parse(String(groupMembersRaw));
-    } catch {
-      return NextResponse.json({ error: "Data anggota kelompok tidak valid." }, { status: 422 });
-    }
-  }
-
   const raw = {
     nama: String(form.get("nama") ?? ""),
     asalInstansi: String(form.get("asalInstansi") ?? ""),
@@ -82,8 +70,6 @@ export async function POST(req: NextRequest) {
     noHp: String(form.get("noHp") ?? ""),
     email: String(form.get("email") ?? ""),
     unitMinatId: String(form.get("unitMinatId") ?? ""),
-    applicationType,
-    groupMembers,
   };
 
   // 3) Validasi Zod untuk semua field sebelum menyentuh database.
@@ -92,14 +78,6 @@ export async function POST(req: NextRequest) {
     const errors = parsed.error.flatten().fieldErrors;
     return NextResponse.json(
       { error: "Validasi gagal.", fieldErrors: errors },
-      { status: 422 }
-    );
-  }
-
-  // 3b) Pendaftaran kelompok wajib memiliki minimal 1 anggota.
-  if (parsed.data.applicationType === "GROUP" && (!parsed.data.groupMembers || parsed.data.groupMembers.length === 0)) {
-    return NextResponse.json(
-      { error: "Data anggota kelompok wajib diisi untuk pendaftaran kelompok." },
       { status: 422 }
     );
   }
@@ -177,9 +155,7 @@ export async function POST(req: NextRequest) {
         ktpKtmUrl: saved.get("ktpKtmUrl") ?? null,
         transkripUrl: saved.get("transkripUrl") ?? null,
         status: "MENUNGGU",
-        applicationType: parsed.data.applicationType,
-        groupMembers:
-          parsed.data.applicationType === "GROUP" ? (parsed.data.groupMembers ?? []) : undefined,
+        applicationType: "INDIVIDUAL",
       },
     });
     await tx.statusHistory.create({

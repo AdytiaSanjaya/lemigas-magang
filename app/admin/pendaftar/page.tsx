@@ -140,10 +140,12 @@ export default async function AdminPendaftarPage({
                         nama: p.nama,
                         noPendaftaran: p.noPendaftaran,
                         status: p.status,
-                        berkasCV: p.berkasCV,
-                        berkasSurat: p.berkasSurat,
                         email: p.email,
                         unitMinatId: p.unitMinatId,
+                        cvUrl: p.cvUrl,
+                        suratPengantarUrl: p.suratPengantarUrl,
+                        ktpKtmUrl: p.ktpKtmUrl,
+                        transkripUrl: p.transkripUrl,
                       }}
                       mentors={mentors}
                     />
