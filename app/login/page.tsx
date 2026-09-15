@@ -1,17 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { auth, isGoogleAuthEnabled } from "@/lib/auth";
 import LoginRoleSelector from "@/components/forms/login-role-selector";
 
-// Halaman beranda per role saat sudah login tanpa callbackUrl.
 const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin/dashboard",
   MENTOR: "/mentor/peserta",
   PENDAFTAR: "/peserta/dashboard",
 };
 
-// Cegah open-redirect: hanya terima callbackUrl internal.
 function safeCallbackUrl(callbackUrl?: string): string | null {
   if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
     return callbackUrl;
@@ -32,8 +31,6 @@ export default async function LoginPage({
   }
   const { callbackUrl } = await searchParams;
 
-  // Jika sudah login, langsung diarahkan ke callbackUrl (mis. dari portal
-  // peserta) atau ke dashboard sesuai role; bukan ke halaman beranda.
   if (session?.user) {
     redirect(safeCallbackUrl(callbackUrl) ?? ROLE_HOME[session.user.role] ?? "/peserta/dashboard");
   }
@@ -42,42 +39,73 @@ export default async function LoginPage({
   const isRegistrationFlow = resolvedCallback.startsWith("/daftar");
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-blue-950 p-4">
-      {/* Decorative blurs */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-yellow-400/5 blur-3xl"
-      />
-
-      {/* Back link */}
+    <main className="relative min-h-screen w-full flex flex-col lg:flex-row">
+      {/* ── Back link ── */}
       <Link
         href="/"
-        className="absolute left-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-slate-200 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white"
+        className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 lg:left-8 lg:top-8"
       >
         <ArrowLeft className="h-4 w-4" />
         Kembali ke Beranda
       </Link>
 
-      {/* Main card */}
-      <div className="relative z-10 flex w-full max-w-lg flex-col items-center rounded-2xl border border-slate-100 bg-white p-8 shadow-2xl md:p-10">
-        <LoginRoleSelector
-          callbackUrl={resolvedCallback}
-          isGoogleEnabled={isGoogleAuthEnabled}
-          mode={isRegistrationFlow ? "registration" : "gateway"}
-        />
+      {/* ════════════════════════════════════════════
+          LEFT COLUMN — Login Area (40%)
+      ════════════════════════════════════════════ */}
+      <section className="w-full lg:w-2/5 flex flex-col justify-center items-center bg-white p-8">
+        <div className="w-full max-w-sm flex flex-col items-center">
+          <LoginRoleSelector
+            callbackUrl={resolvedCallback}
+            isGoogleEnabled={isGoogleAuthEnabled}
+            mode={isRegistrationFlow ? "registration" : "gateway"}
+          />
 
-        <p className="mt-8 text-center text-xs text-slate-400">
-          Balai Besar Pengujian Minyak dan Gas Bumi (LEMIGAS)
-        </p>
-      </div>
+          <p className="mt-8 text-center text-xs text-gray-400">
+            Balai Besar Pengujian Minyak dan Gas Bumi (LEMIGAS)
+          </p>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          RIGHT COLUMN — Quote Area (60%)
+      ════════════════════════════════════════════ */}
+      <section className="hidden lg:flex w-full lg:w-3/5 bg-[#F9FAFB] flex-col justify-center items-center p-12 border-l border-gray-200">
+        <div className="max-w-xl w-full">
+          {/* Double-quote icon */}
+          <svg
+            aria-hidden="true"
+            className="mb-6 h-14 w-14 text-gray-200"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 28c-3.3 0-6-2.7-6-6 0-4.4 3.6-8 8-8 1.4 0 2.7.4 3.8 1C17.7 10.4 14.5 7 10.5 7v-4c7.2 0 13.5 5.1 15 12.1-.7-.1-1.3-.1-2-.1-5.5 0-10 4.5-10 10v3h.5ZM36 28c-3.3 0-6-2.7-6-6 0-4.4 3.6-8 8-8 1.4 0 2.7.4 3.8 1C39.7 10.4 36.5 7 32.5 7v-4c7.2 0 13.5 5.1 15 12.1-.7-.1-1.3-.1-2-.1-5.5 0-10 4.5-10 10v3h.5Z"
+              fill="currentColor"
+            />
+          </svg>
+
+          <blockquote className="text-2xl text-gray-800 font-medium leading-relaxed mt-6">
+            &ldquo;Magang di sini bukan sekadar rutinitas, ini adalah langkah
+            awal membangun insting profesional dan relasi di dunia nyata.&rdquo;
+          </blockquote>
+
+          {/* Profile */}
+          <div className="flex flex-row items-center gap-4 mt-8">
+            <Image
+              src="/adit.png"
+              alt="Adytia Sanjaya"
+              width={48}
+              height={48}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="font-semibold text-gray-900">Adytia Sanjaya</p>
+              <p className="text-sm text-gray-500">@adytiasanjaya</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
