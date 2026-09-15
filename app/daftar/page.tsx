@@ -19,9 +19,72 @@ export default async function DaftarPage() {
     redirect(session.user.role === "ADMIN" ? "/admin/dashboard" : "/mentor/peserta");
   }
 
+  // Cegah pendaftar dengan status MENUNGGU mengajukan ulang.
+  const email = session.user.email?.toLowerCase().trim();
+  if (email) {
+    const pendingPendaftar = await prisma.pendaftar
+      .findFirst({
+        where: { email, status: "MENUNGGU" },
+        select: { id: true, noPendaftaran: true },
+      })
+      .catch(() => null);
+
+    if (pendingPendaftar) {
+      return (
+        <main className="flex min-h-screen flex-col bg-zinc-50">
+          <SiteHeader />
+          <section className="flex flex-1 items-center justify-center px-6 py-14 sm:py-16">
+            <div className="mx-auto max-w-md text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+                <svg
+                  className="h-7 w-7 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900">
+                Pendaftaran Sedang Diproses
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-500">
+                Maaf, sistem mendeteksi bahwa akun kamu sudah memiliki pendaftaran
+                yang sedang diproses.
+                {pendingPendaftar.noPendaftaran && (
+                  <>
+                    <br />
+                    <span className="mt-1 inline-block font-medium text-zinc-700">
+                      No. Pendaftaran: {pendingPendaftar.noPendaftaran}
+                    </span>
+                  </>
+                )}
+              </p>
+              <p className="mt-3 text-sm text-zinc-500">
+                Silakan pantau status daftar Anda melalui fitur cek status.
+              </p>
+              <a
+                href="/cek-status"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Cek Status Pendaftaran
+              </a>
+            </div>
+          </section>
+          <SiteFooter />
+        </main>
+      );
+    }
+  }
+
   // Cegah pendaftar aktif mengakses ulang formulir: jika email sudah tercatat
   // memiliki data Peserta (magang aktif), tampilkan notifikasi lalu redirect.
-  const email = session.user.email?.toLowerCase().trim();
   if (email) {
     const existingActive = await prisma.peserta
       .findFirst({
