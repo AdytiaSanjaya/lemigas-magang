@@ -27,7 +27,7 @@ const uploadConfig: {
     label: "Surat Pengantar Sekolah/Kampus",
     format: "PDF",
     accept: "application/pdf",
-    required: false,
+    required: true,
   },
   {
     key: "ktpKtmUrl",
@@ -228,10 +228,13 @@ export default function PendaftaranForm({
 
           <div>
             <label className="block text-sm font-medium text-zinc-700">
-              No. HP
+              No. HP / WhatsApp Aktif
               <input name="noHp" value={form.noHp} onChange={handleChange} placeholder="08xxxxxxxxxx"
                 className={inputClass} />
             </label>
+            <p className="text-xs text-gray-500 mt-1">
+              Pastikan nomor ini terdaftar di WhatsApp untuk menerima notifikasi status.
+            </p>
             {errors.noHp && <p className="mt-1 text-xs text-red-600">{errors.noHp}</p>}
           </div>
 
@@ -383,6 +386,11 @@ export default function PendaftaranForm({
                 </label>
                 {fileErrors[cfg.key] && (
                   <p className="mt-1.5 text-xs text-red-600">{fileErrors[cfg.key]}</p>
+                )}
+                {cfg.key === "suratPengantarUrl" && (
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    Wajib format PDF. Pastikan surat mencantumkan usulan durasi (tanggal mulai &amp; selesai) magang.
+                  </p>
                 )}
               </div>
             );

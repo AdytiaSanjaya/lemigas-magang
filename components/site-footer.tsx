@@ -1,5 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 
 const developers = [
   { name: "Adytia Sanjaya", initial: "AS" },
@@ -123,6 +141,25 @@ export default function SiteFooter() {
             </span>
             . Seluruh hak dilindungi.
           </p>
+          <div className="flex flex-row items-center gap-6">
+            <a
+              href="https://www.lemigas.esdm.go.id/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 transition hover:text-white"
+            >
+              Website Resmi LEMIGAS
+            </a>
+            <a
+              href="https://www.instagram.com/lemigas.esdm?stkn=MWcwNWRkbnFjZ2o3ZQ=="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 transition hover:text-white"
+              aria-label="Instagram LEMIGAS"
+            >
+              <InstagramIcon className="h-5 w-5" />
+            </a>
+          </div>
           <p>
             Sistem Magang &amp; PKL
             <span className="text-slate-300"> LEMIGAS Magang</span>

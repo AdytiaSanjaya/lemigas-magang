@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { verifikasiSchema } from "@/lib/validation/verifikasi";
 import { sendStatusEmail } from "@/lib/email";
+import { sendWhatsAppNotification } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -115,6 +116,44 @@ export async function PATCH(req: NextRequest) {
     status,
     catatan: catatan ?? undefined,
   });
+
+  // Kirim notifikasi WhatsApp saat status DITERIMA (isolasi error).
+  if (status === "DITERIMA") {
+    try {
+      const tanggalMulaiFmt = mulai!.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      const tanggalSelesaiFmt = selesai!.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      const waMessage = [
+        `Assalamualaikum, ${pendaftar.nama}.`,
+        ``,
+        `Selamat! Status pendaftaran magang/PKL Anda dengan nomor ${pendaftar.noPendaftaran} telah *DITERIMA*.`,
+        ``,
+        `Tanggal mulai: ${tanggalMulaiFmt}`,
+        `Tanggal selesai: ${tanggalSelesaiFmt}`,
+        `Unit penempatan: ${pendaftar.unitMinat.nama}`,
+        ``,
+        `Silakan cek detail lebih lanjut di website magang LEMIGAS:`,
+        `https://lemigas-magang.vercel.app`,
+        ``,
+        `Salam,`,
+        `LEMIGAS`,
+      ].join("\n");
+
+      await sendWhatsAppNotification({
+        phone: pendaftar.noHp,
+        message: waMessage,
+      });
+    } catch (e) {
+      console.error("Gagal mengirim notifikasi WhatsApp:", e);
+    }
+  }
 
   // Revalidasi cache agar dashboard & daftar pendaftar langsung sinkron.
   revalidatePath("/admin/dashboard");

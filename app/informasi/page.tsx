@@ -56,13 +56,9 @@ const kategoriPeserta = [
 const dokumenWajib = [
   {
     label: "Surat Pengantar / Permohonan Magang",
-    detail: "Diterbitkan oleh kampus atau sekolah pemohon.",
-    tag: "PDF",
-  },
-  {
-    label: "Proposal Magang / PKL",
-    detail: "Khusus mahasiswa, memuat rencana kegiatan magang.",
-    tag: "Mahasiswa",
+    detail: "Diterbitkan oleh kampus atau sekolah pemohon. Surat WAJIB mencantumkan usulan tanggal mulai dan selesai magang.",
+    tag: "Wajib",
+    wajib: true,
   },
   {
     label: "Curriculum Vitae (CV)",
@@ -302,14 +298,14 @@ export default async function InformasiPage() {
             </ul>
           </article>
 
-          {/* Dokumen Wajib */}
+          {/* Persyaratan Dokumen */}
           <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-yellow-400 shadow-md">
                 <FileStack className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-navy-900">
-                Dokumen Wajib
+                Persyaratan Dokumen
               </h3>
             </div>
 
@@ -345,8 +341,8 @@ export default async function InformasiPage() {
 
             <p className="mt-5 rounded-xl border border-sky-100 bg-sky-50/60 px-4 py-3 text-xs leading-5 text-sky-800">
               Dokumen diunggah melalui formulir pendaftaran daring (maks. 2MB
-              per berkas). CV merupakan berkas wajib unggah; dokumen lainnya
-              melengkapi proses verifikasi dan seleksi.
+              per berkas). Surat Pengantar dan CV merupakan berkas wajib unggah;
+              dokumen lainnya melengkapi proses verifikasi dan seleksi.
             </p>
           </article>
 
