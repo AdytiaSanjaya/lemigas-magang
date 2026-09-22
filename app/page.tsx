@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
@@ -129,41 +130,58 @@ export default async function HomePage() {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto max-w-6xl px-6 py-24 text-center lg:py-32">
-          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200 backdrop-blur">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-400" />
-            Balai Besar Pengujian Minyak dan Gas Bumi
-          </span>
-
-          <h1 className="mx-auto mt-6 max-w-4xl animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
-            Portal Pendaftaran &amp; Manajemen Magang/PKL{" "}
-            <span className="text-yellow-400">
-              LEMIGAS
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 md:grid-cols-2 md:gap-12 lg:py-28">
+          {/* Kolom kiri: teks */}
+          <div className="text-center md:text-left">
+            <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200 backdrop-blur">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-yellow-400" />
+              Balai Besar Pengujian Minyak dan Gas Bumi
             </span>
-          </h1>
 
-          <p className="mx-auto mt-5 max-w-3xl animate-fade-in-up text-base leading-7 text-slate-300 sm:text-lg">
-            Layanan terpadu pendaftaran, seleksi, serta portal kegiatan harian
-            peserta Magang &amp; PKL (Mahasiswa &amp; Pelajar) di Balai Besar
-            Pengujian Minyak dan Gas Bumi (LEMIGAS).
-          </p>
+            <h1 className="mt-6 animate-fade-in-up text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
+              Portal Pendaftaran &amp; Manajemen Magang/PKL{" "}
+              <span className="text-yellow-400">
+                LEMIGAS
+              </span>
+            </h1>
 
-          <div
-            className="mt-9 flex animate-fade-in-up flex-wrap items-center justify-center gap-4"
-            style={{ animationDelay: "300ms" }}
-          >
-            <Link
-              href={daftarHref}
-              className="rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
+            <p className="mt-5 animate-fade-in-up text-base leading-7 text-slate-300 sm:text-lg">
+              Layanan terpadu pendaftaran, seleksi, serta portal kegiatan harian
+              peserta Magang &amp; PKL (Mahasiswa &amp; Pelajar) di Balai Besar
+              Pengujian Minyak dan Gas Bumi (LEMIGAS).
+            </p>
+
+            <div
+              className="mt-9 flex animate-fade-in-up flex-wrap items-center justify-center gap-4 md:justify-start"
+              style={{ animationDelay: "300ms" }}
             >
-              Daftar Magang Sekarang
-            </Link>
-            <Link
-              href="/cek-status"
-              className="rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-yellow-400/50 hover:bg-white/10"
-            >
-              Cek Status Lamaran
-            </Link>
+              <Link
+                href={daftarHref}
+                className="rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
+              >
+                Daftar Magang Sekarang
+              </Link>
+              <Link
+                href="/cek-status"
+                className="rounded-xl border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:border-yellow-400/50 hover:bg-white/10"
+              >
+                Cek Status Lamaran
+              </Link>
+            </div>
+          </div>
+
+          {/* Kolom kanan: visual */}
+          <div className="flex justify-center md:justify-end">
+            <div className="w-full max-w-2xl overflow-hidden rounded-2xl border-4 border-yellow-400 shadow-2xl shadow-yellow-500/20 lg:max-w-3xl">
+              <Image
+                src="/lemigas-hero.png"
+                alt="Kegiatan program magang dan PKL di LEMIGAS"
+                width={1536}
+                height={1024}
+                priority
+                className="h-auto w-full object-cover"
+              />
+            </div>
           </div>
         </div>
 
