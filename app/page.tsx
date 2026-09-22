@@ -308,7 +308,7 @@ export default async function HomePage() {
                 <h3 className="mt-4 text-base font-semibold text-white">
                   {step.title}
                 </h3>
-                <p className="mx-auto mt-2 max-w-[220px] text-sm leading-6 text-slate-400">
+                <p className="mx-auto mt-2 max-w-55 text-sm leading-6 text-slate-400">
                   {step.description}
                 </p>
               </div>
