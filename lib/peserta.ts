@@ -31,6 +31,24 @@ export async function getPesertaBySession(session: Session | null) {
   return getPesertaByEmail(session?.user?.email ?? null);
 }
 
+// Cek apakah email sudah tercatat sebagai pendaftar. Setiap Peserta aktif
+// selalu punya relasi wajib ke Pendaftar, jadi cek ke tabel Pendaftar sudah
+// mewakili keduanya. Dipakai guard requirePeserta() untuk menghalau akun
+// (mis. login Google) yang belum pernah mendaftar masuk portal peserta.
+export const isEmailTerdaftar = cache(async (email: string | null): Promise<boolean> => {
+  if (!email) return false;
+  try {
+    const pendaftar = await prisma.pendaftar.findFirst({
+      where: { email: email.toLowerCase().trim() },
+      select: { id: true },
+    });
+    return Boolean(pendaftar);
+  } catch {
+    // Gagal DB: jangan blokir akses (konsisten dengan fallback di lib/auth.ts).
+    return true;
+  }
+});
+
 // Ambil User.id ASLI dari database berdasarkan email session (NextAuth).
 // `session.user.id` untuk akun Google OAuth berisi Google `sub` (bukan primary
 // key Prisma), sehingga TIDAK boleh dipakai sebagai FK (Attendance, LeaveRequest).

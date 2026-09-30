@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { isEmailTerdaftar } from "@/lib/peserta";
 
 // Guard untuk halaman panel. Memastikan user sudah login dan role sesuai.
 export async function requireAuth(roles: Array<"ADMIN" | "MENTOR"> = ["ADMIN", "MENTOR"]) {
@@ -21,14 +22,18 @@ export async function requireMentor() {
 }
 
 // Guard untuk halaman portal peserta (role PENDAFTAR). Memastikan user sudah
-// login dan berperan peserta/pendaftar. Keanggotaan sebagai "peserta aktif"
-// diverifikasi lebih lanjut di halaman masing-masing.
+// login, berperan peserta/pendaftar, DAN emailnya sudah tercatat di database
+// pendaftar/peserta. Akun Google yang belum mendaftar diarahkan ke halaman
+// intersepsi /unauthorized sehingga tidak bisa menembus /peserta/dashboard.
 export async function requirePeserta() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
   const role = session.user.role;
   if (role !== "PENDAFTAR") redirect("/login");
+
+  const terdaftar = await isEmailTerdaftar(session.user.email ?? null);
+  if (!terdaftar) redirect("/unauthorized");
 
   return session;
 }
