@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SearchCheck, Hash, Mail, ArrowRight, Loader2, CheckCircle2, HelpCircle } from "lucide-react";
+import { SearchCheck, Hash, Mail, ArrowRight, Loader2, CheckCircle2, HelpCircle, Download } from "lucide-react";
 import { cekStatusSchema } from "@/lib/validation/cek-status";
 import { formatTanggal } from "@/lib/format";
 import StatusBadge from "@/components/ui/status-badge";
@@ -206,6 +206,17 @@ export default function CekStatusPage() {
                       Periode: {formatTanggal(data.peserta.tanggalMulai)} &ndash;{" "}
                       {formatTanggal(data.peserta.tanggalSelesai)}
                     </p>
+                  )}
+
+                  {data.status === "DITERIMA" && (
+                    <a
+                      href="/dummy-loa.pdf"
+                      download
+                      className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0 sm:w-auto"
+                    >
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                      Unduh Surat Balasan (LoA)
+                    </a>
                   )}
 
                   <div className="mx-auto mt-7 h-px max-w-xs bg-white/10" aria-hidden="true" />
