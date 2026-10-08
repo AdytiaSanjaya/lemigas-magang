@@ -1,12 +1,11 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
-import { todayStringWib, toUtcDate, utcDateString, monthRange, formatWaktu } from "@/lib/dates";
+import { todayStringWib, toUtcDate, utcDateString, monthRange } from "@/lib/dates";
 import CheckInWidget from "@/components/peserta/check-in-widget";
-import AttendanceFilter from "@/components/peserta/attendance-filter";
-import StatusBadge from "@/components/ui/status-badge";
-import Pagination from "@/components/ui/pagination";
-import { CalendarCheck2, CircleAlert, ClipboardPenLine, Flame, History } from "lucide-react";
+import AttendanceHistory from "@/components/peserta/attendance-history";
+import { PresensiOptimisticProvider } from "@/components/peserta/presensi-optimistic";
+import { CalendarCheck2, CircleAlert, ClipboardPenLine, Flame } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -95,153 +94,85 @@ export default async function KehadiranPage({
   const hadirCount = monthSummary.find((s) => s.status === "HADIR")?._count._all ?? 0;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Presensi Kehadiran</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Catat kehadiran harian Anda dan lihat riwayatnya per bulan.
-        </p>
-      </div>
-
-      {/* Widget check-in + ringkasan bulan */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <CheckInWidget
-            initialState={{
-              checkedIn: !!attToday?.checkIn,
-              checkedOut: !!attToday?.checkOut,
-              checkInTime: attToday?.checkIn?.toISOString() ?? null,
-              checkOutTime: attToday?.checkOut?.toISOString() ?? null,
-            }}
-          />
+    <PresensiOptimisticProvider>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Presensi Kehadiran</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Catat kehadiran harian Anda dan lihat riwayatnya per bulan.
+          </p>
         </div>
 
-        <div className="grid content-start gap-4">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <Flame className="h-4 w-4 text-orange-500" aria-hidden="true" />
-              Rangkaian Hadir
-            </div>
-            <div className="mt-2 text-3xl font-bold tracking-tight text-navy-700">
-              {streak} <span className="text-sm font-medium text-slate-400">hari berturut-turut</span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <CalendarCheck2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-              Ringkasan {new Date(`${month}-01T00:00:00Z`).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
-            </div>
-            <div className="mt-3 grid w-full max-w-full grid-cols-3 gap-2 text-center box-border sm:gap-4">
-              <div className="rounded-xl bg-emerald-50 py-3">
-                <div className="text-xl font-bold text-emerald-700">{hadirCount}</div>
-                <div className="text-[11px] font-medium text-emerald-600">Hadir</div>
-              </div>
-              <div className="rounded-xl bg-amber-50 py-3">
-                <div className="text-xl font-bold text-amber-700">
-                  {monthSummary.find((s) => s.status === "IZIN")?._count._all ?? 0}
-                </div>
-                <div className="text-[11px] font-medium text-amber-600">Izin</div>
-              </div>
-              <div className="rounded-xl bg-rose-50 py-3">
-                <div className="text-xl font-bold text-rose-700">
-                  {monthSummary.find((s) => s.status === "SAKIT")?._count._all ?? 0}
-                </div>
-                <div className="text-[11px] font-medium text-rose-600">Sakit</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabel riwayat */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-slate-400" aria-hidden="true" />
-            <h2 className="text-sm font-semibold text-slate-800">Riwayat Kehadiran</h2>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-              {total} catatan
-            </span>
-          </div>
-          <AttendanceFilter />
-        </div>
-
-        <div className="w-full max-w-full overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[500px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-5 py-3">Tanggal</th>
-                <th className="px-5 py-3">Hari</th>
-                <th className="px-5 py-3">Check-in</th>
-                <th className="px-5 py-3">Check-out</th>
-                <th className="px-5 py-3">Durasi</th>
-                <th className="px-5 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {records.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center">
-                    <div className="mx-auto flex max-w-xs flex-col items-center">
-                      <CalendarCheck2 className="h-8 w-8 text-slate-300" aria-hidden="true" />
-                      <p className="mt-2 text-sm text-slate-400">
-                        Belum ada catatan kehadiran pada bulan ini.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                records.map((a) => (
-                  <tr key={a.id} className="transition-colors hover:bg-slate-50/60">
-                    <td className="px-5 py-3 font-medium text-slate-800">
-                      {utcDateString(a.date)}
-                    </td>
-                    <td className="px-5 py-3 text-slate-600">
-                      {a.date.toLocaleDateString("id-ID", { weekday: "long" })}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-slate-700">{formatWaktu(a.checkIn)}</td>
-                    <td className="px-5 py-3 font-mono text-slate-700">{formatWaktu(a.checkOut)}</td>
-                    <td className="px-5 py-3 text-slate-600">
-                      {a.checkIn && a.checkOut ? durasiLabel(a.checkIn, a.checkOut) : "-"}
-                    </td>
-                    <td className="px-5 py-3">
-                      <StatusBadge status={a.status} />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {totalPages > 1 && (
-          <div className="border-t border-slate-100 px-5 py-3">
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              basePath="/peserta/kehadiran"
-              query={`month=${encodeURIComponent(month)}`}
+        {/* Widget check-in + ringkasan bulan */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <CheckInWidget
+              today={utcDateString(today)}
+              initialState={{
+                checkedIn: !!attToday?.checkIn,
+                checkedOut: !!attToday?.checkOut,
+                checkInTime: attToday?.checkIn?.toISOString() ?? null,
+                checkOutTime: attToday?.checkOut?.toISOString() ?? null,
+              }}
             />
           </div>
-        )}
-      </section>
 
-      <div className="flex items-start gap-2 rounded-xl border border-navy-100 bg-navy-50/50 px-4 py-3 text-xs text-navy-700">
-        <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <p>
-          Presensi dilakukan satu kali per hari. Status kehadiran dapat disesuaikan oleh mentor
-          bila Anda sedang berhalangan (izin/sakit).
-        </p>
+          <div className="grid content-start gap-4">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <Flame className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                Rangkaian Hadir
+              </div>
+              <div className="mt-2 text-3xl font-bold tracking-tight text-navy-700">
+                {streak} <span className="text-sm font-medium text-slate-400">hari berturut-turut</span>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <CalendarCheck2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                Ringkasan {new Date(`${month}-01T00:00:00Z`).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+              </div>
+              <div className="mt-3 grid w-full max-w-full grid-cols-3 gap-2 text-center box-border sm:gap-4">
+                <div className="rounded-xl bg-emerald-50 py-3">
+                  <div className="text-xl font-bold text-emerald-700">{hadirCount}</div>
+                  <div className="text-[11px] font-medium text-emerald-600">Hadir</div>
+                </div>
+                <div className="rounded-xl bg-amber-50 py-3">
+                  <div className="text-xl font-bold text-amber-700">
+                    {monthSummary.find((s) => s.status === "IZIN")?._count._all ?? 0}
+                  </div>
+                  <div className="text-[11px] font-medium text-amber-600">Izin</div>
+                </div>
+                <div className="rounded-xl bg-rose-50 py-3">
+                  <div className="text-xl font-bold text-rose-700">
+                    {monthSummary.find((s) => s.status === "SAKIT")?._count._all ?? 0}
+                  </div>
+                  <div className="text-[11px] font-medium text-rose-600">Sakit</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabel riwayat (client component agar baris optimistic bisa disisipkan) */}
+        <AttendanceHistory
+          records={records}
+          total={total}
+          page={page}
+          totalPages={totalPages}
+          month={month}
+        />
+
+        <div className="flex items-start gap-2 rounded-xl border border-navy-100 bg-navy-50/50 px-4 py-3 text-xs text-navy-700">
+          <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p>
+            Presensi dilakukan satu kali per hari. Status kehadiran dapat disesuaikan oleh mentor
+            bila Anda sedang berhalangan (izin/sakit).
+          </p>
+        </div>
       </div>
-    </div>
+    </PresensiOptimisticProvider>
   );
-}
-
-function durasiLabel(checkIn: Date, checkOut: Date): string {
-  const ms = Math.max(0, checkOut.getTime() - checkIn.getTime());
-  const jam = Math.floor(ms / 3600000);
-  const menit = Math.floor((ms % 3600000) / 60000);
-  return `${jam}j ${menit}m`;
 }
 
 // Menghitung jumlah hari hadir berturut-turut berakhir hari ini/kemarin.

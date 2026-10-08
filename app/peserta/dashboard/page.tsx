@@ -17,6 +17,9 @@ import {
   Building2,
 } from "lucide-react";
 
+// Selalu render per-request: widget "Presensi Terbaru" & statistik presensi
+// harus mengambil data segar setelah check-in/out (revalidatePath + refresh
+// tidak menutup bila halaman terkunci cache statis).
 export const dynamic = "force-dynamic";
 
 const DAY_MS = 86400000;

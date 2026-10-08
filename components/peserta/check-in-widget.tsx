@@ -13,6 +13,7 @@ import {
 } from "@/lib/geo";
 import { LogIn, LogOut, Loader2, CheckCircle2, CircleAlert } from "lucide-react";
 import { revalidatePresensi } from "@/app/peserta/kehadiran/actions";
+import { usePresensiOptimistic } from "@/components/peserta/presensi-optimistic";
 
 export interface KehadiranState {
   checkedIn: boolean;
@@ -41,10 +42,14 @@ const STATUS_PILL = {
 
 export default function CheckInWidget({
   initialState,
+  today,
 }: {
   initialState: KehadiranState;
+  /** Tanggal kalender hari ini (UTC "YYYY-MM-DD") dari server — kunci baris optimistic. */
+  today: string;
 }) {
   const router = useRouter();
+  const { setPending } = usePresensiOptimistic();
   const [state, setState] = useState<KehadiranState>(initialState);
   const [loading, setLoading] = useState<"CHECK_IN" | "CHECK_OUT" | null>(null);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
@@ -75,10 +80,47 @@ export default function CheckInWidget({
     });
   }
 
+  // Optimistic: begitu tombol ditekan, widget dan tabel Riwayat Kehadiran
+  // langsung menampilkan kehadiran baru tanpa menunggu GPS/network selesai.
+  function applyOptimistic(action: "CHECK_IN" | "CHECK_OUT"): string {
+    const nowIso = new Date().toISOString();
+    if (action === "CHECK_IN") {
+      setState({
+        checkedIn: true,
+        checkedOut: false,
+        checkInTime: nowIso,
+        checkOutTime: null,
+      });
+      setPending({ action, date: today, checkIn: nowIso, checkOut: null });
+    } else {
+      setState({
+        checkedIn: true,
+        checkedOut: true,
+        checkInTime: state.checkInTime,
+        checkOutTime: nowIso,
+      });
+      setPending({
+        action,
+        date: today,
+        checkIn: state.checkInTime,
+        checkOut: nowIso,
+      });
+    }
+    return nowIso;
+  }
+
+  // Batalkan optimistic state bila validasi GPS/radius/request gagal.
+  function revertOptimistic(snapshot: KehadiranState) {
+    setState(snapshot);
+    setPending(null);
+  }
+
   async function act(action: "CHECK_IN" | "CHECK_OUT") {
     setLoading(action);
     setNotice(null);
     setLocInfo(null);
+    const snapshot = state;
+    const optimisticIso = applyOptimistic(action);
     try {
       // 1) Ambil koordinat GPS pengguna.
       let latitude: number;
@@ -102,6 +144,7 @@ export default function CheckInWidget({
             ? "Izin lokasi ditolak. Aktifkan GPS/lokasi untuk presensi."
             : "Tidak dapat memperoleh lokasi Anda. Coba lagi.",
         });
+        revertOptimistic(snapshot);
         setLoading(null);
         return;
       }
@@ -125,6 +168,7 @@ export default function CheckInWidget({
           ok: false,
           text: "Anda berada di luar radius kantor LEMIGAS.",
         });
+        revertOptimistic(snapshot);
         setLoading(null);
         return;
       }
@@ -146,28 +190,38 @@ export default function CheckInWidget({
       }));
       if (!res.ok) {
         setNotice({ ok: false, text: data.error ?? "Terjadi kesalahan." });
+        revertOptimistic(snapshot);
         setLoading(null);
         return;
       }
       setNotice({ ok: true, text: data.message ?? "Berhasil." });
+      // Konfirmasi dengan data asli server (koreksi jam klien bila meleset).
       setState(
         action === "CHECK_IN"
           ? {
               checkedIn: true,
               checkedOut: false,
-              checkInTime: data.record?.checkIn ?? null,
+              checkInTime: data.record?.checkIn ?? optimisticIso,
               checkOutTime: null,
             }
           : {
               checkedIn: true,
               checkedOut: true,
               checkInTime: state.checkInTime,
-              checkOutTime: data.record?.checkOut ?? null,
+              checkOutTime: data.record?.checkOut ?? optimisticIso,
             }
       );
-      await revalidatePresensi();
+      // Revalidate cache Next.js (/peserta/kehadiran & /peserta/dashboard).
+      // Data presensi sudah tersimpan, sehingga kegagalan revalidate tidak
+      // boleh membatalkan state optimis — biarkan tetap dan tetap refresh.
+      try {
+        await revalidatePresensi();
+      } catch {
+        // API route sudah memanggil revalidatePath() di sisi server.
+      }
       router.refresh();
     } catch {
+      revertOptimistic(snapshot);
       setNotice({ ok: false, text: "Gagal terhubung ke server. Coba lagi." });
     }
     setLoading(null);
