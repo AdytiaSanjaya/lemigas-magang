@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       email: true, // dipakai hanya untuk mencocokkan; tidak dikembalikan ke klien
       status: true,
       catatan: true,
+      loaUrl: true, // hanya untuk memeriksa keberadaan; TIDAK dikirim ke klien
       createdAt: true,
       unitMinat: { select: { nama: true } },
       statusHistories: {
@@ -53,8 +54,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Hanya kembalikan data status yang aman (tanpa email/no.HP).
-  const { email: _email, ...safeData } = pendaftar;
+  // Hanya kembalikan data status yang aman (tanpa email/no.HP/isi berkas).
+  // loaUrl (data URL PDF) tidak dikirim utuh — cukup boolean keberadaannya
+  // untuk merender tombol unduh; berkasnya diambil lewat POST /api/loa.
+  const { email: _email, loaUrl, ...safeData } = pendaftar;
   void _email;
-  return NextResponse.json({ pendaftar: safeData });
+  return NextResponse.json({
+    pendaftar: { ...safeData, loaTersedia: Boolean(loaUrl && loaUrl.trim()) },
+  });
 }

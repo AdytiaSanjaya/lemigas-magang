@@ -18,6 +18,8 @@ type StatusData = {
   createdAt: string;
   unitMinat: { nama: string };
   peserta?: { tanggalMulai: string; tanggalSelesai: string } | null;
+  // Boolean keberadaan LoA (isi berkas PDF tidak dikirim ke klien).
+  loaTersedia?: boolean;
 };
 
 export default function CekStatusPage() {
@@ -28,11 +30,47 @@ export default function CekStatusPage() {
   const [data, setData] = useState<StatusData | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [lupaKodeOpen, setLupaKodeOpen] = useState(false);
+  const [loaLoading, setLoaLoading] = useState(false);
+  const [loaError, setLoaError] = useState<string | null>(null);
+
+  // Unduh Surat Balasan (LoA): diverifikasi server dengan pasangan
+  // no. pendaftaran + email yang sedang diisi, lalu diunduh sebagai PDF.
+  async function handleUnduhLoa() {
+    if (!data) return;
+    setLoaError(null);
+    setLoaLoading(true);
+    try {
+      const res = await fetch("/api/loa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noPendaftaran: data.noPendaftaran, email }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setLoaError(body.error ?? "Gagal mengunduh Surat Balasan (LoA).");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `LoA-${data.noPendaftaran}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setLoaError("Gagal terhubung, coba lagi nanti.");
+    } finally {
+      setLoaLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
     setData(null);
+    setLoaError(null);
 
     const parsed = cekStatusSchema.safeParse({ noPendaftaran, email });
     if (!parsed.success) {
@@ -208,15 +246,32 @@ export default function CekStatusPage() {
                     </p>
                   )}
 
-                  {data.status === "DITERIMA" && (
-                    <a
-                      href="/dummy-loa.pdf"
-                      download
-                      className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0 sm:w-auto"
-                    >
-                      <Download className="h-4 w-4" aria-hidden="true" />
-                      Unduh Surat Balasan (LoA)
-                    </a>
+                  {/* Unduh LoA: hanya bila berstatus DITERIMA dan admin sudah
+                      mengunggah berkas LoA pendaftar. */}
+                  {data.status === "DITERIMA" && data.loaTersedia && (
+                    <div className="mt-6">
+                      <button
+                        type="button"
+                        onClick={handleUnduhLoa}
+                        disabled={loaLoading}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                      >
+                        {loaLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                            Menyiapkan berkas...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4" aria-hidden="true" />
+                            Unduh Surat Balasan (LoA)
+                          </>
+                        )}
+                      </button>
+                      {loaError && (
+                        <p className="mt-2 text-xs font-medium text-red-300">{loaError}</p>
+                      )}
+                    </div>
                   )}
 
                   <div className="mx-auto mt-7 h-px max-w-xs bg-white/10" aria-hidden="true" />

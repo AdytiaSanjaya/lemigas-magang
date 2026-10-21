@@ -1,6 +1,10 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import {
+  getPesertaBySession,
+  getUserIdBySession,
+  punyaSertifikatByEmail,
+} from "@/lib/peserta";
 import { todayStringWib, toUtcDate, utcDateString, businessDaysRemaining, formatWaktu } from "@/lib/dates";
 import { formatTanggal } from "@/lib/format";
 import RealtimeClock from "@/components/peserta/realtime-clock";
@@ -15,6 +19,8 @@ import {
   IdCard,
   ClipboardPenLine,
   Building2,
+  Award,
+  Download,
 } from "lucide-react";
 
 // Selalu render per-request: widget "Presensi Terbaru" & statistik presensi
@@ -77,6 +83,7 @@ export default async function PesertaDashboardPage() {
     izinPending,
     recentAttendance,
     recentIzin,
+    punyaSertifikat,
   ] = await Promise.all([
     prisma.attendance.count({ where: { userId } }).catch(() => 0),
     prisma.attendance
@@ -124,6 +131,8 @@ export default async function PesertaDashboardPage() {
         select: { id: true, type: true, startDate: true, endDate: true, reason: true, status: true },
       })
       .catch(() => []),
+    // Hanya boolean keberadaan sertifikat (berkas PDF tidak ikut dimuat).
+    punyaSertifikatByEmail(session.user.email ?? null).catch(() => false),
   ]);
 
   // Status hari ini
@@ -316,6 +325,32 @@ export default async function PesertaDashboardPage() {
           <span>Selesai: {formatTanggal(peserta.tanggalSelesai)}</span>
         </div>
       </section>
+
+      {/* Sertifikat magang: hanya dirender bila admin sudah mengunggah berkas. */}
+      {punyaSertifikat && (
+        <section className="flex flex-col gap-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <Award size={20} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">Sertifikat Magang</h2>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                Sertifikat Anda telah diterbitkan oleh admin dan siap diunduh
+                dalam format PDF.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/api/sertifikat"
+            download
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            Unduh Sertifikat
+          </a>
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Riwayat kehadiran terbaru */}

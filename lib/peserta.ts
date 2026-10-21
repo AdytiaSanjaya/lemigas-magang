@@ -49,6 +49,36 @@ export const isEmailTerdaftar = cache(async (email: string | null): Promise<bool
   }
 });
 
+// Cek apakah peserta punya sertifikat magang. Hanya mengambil boolean (id saja)
+// sehingga isi berkas (data URL PDF) yang berukuran besar tidak ikut dimuat
+// saat render halaman portal peserta.
+export const punyaSertifikatByEmail = cache(async (email: string | null): Promise<boolean> => {
+  if (!email) return false;
+  try {
+    const peserta = await prisma.peserta.findFirst({
+      where: {
+        pendaftar: { email: email.toLowerCase().trim() },
+        sertifikatUrl: { not: null },
+      },
+      select: { id: true },
+    });
+    return Boolean(peserta);
+  } catch {
+    return false;
+  }
+});
+
+// Ambil isi sertifikat (data URL) beserta nama pemilik untuk endpoint unduh
+// /api/sertifikat. Terpisah dari getPesertaByEmail agar payload halaman panel
+// tetap ringan (berkas PDF tidak ikut di-query saat render).
+export const getSertifikatByEmail = cache(async (email: string | null) => {
+  if (!email) return null;
+  return prisma.peserta.findFirst({
+    where: { pendaftar: { email: email.toLowerCase().trim() } },
+    select: { sertifikatUrl: true, pendaftar: { select: { nama: true } } },
+  });
+});
+
 // Ambil User.id ASLI dari database berdasarkan email session (NextAuth).
 // `session.user.id` untuk akun Google OAuth berisi Google `sub` (bukan primary
 // key Prisma), sehingga TIDAK boleh dipakai sebagai FK (Attendance, LeaveRequest).

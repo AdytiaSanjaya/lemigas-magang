@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, ExternalLink } from "lucide-react";
 
@@ -13,10 +13,12 @@ type PendaftarDokumen = {
   status: string;
   email: string;
   unitMinatId?: string | null;
-  cvUrl?: string | null;
-  suratPengantarUrl?: string | null;
-  ktpKtmUrl?: string | null;
-  transkripUrl?: string | null;
+  // Ketersediaan berkas (boolean — isi data URL tidak dikirim ke klien).
+  cvTersedia?: boolean;
+  suratTersedia?: boolean;
+  ktpTersedia?: boolean;
+  transkripTersedia?: boolean;
+  loaTersedia?: boolean;
 };
 
 // Definisi item dokumen yang akan ditampilkan di modal.
@@ -25,6 +27,7 @@ const DOC_ITEMS = [
   { key: "surat", label: "Surat Pengantar Sekolah/Kampus", type: "surat" },
   { key: "ktp", label: "KTP / Kartu Tanda Mahasiswa (KTM)", type: "ktp" },
   { key: "transkrip", label: "Transkrip Nilai Akademik", type: "transkrip" },
+  { key: "loa", label: "Surat Balasan (LoA)", type: "loa" },
 ] as const;
 
 export default function VerifikasiActiva({
@@ -42,34 +45,48 @@ export default function VerifikasiActiva({
   const [mulai, setMulai] = useState("");
   const [selesai, setSelesai] = useState("");
   const [mentorId, setMentorId] = useState("");
+  const [loaFile, setLoaFile] = useState<File | null>(null);
+  const loaInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // LoA wajib diunggah saat status DITERIMA / PESERTA_AKTIF — kecuali pendaftar
+  // sudah punya LoA tersimpan (re-verifikasi tidak memaksa unggah ulang).
+  const statusDiterima = status === "DITERIMA" || status === "PESERTA_AKTIF";
+  const loaWajib = statusDiterima && !pendaftar.loaTersedia;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (loaWajib && !loaFile) {
+      setError("Unggah Surat Balasan (LoA) dalam format PDF terlebih dahulu.");
+      if (loaInputRef.current) loaInputRef.current.focus();
+      return;
+    }
+
     setLoading(true);
 
-    const payload: Record<string, unknown> = {
-      pendaftarId: pendaftar.id,
-      status,
-      catatan: catatan || undefined,
-    };
+    // Kirim sebagai multipart/form-data (field teks + berkas LoA opsional).
+    const fd = new FormData();
+    fd.set("pendaftarId", pendaftar.id);
+    fd.set("status", status);
+    if (catatan) fd.set("catatan", catatan);
     if (status === "DITERIMA") {
       if (!mulai || !selesai) {
         setError("Isi tanggal mulai & selesai peserta.");
         setLoading(false);
         return;
       }
-      payload.tanggalMulai = mulai;
-      payload.tanggalSelesai = selesai;
-      payload.mentorId = mentorId || null;
+      fd.set("tanggalMulai", mulai);
+      fd.set("tanggalSelesai", selesai);
+      if (mentorId) fd.set("mentorId", mentorId);
     }
+    if (loaFile) fd.set("loa", loaFile);
 
     const res_ = await fetch("/api/verifikasi", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: fd,
     });
     const data = await res_.json();
     setLoading(false);
@@ -78,18 +95,21 @@ export default function VerifikasiActiva({
       return;
     }
     setOpen(false);
+    setLoaFile(null);
+    if (loaInputRef.current) loaInputRef.current.value = "";
     router.refresh();
   }
 
   // Cek apakah su ada file untuk tipe tertentu (ada = true, null/kosong = false).
   function hasFile(type: string): boolean {
-    const map: Record<string, string | null | undefined> = {
-      cv: pendaftar.cvUrl,
-      surat: pendaftar.suratPengantarUrl,
-      ktp: pendaftar.ktpKtmUrl,
-      transkrip: pendaftar.transkripUrl,
+    const map: Record<string, boolean | undefined> = {
+      cv: pendaftar.cvTersedia,
+      surat: pendaftar.suratTersedia,
+      ktp: pendaftar.ktpTersedia,
+      transkrip: pendaftar.transkripTersedia,
+      loa: pendaftar.loaTersedia,
     };
-    return !!map[type] && map[type]!.trim().length > 0;
+    return !!map[type];
   }
 
   return (
@@ -252,6 +272,30 @@ export default function VerifikasiActiva({
                     </select>
                   </div>
                 </>
+              )}
+
+              {statusDiterima && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Surat Balasan (LoA){" "}
+                    {loaWajib && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    ref={loaInputRef}
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={(e) => {
+                      setLoaFile(e.target.files?.[0] ?? null);
+                      setError(null);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-700"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    {pendaftar.loaTersedia
+                      ? "LoA sudah terunggah. Pilih berkas baru hanya jika ingin mengganti."
+                      : "Wajib diunggah (PDF) — pendaftar hanya dapat mengunduh LoA setelah berkas tersimpan."}
+                  </p>
+                </div>
               )}
 
               <div>

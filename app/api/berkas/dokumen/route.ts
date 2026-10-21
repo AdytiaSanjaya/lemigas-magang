@@ -9,6 +9,7 @@ const DOC_FIELDS = {
   surat: { field: "suratPengantarUrl" as const, fallback: null, label: "Surat Pengantar" },
   ktp: { field: "ktpKtmUrl" as const, fallback: null, label: "KTP/KTM" },
   transkrip: { field: "transkripUrl" as const, fallback: null, label: "Transkrip Nilai" },
+  loa: { field: "loaUrl" as const, fallback: null, label: "Surat Balasan (LoA)" },
 } as const;
 
 type DocType = keyof typeof DOC_FIELDS;
@@ -73,7 +74,7 @@ export async function GET(req: NextRequest) {
 
   if (!id || !type || !(type in DOC_FIELDS)) {
     return NextResponse.json(
-      { error: "Parameter id & type wajib diisi (type: cv|surat|ktp|transkrip)." },
+      { error: "Parameter id & type wajib diisi (type: cv|surat|ktp|transkrip|loa)." },
       { status: 400 }
     );
   }

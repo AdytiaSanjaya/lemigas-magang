@@ -111,6 +111,7 @@ model Pendaftar {
   suratPengantarUrl String? // URL berkas surat pengantar (PDF)
   ktpKtmUrl         String? // URL berkas KTP/KTM (PDF/JPG)
   transkripUrl      String? // URL berkas transkrip nilai (PDF)
+  loaUrl            String? // data URL PDF Surat Balasan (LoA) — diunggah admin saat DITERIMA
   status            StatusPendaftar @default(MENUNGGU)
   catatan           String? // catatan admin
   applicationType   String          @default("INDIVIDUAL") // "INDIVIDUAL" atau "GROUP"
@@ -158,6 +159,7 @@ model Peserta {
   mentorId       String?
   mentor         User?     @relation(fields: [mentorId], references: [id])
   catatan        String?
+  sertifikatUrl  String? // data URL PDF sertifikat magang (opsional, diunggah admin)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

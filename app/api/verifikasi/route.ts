@@ -5,9 +5,16 @@ import { auth } from "@/lib/auth";
 import { verifikasiSchema } from "@/lib/validation/verifikasi";
 import { sendStatusEmail } from "@/lib/email";
 import { sendWhatsAppNotification } from "@/lib/whatsapp";
+import { validatePdfFile } from "@/lib/security";
 
 export const runtime = "nodejs";
-export const maxDuration = 20;
+export const maxDuration = 30;
+
+// Ubah buffer PDF LoA terverifikasi menjadi data URL (storage sama dengan
+// fitur sertifikat: di database, aman untuk runtime serverless Vercel).
+function toDataUrl(mime: string, buffer: Buffer): string {
+  return `data:${mime};base64,${buffer.toString("base64")}`;
+}
 
 export async function PATCH(req: NextRequest) {
   // Hanya admin yang boleh mengubah status pendaftar.
@@ -16,15 +23,25 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  let body: unknown;
+  // Body berupa multipart/form-data: field teks biasa + berkas PDF LoA opsional.
+  let form: FormData;
   try {
-    body = await req.json();
+    form = await req.formData();
   } catch {
     return NextResponse.json({ error: "Body tidak valid." }, { status: 400 });
   }
 
+  const raw = {
+    pendaftarId: String(form.get("pendaftarId") ?? ""),
+    status: String(form.get("status") ?? ""),
+    catatan: String(form.get("catatan") ?? "") || undefined,
+    tanggalMulai: String(form.get("tanggalMulai") ?? "") || undefined,
+    tanggalSelesai: String(form.get("tanggalSelesai") ?? "") || undefined,
+    mentorId: String(form.get("mentorId") ?? "") || undefined,
+  };
+
   // Validasi Zod sebelum mengubah data.
-  const parsed = verifikasiSchema.safeParse(body);
+  const parsed = verifikasiSchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Validasi gagal.", fieldErrors: parsed.error.flatten().fieldErrors },
@@ -34,12 +51,46 @@ export async function PATCH(req: NextRequest) {
 
   const { pendaftarId, status, catatan, tanggalMulai, tanggalSelesai, mentorId } = parsed.data;
 
-  const pendaftar = await prisma.pendaftar.findUnique({
-    where: { id: pendaftarId },
-    include: { unitMinat: true },
-  });
+  const pendaftar = await prisma.pendaftar
+    .findUnique({
+      where: { id: pendaftarId },
+      select: {
+        email: true,
+        noPendaftaran: true,
+        nama: true,
+        noHp: true, // dipakai blok notifikasi WhatsApp (Fonnte) di bawah
+        unitMinatId: true,
+        loaUrl: true,
+        unitMinat: { select: { nama: true } },
+      },
+    })
+    .catch(() => null);
   if (!pendaftar) {
     return NextResponse.json({ error: "Pendaftar tidak ditemukan." }, { status: 404 });
+  }
+
+  // --- Surat Balasan (LoA) ---
+  // Wajib diunggah saat status DITERIMA (PESERTA_AKTIF bukan nilai yang
+  // diterima verifikasiSchema, jadi tidak perlu dicek di sini), kecuali
+  // pendaftar sudah punya LoA tersimpan (re-verifikasi tanpa unggah ulang).
+  const butuhLoa = status === "DITERIMA";
+  const loaFile = form.get("loa") as File | null;
+  let loaUrlBaru: string | null = null;
+
+  if (loaFile && loaFile.size > 0) {
+    const hasil = await validatePdfFile(loaFile);
+    if (!hasil.ok) {
+      return NextResponse.json(
+        { error: `Surat Balasan (LoA): ${hasil.error}` },
+        { status: 422 }
+      );
+    }
+    loaUrlBaru = toDataUrl(hasil.mime!, hasil.buffer!);
+  } else if (butuhLoa && !pendaftar.loaUrl?.trim()) {
+    return NextResponse.json(
+      { error: "Surat Balasan (LoA) wajib diunggah saat pendaftar diterima." },
+      { status: 422 }
+    );
   }
 
   // Validasi tanggal (wajib saat DITERIMA untuk pencatatan peserta).
@@ -63,6 +114,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   // Simpan perubahan status + riwayat dalam satu transaksi.
+  // LoA ikut di-commit di sini sehingga sudah tersimpan sebelum notifikasi
+  // email/WhatsApp dikirim (lihat blok Fonnte di bawah).
   await prisma.$transaction(async (tx) => {
     await tx.pendaftar.update({
       where: { id: pendaftarId },
@@ -70,6 +123,8 @@ export async function PATCH(req: NextRequest) {
         status,
         catatan: catatan ?? null,
         diprosesAdminId: session.user.id,
+        // Hanya tulis loaUrl bila ada berkas baru — jangan menimpa yang lama.
+        ...(loaUrlBaru ? { loaUrl: loaUrlBaru } : {}),
       },
     });
 
@@ -118,6 +173,9 @@ export async function PATCH(req: NextRequest) {
   });
 
   // Kirim notifikasi WhatsApp saat status DITERIMA (isolasi error).
+  // CATATAN: blok Fonnte ini sengaja diletakkan SETELAH transaksi commit di
+  // atas — pesan mengarahkan pendaftar mengunduh LoA di halaman Cek Status,
+  // jadi berkas LoA wajib sudah tersimpan di database saat pesan terkirim.
   if (status === "DITERIMA") {
     try {
       const tanggalMulaiFmt = mulai!.toLocaleDateString("id-ID", {

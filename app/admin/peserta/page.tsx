@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import Pagination from "@/components/ui/pagination";
 import PesertaActions from "@/components/admin/peserta-actions";
+import SertifikatUpload from "@/components/admin/sertifikat-upload";
 import { formatTanggal } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,15 @@ export default async function AdminPesertaPage({
     prisma.peserta
       .findMany({
         where,
-        include: {
+        // select eksplisit: kolom sertifikatUrl sengaja TIDAK diambil agar
+        // berkas PDF (data URL) tidak ikut dimuat saat render tabel.
+        select: {
+          id: true,
+          unitId: true,
+          tanggalMulai: true,
+          tanggalSelesai: true,
+          mentorId: true,
+          catatan: true,
           pendaftar: { select: { nama: true, asalInstansi: true } },
           unit: { select: { nama: true } },
           mentor: { select: { id: true, nama: true } },
@@ -42,6 +51,24 @@ export default async function AdminPesertaPage({
       .catch(() => []),
     prisma.peserta.count({ where }).catch(() => 0),
   ]);
+
+  // Kepemilikan sertifikat hanya perlu boolean (id), dibatasi ke halaman ini.
+  const sertifikatRows = items.length
+    ? await prisma.peserta
+        .findMany({
+          where: { id: { in: items.map((i) => i.id) }, sertifikatUrl: { not: null } },
+          select: { id: true },
+        })
+        .catch(() => [])
+    : [];
+  const punyaSertifikat = new Set(sertifikatRows.map((r) => r.id));
+
+  // Status masa magang: "Selesai" bila akhir hari tanggal selesai sudah lewat.
+  const isSelesai = (tanggalSelesai: Date): boolean => {
+    const batas = new Date(tanggalSelesai);
+    batas.setHours(23, 59, 59, 999);
+    return batas.getTime() <= Date.now();
+  };
 
   const units = await prisma.unit
     .findMany({ orderBy: { nama: "asc" }, select: { id: true, nama: true } })
@@ -77,7 +104,7 @@ export default async function AdminPesertaPage({
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-3">Nama</th>
@@ -86,13 +113,14 @@ export default async function AdminPesertaPage({
               <th className="px-4 py-3">Mulai</th>
               <th className="px-4 py-3">Selesai</th>
               <th className="px-4 py-3">Mentor</th>
+              <th className="px-4 py-3">Sertifikat</th>
               <th className="px-4 py-3">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-400">Belum ada peserta aktif.</td>
+                <td colSpan={8} className="px-4 py-8 text-center text-slate-400">Belum ada peserta aktif.</td>
               </tr>
             ) : (
               items.map((p) => (
@@ -103,6 +131,18 @@ export default async function AdminPesertaPage({
                   <td className="px-4 py-3 text-slate-600">{formatTanggal(p.tanggalMulai)}</td>
                   <td className="px-4 py-3 text-slate-600">{formatTanggal(p.tanggalSelesai)}</td>
                   <td className="px-4 py-3 text-slate-600">{p.mentor?.nama ?? "-"}</td>
+                  <td className="px-4 py-3">
+                    {isSelesai(p.tanggalSelesai) ? (
+                      <SertifikatUpload
+                        pesertaId={p.id}
+                        nama={p.pendaftar?.nama ?? "-"}
+                        selesai={true}
+                        sudahAda={punyaSertifikat.has(p.id)}
+                      />
+                    ) : (
+                      <span className="text-xs text-slate-400">Belum selesai</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <PesertaActions
                       peserta={{

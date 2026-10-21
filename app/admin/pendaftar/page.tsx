@@ -41,7 +41,24 @@ export default async function AdminPendaftarPage({
     prisma.pendaftar
       .findMany({
         where,
-        include: { unitMinat: { select: { id: true, nama: true } } },
+        // select eksplisit: URL berkas hanya dipakai untuk menentukan boolean
+        // ketersediaan di sisi server — isi data URL tidak dikirim ke klien.
+        select: {
+          id: true,
+          nama: true,
+          noPendaftaran: true,
+          status: true,
+          email: true,
+          asalInstansi: true,
+          unitMinatId: true,
+          createdAt: true,
+          cvUrl: true,
+          suratPengantarUrl: true,
+          ktpKtmUrl: true,
+          transkripUrl: true,
+          loaUrl: true,
+          unitMinat: { select: { id: true, nama: true } },
+        },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
@@ -142,10 +159,11 @@ export default async function AdminPendaftarPage({
                         status: p.status,
                         email: p.email,
                         unitMinatId: p.unitMinatId,
-                        cvUrl: p.cvUrl,
-                        suratPengantarUrl: p.suratPengantarUrl,
-                        ktpKtmUrl: p.ktpKtmUrl,
-                        transkripUrl: p.transkripUrl,
+                        cvTersedia: Boolean(p.cvUrl?.trim()),
+                        suratTersedia: Boolean(p.suratPengantarUrl?.trim()),
+                        ktpTersedia: Boolean(p.ktpKtmUrl?.trim()),
+                        transkripTersedia: Boolean(p.transkripUrl?.trim()),
+                        loaTersedia: Boolean(p.loaUrl?.trim()),
                       }}
                       mentors={mentors}
                     />
