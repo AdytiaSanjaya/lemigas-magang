@@ -78,6 +78,13 @@ model User {
   unitId       String?
   unit         Unit?    @relation(fields: [unitId], references: [id])
   isAktif      Boolean  @default(true)
+
+  // AUD-20: proteksi brute-force login (Credentials provider).
+  // failedAttempts = jumlah percobaan password salah berturut-turut.
+  // lockedUntil    = sampai kapan akun ditolak login (null = tidak terkunci).
+  failedAttempts Int      @default(0)
+  lockedUntil    DateTime?
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

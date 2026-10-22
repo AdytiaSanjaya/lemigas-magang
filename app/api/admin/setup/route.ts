@@ -1,43 +1,26 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
 
-const ADMIN_EMAIL = "admin@lemigas.example";
-const ADMIN_NAME = "Admin LEMIGAS";
+// AUD-28 (DITUTUP): Endpoint bootstrap/reset sandi default DINONAKTIFKAN.
+// Sebelumnya handler ini meng-upsert akun admin@lemigas.example dengan
+// DEFAULT_ADMIN_PASSWORD dari environment — sebuah "pintu belakang" yang bisa
+// mengembalikan akun admin ke kata sandi default bersama kapan pun dari internet
+// (bahkan oleh sesi admin yang dikompromikan), tanpa jejak audit.
+//
+// Kini SEMUA method (GET/POST) langsung menolak dengan 403 Forbidden.
+// Pembuatan awal akun admin hanya boleh dilakukan lewat skrip lokal/CLI yang
+// dijalankan dari terminal oleh operator, bukan lewat endpoint HTTP.
+//
+// CATATAN: jangan dipulihkan tanpa pengganti yang aman (shared secret +
+// audit log + blokir bila sudah ada ADMIN aktif).
+
+const FORBIDDEN = {
+  error: "Akses Ditolak.",
+} as const;
+
+export async function GET() {
+  return NextResponse.json(FORBIDDEN, { status: 403 });
+}
 
 export async function POST() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD;
-  if (!defaultPassword) {
-    return NextResponse.json(
-      { error: "Konfigurasi DEFAULT_ADMIN_PASSWORD belum diset di environment." },
-      { status: 500 }
-    );
-  }
-
-  const passwordHash = await bcrypt.hash(defaultPassword, 10);
-
-  await prisma.user.upsert({
-    where: { email: ADMIN_EMAIL },
-    update: {
-      nama: ADMIN_NAME,
-      passwordHash,
-      role: "ADMIN",
-      isAktif: true,
-    },
-    create: {
-      email: ADMIN_EMAIL,
-      nama: ADMIN_NAME,
-      passwordHash,
-      role: "ADMIN",
-      isAktif: true,
-    },
-  });
-
-  return NextResponse.json({ success: true, message: "Admin account ready" });
+  return NextResponse.json(FORBIDDEN, { status: 403 });
 }

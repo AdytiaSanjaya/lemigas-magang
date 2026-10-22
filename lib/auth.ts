@@ -17,6 +17,15 @@ const useGoogleAuth = Boolean(
 
 export const isGoogleAuthEnabled = useGoogleAuth;
 
+// AUD-20: proteksi brute-force untuk login kredensial (Admin/Mentor).
+// Setelah LOGIN_MAX_FAILED percobaan password salah berturut-turut, akun
+// dikunci selama LOGIN_LOCKOUT_MS dan semua percobaan (termasuk password yang
+// benar) ditolak sampai masa kunci berakhir.
+const LOGIN_MAX_FAILED = 5;
+const LOGIN_LOCKOUT_MS = 15 * 60_000; // 15 menit
+const LOGIN_LOCKED_MESSAGE =
+  "Akun terkunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam 15 menit.";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET,
@@ -46,8 +55,57 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !user.isAktif) return null;
 
+        // AUD-20 — Cek kunci akun SEBELUM verifikasi password.
+        // Bila masih dalam masa kunci, tolak login (gagal-tertutup). NextAuth
+        // tetap mengembalikan error kredensial standar ke klien; pesan lengkap
+        // dicatat di log server agar tidak membocorkan status akun (enumerasi).
+        const lockedUntil = user.lockedUntil ?? null;
+        if (lockedUntil && lockedUntil.getTime() > Date.now()) {
+          console.warn(
+            `[auth] Login ditolak — ${LOGIN_LOCKED_MESSAGE} (akun=${user.email}, sampai=${lockedUntil.toISOString()})`
+          );
+          return null;
+        }
+
         const valid = await bcrypt.compare(password, user.passwordHash);
-        if (!valid) return null;
+        if (!valid) {
+          // AUD-20 — Password salah: naikkan penghitung kegagalan dan kunci
+          // akun bila mencapai 5 kali. Pembukuan dibungkus try/catch agar
+          // kegagalan tulis DB tidak pernah menjatuhkan/mengubah alur login.
+          try {
+            const updated = await prisma.user.update({
+              where: { id: user.id },
+              data: { failedAttempts: { increment: 1 } },
+              select: { failedAttempts: true },
+            });
+            if (updated.failedAttempts >= LOGIN_MAX_FAILED) {
+              const until = new Date(Date.now() + LOGIN_LOCKOUT_MS);
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { lockedUntil: until },
+              });
+              console.warn(
+                `[auth] Akun dikunci sementara — ${LOGIN_LOCKED_MESSAGE} (akun=${user.email}, sampai=${until.toISOString()})`
+              );
+            }
+          } catch {
+            // abaikan: percobaan tetap ditolak tanpa efek samping
+          }
+          return null;
+        }
+
+        // AUD-20 — Password benar: reset penghitung & buka kunci akun.
+        try {
+          if ((user.failedAttempts ?? 0) > 0 || user.lockedUntil) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { failedAttempts: 0, lockedUntil: null },
+            });
+          }
+        } catch {
+          // abaikan: login tetap diizinkan (kunci akan dibersihkan pada
+          // percobaan sukses berikutnya bila tulis ini gagal sementara).
+        }
 
         return {
           id: user.id,

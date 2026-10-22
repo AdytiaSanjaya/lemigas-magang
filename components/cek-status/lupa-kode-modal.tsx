@@ -1,25 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Mail, Loader2, KeyRound, Copy, Check, Search } from "lucide-react";
+import { X, Mail, Loader2, Search, CheckCircle2 } from "lucide-react";
 import { lupaKodeSchema } from "@/lib/validation/cek-status";
-import StatusBadge from "@/components/ui/status-badge";
-
-type LupaKodeResult = {
-  noPendaftaran: string;
-  nama: string;
-  status: string;
-  createdAt: string;
-  unitMinat: { nama: string } | null;
-};
 
 export default function LupaKodeModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [results, setResults] = useState<LupaKodeResult[] | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
+  // Pesan generik sukses dari backend (tanpa daftar noPendaftaran — AUD-22).
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Fokus ke input saat modal terbuka + tutup dengan tombol Escape.
@@ -45,8 +36,7 @@ export default function LupaKodeModal({ onClose }: { onClose: () => void }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
-    setResults(null);
-    setCopied(null);
+    setSuccessMessage(null);
 
     const parsed = lupaKodeSchema.safeParse({ email });
     if (!parsed.success) {
@@ -62,26 +52,25 @@ export default function LupaKodeModal({ onClose }: { onClose: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const body = await res.json();
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        message?: string;
+        success?: boolean;
+      };
       if (!res.ok) {
         setFormError(body.error ?? "Terjadi kesalahan.");
         return;
       }
-      setResults(body.pendaftar as LupaKodeResult[]);
+      // Respons sukses kini hanya berisi pesan generik (tanpa daftar data),
+      // sehingga tidak ada lagi looping/pembacaan array dari server.
+      setSuccessMessage(
+        body.message ??
+          "Permintaan diproses. Jika email terdaftar, informasi akan dikirimkan secara internal."
+      );
     } catch {
       setFormError("Gagal terhubung ke server. Coba lagi nanti.");
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function copyCode(code: string) {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(code);
-      setTimeout(() => setCopied(null), 1500);
-    } catch {
-      // clipboard tidak tersedia — biarkan pengguna menyalin manual
     }
   }
 
@@ -124,100 +113,80 @@ export default function LupaKodeModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="px-6 py-5">
-          <form onSubmit={handleSubmit} noValidate>
-            {formError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {formError}
+          {successMessage ? (
+            /* Status sukses: backend hanya mengirim pesan generik — tidak ada
+               lagi daftar noPendaftaran yang dirender di sisi klien (AUD-22). */
+            <div className="text-center" role="status" aria-live="polite">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                <CheckCircle2 className="h-6 w-6 text-emerald-600" aria-hidden="true" />
               </div>
-            )}
 
-            <label className="block text-sm font-medium text-zinc-700">
-              Email Pendaftaran
-              <span className="relative mt-1.5 block">
-                <Mail
-                  className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-zinc-400"
-                  aria-hidden="true"
-                />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setErrors((p) => ({ ...p, email: undefined }));
-                  }}
-                  placeholder="nama@email.com"
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-3.5 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 transition outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                />
-              </span>
-            </label>
-            {errors.email && <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>}
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm font-semibold leading-relaxed text-emerald-700">
+                {successMessage}
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Mencari...
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4" aria-hidden="true" />
-                  Cari Kode
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Hasil pencarian */}
-          {results && (
-            <div className="mt-5 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                {results.length} pendaftaran ditemukan
+              <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+                Untuk mengecek status pendaftaran Anda, silakan gunakan menu{" "}
+                <span className="font-medium text-zinc-700">Cek Status</span> dengan
+                nomor pendaftaran yang Anda simpan.
               </p>
-              {results.map((r) => (
-                <div
-                  key={r.noPendaftaran}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50/60 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <KeyRound className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
-                      <span className="truncate font-mono text-sm font-semibold text-zinc-900">
-                        {r.noPendaftaran}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                      <span className="truncate">{r.nama}</span>
-                      <span className="h-1 w-1 rounded-full bg-zinc-300" aria-hidden="true" />
-                      <span className="truncate">{r.unitMinat?.nama ?? "-"}</span>
-                    </div>
-                    <div className="mt-1.5">
-                      <StatusBadge status={r.status} />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => copyCode(r.noPendaftaran)}
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ${
-                      copied === r.noPendaftaran
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-                        : "border-zinc-200 bg-white text-zinc-500 hover:border-blue-300 hover:text-blue-600"
-                    }`}
-                    aria-label={`Salin kode ${r.noPendaftaran}`}
-                    title="Salin kode"
-                  >
-                    {copied === r.noPendaftaran ? (
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <Copy className="h-4 w-4" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              ))}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-zinc-700 active:scale-[0.99]"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                Tutup
+              </button>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate>
+              {formError && (
+                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {formError}
+                </div>
+              )}
+
+              <label className="block text-sm font-medium text-zinc-700">
+                Email Pendaftaran
+                <span className="relative mt-1.5 block">
+                  <Mail
+                    className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-zinc-400"
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setErrors((p) => ({ ...p, email: undefined }));
+                    }}
+                    placeholder="nama@email.com"
+                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-3.5 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 transition outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </span>
+              </label>
+              {errors.email && <p className="mt-1.5 text-xs text-red-600">{errors.email}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-blue-700 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4" aria-hidden="true" />
+                    Kirim Permintaan
+                  </>
+                )}
+              </button>
+            </form>
           )}
         </div>
       </div>
