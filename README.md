@@ -13,7 +13,7 @@ Sistem Pendaftaran & Manajemen Data Peserta Magang/PKL untuk **Balai Besar Pengu
 
 ## Fitur
 
-1. **Pendaftaran Online** — form pendaftar + upload CV/surat (PDF asli, maks 2MB, verifikasi magic bytes).
+1. **Pendaftaran Online** — form pendaftar + upload CV/surat (PDF asli, maks 1.5MB, verifikasi magic bytes).
 2. **Autentikasi & Hak Akses** — login Admin/Mentor, guard route via middleware + server.
 3. **Verifikasi & Seleksi** — admin mengubah status (Menunggu/Diterima/Ditolak) + catatan.
 4. **Notifikasi & Cek Status** — pendaftar mengecek status via nomor pendaftaran + email; email otomatis saat status berubah.
@@ -27,7 +27,7 @@ Sistem Pendaftaran & Manajemen Data Peserta Magang/PKL untuk **Balai Besar Pengu
 - Prisma Query API (bukan raw SQL) → anti SQL Injection.
 - Rate limiting (5 request/menit/IP) pada login, pendaftaran, dan cek-status.
 - Security headers (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, dsb.) & CSRF origin-check di middleware.
-- Upload PDF diverifikasi dari isi file (magic bytes), ukuran maks 2MB.
+- Upload PDF diverifikasi dari isi file (magic bytes), ukuran maks 1.5MB (ditolak dengan 400 bila lebih).
 - RBAC: halaman `/admin` dan `/mentor` dilindungi role; data sensitif tidak diekspos di halaman publik.
 
 ## Kebutuhan

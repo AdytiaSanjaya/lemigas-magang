@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { validatePdfFile } from "@/lib/security";
+import { checkDocumentSize, validatePdfFile } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -50,7 +50,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 3) Validasi isi file: wajib PDF sungguhan (magic bytes), dibatasi ukuran.
+  // 3) AUD-09: tolak berkas > 1.5MB SEBELUM dibaca/dikonversi ke buffer
+  //    Base64, lalu validasi isi file: wajib PDF sungguhan (magic bytes).
+  const sizeCheck = checkDocumentSize(file);
+  if (!sizeCheck.ok) {
+    return NextResponse.json({ error: sizeCheck.error }, { status: 400 });
+  }
   const result = await validatePdfFile(file);
   if (!result.ok) {
     return NextResponse.json({ error: `Sertifikat: ${result.error}` }, { status: 422 });

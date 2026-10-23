@@ -5,13 +5,13 @@ import { auth } from "@/lib/auth";
 import { izinSchema } from "@/lib/validation/presensi";
 import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
 import { toUtcDate } from "@/lib/dates";
-import { validateUploadFile } from "@/lib/security";
+import { checkDocumentSize, validateUploadFile } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 // Pengajuan izin / sakit peserta. Menggunakan multipart form agar dapat
-// melampirkan bukti pendukung (PDF/JPG, opsional, maks. 2MB).
+// melampirkan bukti pendukung (PDF/JPG, opsional, maks. 1.5MB).
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user || session.user.role !== "PENDAFTAR") {
@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Cegah tumpang-tindih dengan pengajuan yang masih aktif.
+  // AUD-14: cukup id — kolom attachmentUrl (data URL Base64) tidak dimuat.
   const overlap = await prisma.leaveRequest.findFirst({
     where: {
       userId,
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
       startDate: { lte: endDate },
       endDate: { gte: startDate },
     },
+    select: { id: true },
   });
   if (overlap) {
     return NextResponse.json(
@@ -88,6 +90,11 @@ export async function POST(req: NextRequest) {
   const attachment = form.get("attachment") as File | null;
   let attachmentUrl: string | null = null;
   if (attachment && attachment.size > 0) {
+    // AUD-09: tolak lampiran kebesaran SEBELUM dibaca/dikonversi ke buffer Base64.
+    const sizeCheck = checkDocumentSize(attachment);
+    if (!sizeCheck.ok) {
+      return NextResponse.json({ error: sizeCheck.error }, { status: 400 });
+    }
     const result = await validateUploadFile(attachment, ["application/pdf", "image/jpeg"]);
     if (!result.ok) {
       return NextResponse.json({ error: `Lampiran: ${result.error}` }, { status: 422 });

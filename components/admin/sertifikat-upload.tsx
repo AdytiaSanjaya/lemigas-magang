@@ -97,7 +97,7 @@ export default function SertifikatUpload({ pesertaId, nama, selesai, sudahAda }:
             </h3>
             <p className="mt-1 text-xs text-slate-500">
               Masa magang sudah selesai. Berkas wajib berupa PDF (ukuran maksimal
-              mengikuti konfigurasi server, default 2MB).
+              1.5MB).
             </p>
 
             {error && (

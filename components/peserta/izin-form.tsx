@@ -58,8 +58,8 @@ export default function IzinForm() {
       setNotice({ ok: false, text: "Lampiran hanya PDF atau JPG." });
       return;
     }
-    if (f.size > 2_000_000) {
-      setNotice({ ok: false, text: "Ukuran lampiran maksimal 2MB." });
+    if (f.size > 1_500_000) {
+      setNotice({ ok: false, text: "Ukuran lampiran maksimal 1.5MB." });
       return;
     }
     setNotice(null);
@@ -243,7 +243,7 @@ export default function IzinForm() {
       <div className="mt-6">
         <span className="text-sm font-medium text-slate-700">
           Lampiran Bukti{" "}
-          <span className="font-normal text-slate-400">(opsional, PDF/JPG maks. 2MB)</span>
+          <span className="font-normal text-slate-400">(opsional, PDF/JPG maks. 1.5MB)</span>
         </span>
 
         {file ? (

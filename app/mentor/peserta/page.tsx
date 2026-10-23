@@ -37,7 +37,12 @@ export default async function MentorPesertaPage() {
   const peserta = await prisma.peserta
     .findMany({
       where: { mentorId: session.user.id },
-      include: {
+      // AUD-14: select eksplisit — kolom sertifikatUrl (data URL PDF Base64)
+      // tidak ikut diambil sehingga render tabel mentor tetap ringan.
+      select: {
+        id: true,
+        tanggalMulai: true,
+        tanggalSelesai: true,
         pendaftar: {
           select: {
             nama: true,

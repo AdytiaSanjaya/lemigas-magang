@@ -93,7 +93,16 @@ export async function GET(req: NextRequest) {
   const [items, total] = await Promise.all([
     prisma.peserta.findMany({
       where,
-      include: {
+      // AUD-14: select eksplisit — kolom sertifikatUrl (data URL PDF Base64)
+      // sengaja tidak diambil agar tidak ikut dimuat ke memori & respons.
+      select: {
+        id: true,
+        unitId: true,
+        mentorId: true,
+        tanggalMulai: true,
+        tanggalSelesai: true,
+        catatan: true,
+        createdAt: true,
         pendaftar: { select: { nama: true, asalInstansi: true, email: true } },
         unit: { select: { nama: true } },
         mentor: { select: { id: true, nama: true } },
@@ -128,7 +137,11 @@ export async function DELETE(req: NextRequest) {
 
   try {
     await prisma.$transaction(async (tx) => {
-      const peserta = await tx.peserta.findUnique({ where: { id: pesertaId } });
+      // AUD-14: select minimal — kolom sertifikatUrl (data URL Base64) tidak dimuat.
+      const peserta = await tx.peserta.findUnique({
+        where: { id: pesertaId },
+        select: { id: true, pendaftarId: true },
+      });
       if (!peserta) {
         throw new Error("PESERTA_NOT_FOUND");
       }

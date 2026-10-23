@@ -26,13 +26,15 @@ export async function POST(req: NextRequest) {
 
   const pendaftar = await prisma.pendaftar.findUnique({
     where: { noPendaftaran: noPendaftaran.trim().toUpperCase() },
+    // AUD-14: loaUrl (data URL PDF Base64) TIDAK ikut di-select — keberadaannya
+    // cukup dicek lewat query terpisah yang hanya mengembalikan id (lihat bawah).
     select: {
+      id: true,
       noPendaftaran: true,
       nama: true,
       email: true, // dipakai hanya untuk mencocokkan; tidak dikembalikan ke klien
       status: true,
       catatan: true,
-      loaUrl: true, // hanya untuk memeriksa keberadaan; TIDAK dikirim ke klien
       createdAt: true,
       unitMinat: { select: { nama: true } },
       statusHistories: {
@@ -54,12 +56,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Keberadaan LoA: cukup boolean (query id saja) — isi berkas tidak dimuat.
+  const loaTersedia = await prisma.pendaftar
+    .findFirst({
+      where: { id: pendaftar.id, NOT: { OR: [{ loaUrl: null }, { loaUrl: "" }] } },
+      select: { id: true },
+    })
+    .catch(() => null);
+
   // Hanya kembalikan data status yang aman (tanpa email/no.HP/isi berkas).
-  // loaUrl (data URL PDF) tidak dikirim utuh — cukup boolean keberadaannya
-  // untuk merender tombol unduh; berkasnya diambil lewat POST /api/loa.
-  const { email: _email, loaUrl, ...safeData } = pendaftar;
+  // loaUrl tidak dikirim utuh — cukup boolean keberadaannya untuk merender
+  // tombol unduh; berkasnya diambil lewat POST /api/loa.
+  const { email: _email, id: _id, ...safeData } = pendaftar;
   void _email;
+  void _id;
   return NextResponse.json({
-    pendaftar: { ...safeData, loaTersedia: Boolean(loaUrl && loaUrl.trim()) },
+    pendaftar: { ...safeData, loaTersedia: Boolean(loaTersedia) },
   });
 }

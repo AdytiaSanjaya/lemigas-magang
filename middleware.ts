@@ -13,21 +13,40 @@ export const config = {
   ],
 };
 
-// Security headers yang diterapkan ke semua respon (PWA/OWASP).
-const securityHeaders = {
+// Security headers yang diterapkan ke semua respon (PWA/OWASP) — AUD-27.
+const isDev = process.env.NODE_ENV === "development";
+
+const securityHeaders: Record<string, string> = {
+  // AUD-27: `https:` DIHAPUS dari script-src — semua aset skrip dihasilkan
+  // sendiri oleh Next.js ('self'), sehingga skrip dari origin HTTPS asing
+  // tidak lagi boleh dieksekusi. 'unsafe-inline' masih dipertahankan karena
+  // App Router merender payload/hydration lewat <script> inline (migrasi ke
+  // nonce/hash adalah peningkatan lanjutan).
   "Content-Security-Policy": [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https:", // Tailwind/Next injects some inline scripts
+    "script-src 'self' 'unsafe-inline'",
+    // 'unsafe-inline' dibutuhkan atribut style (recharts, utilitas inline).
     "style-src 'self' 'unsafe-inline'",
+    // Gambar: aset lokal + data URL (dokumen base64) + blob (pratinjau berkas).
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    // Hanya XHR/fetch ke origin sendiri. Di development ditambah ws:/wss:
+    // agar Hot Module Replacement (Turbopack) tidak diblokir.
+    `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
     "frame-ancestors 'none'",
+    // Naikkan request http → https di produksi (localhost bersifat
+    // "potentially trustworthy" sehingga aman untuk development).
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; "),
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",
+  // Nilai dipertahankan >= permintaan audit (31536000) + preload; guardrail
+  // melarang penurunan kekuatan header keamanan.
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
 };
 
@@ -35,14 +54,18 @@ function isStateChanging(method: string): boolean {
   return ["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase());
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const response = NextResponse.next();
-
-  // Terapkan security headers pada semua response.
+// Semua response (baik halaman/API yang dilanjutkan maupun error CSRF) wajib
+// membawa security headers — termasuk response error agar tidak "telanjang".
+function denganSecurityHeaders(response: NextResponse): NextResponse {
   Object.entries(securityHeaders).forEach(([header, value]) => {
     response.headers.set(header, value);
   });
+  return response;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const response = denganSecurityHeaders(NextResponse.next());
 
   // Middleware HANYA menangani rute API internal (kecuali /api/auth yang
   // dikelola NextAuth sendiri). Semua rute halaman (/login, /admin/*,
@@ -62,13 +85,14 @@ export async function middleware(request: NextRequest) {
       try {
         const originUrl = new URL(origin);
         if (originUrl.host !== host) {
-          return NextResponse.json(
-            { error: "Cross-site request ditolak." },
-            { status: 403 }
+          return denganSecurityHeaders(
+            NextResponse.json({ error: "Cross-site request ditolak." }, { status: 403 })
           );
         }
       } catch {
-        return NextResponse.json({ error: "Origin tidak valid." }, { status: 403 });
+        return denganSecurityHeaders(
+          NextResponse.json({ error: "Origin tidak valid." }, { status: 403 })
+        );
       }
     }
   }

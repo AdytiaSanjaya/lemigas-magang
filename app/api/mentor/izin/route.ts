@@ -29,8 +29,10 @@ export async function PATCH(req: NextRequest) {
     );
   }
 
+  // AUD-14: select minimal — kolom attachmentUrl (data URL Base64) tidak dimuat.
   const izin = await prisma.leaveRequest.findUnique({
     where: { id: parsed.data.izinId },
+    select: { id: true, status: true, userId: true },
   });
   if (!izin) {
     return NextResponse.json({ error: "Pengajuan tidak ditemukan." }, { status: 404 });

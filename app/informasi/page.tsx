@@ -340,7 +340,7 @@ export default async function InformasiPage() {
             </ul>
 
             <p className="mt-5 rounded-xl border border-sky-100 bg-sky-50/60 px-4 py-3 text-xs leading-5 text-sky-800">
-              Dokumen diunggah melalui formulir pendaftaran daring (maks. 2MB
+              Dokumen diunggah melalui formulir pendaftaran daring (maks. 1.5MB
               per berkas). Surat Pengantar dan CV merupakan berkas wajib unggah;
               dokumen lainnya melengkapi proses verifikasi dan seleksi.
             </p>

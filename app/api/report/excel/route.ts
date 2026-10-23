@@ -33,7 +33,16 @@ export async function GET(req: NextRequest) {
   try {
     const data = await prisma.pendaftar.findMany({
       where,
-      include: { unitMinat: { select: { nama: true } } },
+      // AUD-14: select eksplisit — kolom berkas (cvUrl, ktpKtmUrl, transkripUrl,
+      // loaUrl, berkasCV) yang berisi data URL Base64 TIDAK ikut dimuat ke RAM.
+      select: {
+        noPendaftaran: true,
+        nama: true,
+        asalInstansi: true,
+        status: true,
+        createdAt: true,
+        unitMinat: { select: { nama: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: 5000,
     });

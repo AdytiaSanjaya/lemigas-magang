@@ -128,7 +128,7 @@ export default async function DaftarPage() {
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">
             Isi data dengan benar. CV wajib dalam format PDF; surat pengantar
             (PDF), KTP/KTM (PDF/JPG), dan transkrip nilai (PDF) bersifat opsional
-            (maks. 2MB per berkas).
+            (maks. 1.5MB per berkas).
           </p>
         </div>
 

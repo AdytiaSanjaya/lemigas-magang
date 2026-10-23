@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { verifikasiSchema } from "@/lib/validation/verifikasi";
 import { sendStatusEmail } from "@/lib/email";
 import { sendWhatsAppNotification } from "@/lib/whatsapp";
-import { validatePdfFile } from "@/lib/security";
+import { checkDocumentSize, validatePdfFile } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -54,13 +54,14 @@ export async function PATCH(req: NextRequest) {
   const pendaftar = await prisma.pendaftar
     .findUnique({
       where: { id: pendaftarId },
+      // AUD-14: loaUrl (data URL PDF Base64) tidak ikut di-select — cukup
+      // dicek keberadaannya lewat query kecil di blok Surat Balasan (LoA).
       select: {
         email: true,
         noPendaftaran: true,
         nama: true,
         noHp: true, // dipakai blok notifikasi WhatsApp (Fonnte) di bawah
         unitMinatId: true,
-        loaUrl: true,
         unitMinat: { select: { nama: true } },
       },
     })
@@ -78,6 +79,11 @@ export async function PATCH(req: NextRequest) {
   let loaUrlBaru: string | null = null;
 
   if (loaFile && loaFile.size > 0) {
+    // AUD-09: tolak berkas kebesaran SEBELUM dibaca/dikonversi ke buffer Base64.
+    const sizeCheck = checkDocumentSize(loaFile);
+    if (!sizeCheck.ok) {
+      return NextResponse.json({ error: sizeCheck.error }, { status: 400 });
+    }
     const hasil = await validatePdfFile(loaFile);
     if (!hasil.ok) {
       return NextResponse.json(
@@ -86,11 +92,20 @@ export async function PATCH(req: NextRequest) {
       );
     }
     loaUrlBaru = toDataUrl(hasil.mime!, hasil.buffer!);
-  } else if (butuhLoa && !pendaftar.loaUrl?.trim()) {
-    return NextResponse.json(
-      { error: "Surat Balasan (LoA) wajib diunggah saat pendaftar diterima." },
-      { status: 422 }
-    );
+  } else if (butuhLoa) {
+    // Cek keberadaan LoA lama: query id saja, tanpa memuat isi data URL Base64.
+    const loaTersedia = await prisma.pendaftar
+      .findFirst({
+        where: { id: pendaftarId, NOT: { OR: [{ loaUrl: null }, { loaUrl: "" }] } },
+        select: { id: true },
+      })
+      .catch(() => null);
+    if (!loaTersedia) {
+      return NextResponse.json(
+        { error: "Surat Balasan (LoA) wajib diunggah saat pendaftar diterima." },
+        { status: 422 }
+      );
+    }
   }
 
   // Validasi tanggal (wajib saat DITERIMA untuk pencatatan peserta).
@@ -138,7 +153,11 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (status === "DITERIMA") {
-      const existing = await tx.peserta.findUnique({ where: { pendaftarId } });
+      // AUD-14: cukup id saja — kolom sertifikatUrl (data URL Base64) tidak dimuat.
+      const existing = await tx.peserta.findUnique({
+        where: { pendaftarId },
+        select: { id: true },
+      });
       if (existing) {
         await tx.peserta.update({
           where: { pendaftarId },

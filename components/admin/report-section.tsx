@@ -166,9 +166,13 @@ export default function ReportSection({ units }: { units: Unit[] }) {
         <div className="relative">
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <div className={chartCardClass}>
-              <h3 className="mb-4 text-sm font-semibold text-slate-700">
-                Pendaftar per Bulan (6 bln)
+              <h3 className="mb-1.5 text-sm font-semibold text-slate-700">
+                Pendaftar per Bulan (status terkini)
               </h3>
+              <p className="mb-4 text-xs text-slate-400">
+                Dikelompokkan per bulan pendaftaran (createdAt); seri &ldquo;Peserta Aktif&rdquo;
+                merupakan bagian dari &ldquo;Diterima&rdquo; — sama seperti kartu ringkasan.
+              </p>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={stats.perBulan}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -198,7 +202,11 @@ export default function ReportSection({ units }: { units: Unit[] }) {
             </div>
 
             <div className={chartCardClass}>
-              <h3 className="mb-4 text-sm font-semibold text-slate-700">Status Pendaftaran</h3>
+              <h3 className="mb-1.5 text-sm font-semibold text-slate-700">Status Pendaftaran</h3>
+              <p className="mb-4 text-xs text-slate-400">
+                Persis seperti kartu ringkasan; &ldquo;Peserta Aktif&rdquo; tidak mengurangi jumlah
+                &ldquo;Diterima&rdquo;.
+              </p>
               <div className="flex h-[260px] items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

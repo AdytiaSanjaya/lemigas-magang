@@ -5,6 +5,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadDir } from "@/lib/security";
+import { authorizeBerkasAccess } from "@/lib/berkas-access";
 
 // PDF fallback yang dirender di browser ketika CV tidak tersedia, sehingga
 // admin tetap mendapat tampilan PDF (bukan error 400 "nama berkas tidak valid").
@@ -47,6 +48,8 @@ function pdfResponse(data: Buffer): NextResponse {
 // Data diambil dari database (data URL) untuk pendaftar baru, atau dari
 // filesystem untuk rekaman lama. Bila CV tidak tersedia/tidak valid, ditampilkan
 // PDF default "Berkas CV tidak ditemukan." — bukan error nama berkas.
+// AUD-01/AUD-02: akses dibatasi — ADMIN bebas; pemilik (email cocok) hanya untuk
+// CV miliknya sendiri; MENTOR hanya CV milik peserta bimbingannya (403 bila tidak).
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
@@ -59,23 +62,30 @@ export async function GET(req: NextRequest) {
   }
 
   let source: string | null = null;
-  let pendaftarEmail: string | null = null;
+  let ownerEmail: string | null = null;
+  let mentorId: string | null = null;
   try {
     const pendaftar = await prisma.pendaftar.findUnique({
       where: { id },
-      select: { berkasCV: true, cvUrl: true, email: true },
+      select: {
+        berkasCV: true,
+        cvUrl: true,
+        email: true,
+        peserta: { select: { mentorId: true } },
+      },
     });
     source = pendaftar?.cvUrl ?? pendaftar?.berkasCV ?? null;
-    pendaftarEmail = pendaftar?.email ?? null;
+    ownerEmail = pendaftar?.email ?? null;
+    mentorId = pendaftar?.peserta?.mentorId ?? null;
   } catch {
     source = null;
   }
 
-  const userRole = session.user.role as string;
-  const isOwner = pendaftarEmail && session.user.email === pendaftarEmail;
-  const isPrivileged = userRole === "ADMIN" || userRole === "MENTOR";
-  if (!isOwner && !isPrivileged) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // AUD-01/AUD-02: verifikasi kepemilikan (owner-by-email) dan cakupan mentor
+  // (hanya cv milik peserta bimbingannya). Fail-closed → 403.
+  const akses = authorizeBerkasAccess({ session, ownerEmail, mentorId, tipe: "cv" });
+  if (!akses.ok) {
+    return NextResponse.json({ error: akses.error }, { status: akses.status });
   }
 
   // Fallback: CV tidak tersedia di database.

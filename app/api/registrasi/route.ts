@@ -3,26 +3,13 @@ import { auth, ROLE_PENDAFTAR } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { pendaftarSchema } from "@/lib/validation/pendaftar";
 import { rateLimiter, getClientIp } from "@/lib/rate-limit";
-import { validateUploadFile } from "@/lib/security";
+import { checkDocumentSize, validateUploadFile } from "@/lib/security";
+import { generateNoPendaftaran } from "@/lib/no-pendaftaran";
 
 // Ubah buffer terverifikasi menjadi data URL (mis. "data:application/pdf;base64,...")
 // agar berkas tersimpan di database tanpa bergantung pada filesystem serverless.
 function toDataUrl(mime: string, buffer: Buffer): string {
   return `data:${mime};base64,${buffer.toString("base64")}`;
-}
-
-// Generator nomor pendaftaran: LEMIGAS-<Tahun>-<urutan>
-async function generateNoPendaftaran(): Promise<string> {
-  const year = new Date().getFullYear();
-  const count = await prisma.pendaftar.count();
-  const seq = (count + 1).toString().padStart(4, "0");
-  let candidate = `LEMIGAS-${year}-${seq}`;
-  // Pastikan unik (perlindungan jika ada penghapusan data di tengah urutan).
-  while (await prisma.pendaftar.findUnique({ where: { noPendaftaran: candidate } })) {
-    const next = Math.floor(Math.random() * 9000) + 1000;
-    candidate = `LEMIGAS-${year}-${next}`;
-  }
-  return candidate;
 }
 
 export async function POST(req: NextRequest) {
@@ -106,6 +93,11 @@ export async function POST(req: NextRequest) {
   if (!cv || cv.size === 0) {
     return NextResponse.json({ error: "CV (PDF) wajib diunggah." }, { status: 422 });
   }
+  // AUD-09: tolak berkas > 1.5MB SEBELUM dibaca/dikonversi ke buffer Base64.
+  const cvSize = checkDocumentSize(cv);
+  if (!cvSize.ok) {
+    return NextResponse.json({ error: cvSize.error }, { status: 400 });
+  }
   const cvResult = await validateUploadFile(cv, ["application/pdf"]);
   if (!cvResult.ok) {
     return NextResponse.json({ error: `CV: ${cvResult.error}` }, { status: 422 });
@@ -125,6 +117,11 @@ export async function POST(req: NextRequest) {
   for (const spec of uploadSpecs) {
     const file = spec.file;
     if (!file || file.size === 0) continue;
+    // AUD-09: tolak berkas > 1.5MB SEBELUM dibaca/dikonversi ke buffer Base64.
+    const sizeCheck = checkDocumentSize(file);
+    if (!sizeCheck.ok) {
+      return NextResponse.json({ error: sizeCheck.error }, { status: 400 });
+    }
     const result = await validateUploadFile(file, spec.allowed);
     if (!result.ok) {
       return NextResponse.json(
@@ -135,34 +132,65 @@ export async function POST(req: NextRequest) {
     saved.set(spec.key, toDataUrl(result.mime!, result.buffer!));
   }
 
-  // 8) Simpan data pendaftar dalam transaksi (beserta riwayat status awal).
-  const noPendaftaran = await generateNoPendaftaran();
-  const pendaftar = await prisma.$transaction(async (tx) => {
-    const created = await tx.pendaftar.create({
-      data: {
-        noPendaftaran,
-        nama: parsed.data.nama,
-        asalInstansi: parsed.data.asalInstansi,
-        jurusan: parsed.data.jurusan || null,
-        jenisKelamin: (parsed.data.jenisKelamin as "L" | "P" | null) ?? null,
-        noHp: parsed.data.noHp,
-        email: parsed.data.email.toLowerCase().trim(),
-        unitMinatId: parsed.data.unitMinatId,
-        berkasCV: cvDataUrl,
-        berkasSurat: saved.get("suratPengantarUrl") ?? null,
-        cvUrl: cvDataUrl,
-        suratPengantarUrl: saved.get("suratPengantarUrl") ?? null,
-        ktpKtmUrl: saved.get("ktpKtmUrl") ?? null,
-        transkripUrl: saved.get("transkripUrl") ?? null,
-        status: "MENUNGGU",
-        applicationType: "INDIVIDUAL",
-      },
+  // 8) AUD-23: noPendaftaran kini ACAK — MAG-<YYMM>-<4 karakter acak> dengan
+  // collision check ke database (lihat lib/no-pendaftaran.ts). Kegagalan
+  // generator yang terkontrol dipetakan ke 503, bukan error 500.
+  let noPendaftaran: string;
+  try {
+    noPendaftaran = await generateNoPendaftaran();
+  } catch {
+    return NextResponse.json(
+      { error: "Gagal membuat nomor pendaftaran. Silakan coba lagi." },
+      { status: 503 }
+    );
+  }
+
+  // Simpan data pendaftar dalam transaksi (beserta riwayat status awal).
+  let pendaftar: { noPendaftaran: string };
+  try {
+    pendaftar = await prisma.$transaction(async (tx) => {
+      const created = await tx.pendaftar.create({
+        data: {
+          noPendaftaran,
+          nama: parsed.data.nama,
+          asalInstansi: parsed.data.asalInstansi,
+          jurusan: parsed.data.jurusan || null,
+          jenisKelamin: (parsed.data.jenisKelamin as "L" | "P" | null) ?? null,
+          noHp: parsed.data.noHp,
+          email: parsed.data.email.toLowerCase().trim(),
+          unitMinatId: parsed.data.unitMinatId,
+          berkasCV: cvDataUrl,
+          berkasSurat: saved.get("suratPengantarUrl") ?? null,
+          cvUrl: cvDataUrl,
+          suratPengantarUrl: saved.get("suratPengantarUrl") ?? null,
+          ktpKtmUrl: saved.get("ktpKtmUrl") ?? null,
+          transkripUrl: saved.get("transkripUrl") ?? null,
+          status: "MENUNGGU",
+          applicationType: "INDIVIDUAL",
+        },
+      });
+      await tx.statusHistory.create({
+        data: { pendaftarId: created.id, status: "MENUNGGU" },
+      });
+      return created;
     });
-    await tx.statusHistory.create({
-      data: { pendaftarId: created.id, status: "MENUNGGU" },
-    });
-    return created;
-  });
+  } catch (err) {
+    // P2002 = pelanggaran unique constraint (balapan langka ketika dua
+    // pendaftaran bersamaan memilih kandidat nomor yang sama) → diminta
+    // mencoba ulang, bukan jatuh ke error 500.
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      (err as { code?: unknown }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Nomor pendaftaran bentrok. Silakan coba lagi." },
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 
   return NextResponse.json(
     {

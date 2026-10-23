@@ -143,7 +143,7 @@ export default function CekStatusPage() {
                   <input
                     value={noPendaftaran}
                     onChange={(e) => { setNoPendaftaran(e.target.value); setErrors((p) => ({ ...p, noPendaftaran: undefined })); }}
-                    placeholder="LEMIGAS-2026-0001"
+                    placeholder="MAG-2610-A7X9"
                     className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-3.5 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 transition outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                   />
                 </span>

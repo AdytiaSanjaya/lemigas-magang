@@ -1,6 +1,20 @@
 import { randomBytes } from "crypto";
 
-const DEFAULT_MAX_BYTES = 2_000_000; // 2MB
+// AUD-09: batas ketat ukuran dokumen yang disimpan sebagai data URL (Base64)
+// di database. Diverifikasi SEBELUM berkas dibaca/dikonversi ke buffer agar
+// memori serverless tidak terbuang untuk berkas yang akan ditolak.
+export const MAX_DOCUMENT_BYTES = 1_500_000; // 1.5MB
+export const DOCUMENT_SIZE_ERROR =
+  "Ukuran dokumen maksimal 1.5MB untuk menghemat ruang penyimpanan.";
+
+// Cek ukuran wajib dipanggil tiap rute unggahan sebelum validateUploadFile /
+// validatePdfFile (yang membaca isi berkas ke buffer) dan sebelum toDataUrl.
+export function checkDocumentSize(file: File): { ok: boolean; error?: string } {
+  if (file.size > MAX_DOCUMENT_BYTES) {
+    return { ok: false, error: DOCUMENT_SIZE_ERROR };
+  }
+  return { ok: true };
+}
 
 // Deteksi tipe file sebenarnya berdasarkan "magic bytes" (isi file), bukan hanya
 // ekstensi nama file. Mencegah berkas berbahaya yang diubah namanya jadi .pdf.
@@ -51,9 +65,10 @@ export async function validateUploadFile(
     return { ok: false, error: "Berkas kosong." };
   }
   if (file.size > maxBytes) {
+    const mb = maxBytes / 1_000_000;
     return {
       ok: false,
-      error: `Ukuran berkas melebihi ${Math.round(maxBytes / 1_000_000)}MB.`,
+      error: `Ukuran berkas melebihi ${Number.isInteger(mb) ? mb : mb.toFixed(1)}MB.`,
     };
   }
 
@@ -84,7 +99,10 @@ export function safeFileName(extension = "pdf"): string {
 
 export function maxUploadBytes(): number {
   const v = parseInt(process.env.MAX_FILE_SIZE ?? "", 10);
-  return isNaN(v) || v <= 0 ? DEFAULT_MAX_BYTES : v;
+  const configured = isNaN(v) || v <= 0 ? MAX_DOCUMENT_BYTES : v;
+  // Env hanya boleh MENURUNKAN batas, tidak pernah menaikkan di atas 1.5MB
+  // (batas keras AUD-09 juga dijalankan rute lewat checkDocumentSize).
+  return Math.min(configured, MAX_DOCUMENT_BYTES);
 }
 
 export function uploadDir(): string {

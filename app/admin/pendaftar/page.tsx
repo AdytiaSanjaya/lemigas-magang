@@ -41,8 +41,9 @@ export default async function AdminPendaftarPage({
     prisma.pendaftar
       .findMany({
         where,
-        // select eksplisit: URL berkas hanya dipakai untuk menentukan boolean
-        // ketersediaan di sisi server — isi data URL tidak dikirim ke klien.
+        // AUD-14: select eksplisit tanpa kolom berkas (cvUrl, ktpKtmUrl,
+        // transkripUrl, loaUrl, berkasCV, dll) — semua berkas disimpan sebagai
+        // data URL Base64 yang berat. Keberadaannya cukup dipakai sebagai boolean.
         select: {
           id: true,
           nama: true,
@@ -52,11 +53,6 @@ export default async function AdminPendaftarPage({
           asalInstansi: true,
           unitMinatId: true,
           createdAt: true,
-          cvUrl: true,
-          suratPengantarUrl: true,
-          ktpKtmUrl: true,
-          transkripUrl: true,
-          loaUrl: true,
           unitMinat: { select: { id: true, nama: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -66,6 +62,28 @@ export default async function AdminPendaftarPage({
       .catch(() => []),
     prisma.pendaftar.count({ where }).catch(() => 0),
   ]);
+
+  // Keberadaan dokumen: cukup query id saja (boolean keberadaan), tanpa memuat
+  // isi data URL Base64 ke memori. Satu query kecil per jenis dokumen.
+  const berkasIds = pendaftar.map((p) => p.id);
+  const keberadaanBerkas = async (syarat: Prisma.PendaftarWhereInput): Promise<Set<string>> => {
+    if (!berkasIds.length) return new Set<string>();
+    const rows = await prisma.pendaftar
+      .findMany({
+        where: { id: { in: berkasIds }, AND: [syarat] },
+        select: { id: true },
+      })
+      .catch(() => []);
+    return new Set(rows.map((r) => r.id));
+  };
+  const [cvTersedia, suratTersedia, ktpTersedia, transkripTersedia, loaTersedia] =
+    await Promise.all([
+      keberadaanBerkas({ NOT: { OR: [{ cvUrl: null }, { cvUrl: "" }] } }),
+      keberadaanBerkas({ NOT: { OR: [{ suratPengantarUrl: null }, { suratPengantarUrl: "" }] } }),
+      keberadaanBerkas({ NOT: { OR: [{ ktpKtmUrl: null }, { ktpKtmUrl: "" }] } }),
+      keberadaanBerkas({ NOT: { OR: [{ transkripUrl: null }, { transkripUrl: "" }] } }),
+      keberadaanBerkas({ NOT: { OR: [{ loaUrl: null }, { loaUrl: "" }] } }),
+    ]);
 
   const units = await prisma.unit
     .findMany({ orderBy: { nama: "asc" }, select: { id: true, nama: true } })
@@ -159,11 +177,11 @@ export default async function AdminPendaftarPage({
                         status: p.status,
                         email: p.email,
                         unitMinatId: p.unitMinatId,
-                        cvTersedia: Boolean(p.cvUrl?.trim()),
-                        suratTersedia: Boolean(p.suratPengantarUrl?.trim()),
-                        ktpTersedia: Boolean(p.ktpKtmUrl?.trim()),
-                        transkripTersedia: Boolean(p.transkripUrl?.trim()),
-                        loaTersedia: Boolean(p.loaUrl?.trim()),
+                        cvTersedia: cvTersedia.has(p.id),
+                        suratTersedia: suratTersedia.has(p.id),
+                        ktpTersedia: ktpTersedia.has(p.id),
+                        transkripTersedia: transkripTersedia.has(p.id),
+                        loaTersedia: loaTersedia.has(p.id),
                       }}
                       mentors={mentors}
                     />

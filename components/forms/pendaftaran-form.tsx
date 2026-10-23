@@ -113,8 +113,8 @@ export default function PendaftaranForm({
         const allowed = cfg.accept.split(",").map((m) => m.trim());
         if (!allowed.some((m) => file.type === m)) {
           fileIssues[cfg.key] = `Hanya file ${cfg.format} yang diizinkan.`;
-        } else if (file.size > 2_000_000) {
-          fileIssues[cfg.key] = `Ukuran ${cfg.label} maksimal 2MB.`;
+        } else if (file.size > 1_500_000) {
+          fileIssues[cfg.key] = `Ukuran ${cfg.label} maksimal 1.5MB.`;
         }
       }
     }
@@ -325,7 +325,7 @@ export default function PendaftaranForm({
           <div>
             <h3 className="text-sm font-semibold text-zinc-900">Dokumen Pendukung</h3>
             <p className="text-xs text-zinc-400">
-              Unggah CV (wajib) dan dokumen pelengkap. Masing-masing maks. 2MB.
+              Unggah CV (wajib) dan dokumen pelengkap. Masing-masing maks. 1.5MB.
             </p>
           </div>
         </div>
@@ -379,7 +379,7 @@ export default function PendaftaranForm({
                         Klik untuk memilih file
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">
-                        Format {cfg.format}, maks 2MB
+                        Format {cfg.format}, maks 1.5MB
                       </p>
                     </>
                   )}
