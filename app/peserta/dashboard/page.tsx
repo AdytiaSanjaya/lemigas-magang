@@ -175,6 +175,16 @@ export default async function PesertaDashboardPage() {
   const kerjaTersisa = businessDaysRemaining(selesai, now);
   const progress = Math.min(100, Math.round(((totalDays - hariTersisa) / totalDays) * 100));
 
+  // Sertifikat magang — visibilitas ABSOLUT: kartu tampil PERMANEN selama
+  // (1) berkas sertifikat ada di database (admin sudah mengunggah) DAN
+  // (2) masa magang sudah selesai (akhir hari tanggal selesai sudah lewat).
+  // Tidak ada state "sudah pernah diunduh" — tombol tidak pernah disembunyikan
+  // setelah diklik, sehingga peserta bebas mengunduh ulang kapan saja.
+  const batasSelesai = new Date(selesai);
+  batasSelesai.setHours(23, 59, 59, 999);
+  const magangSelesai = batasSelesai.getTime() <= now.getTime();
+  const tampilSertifikat = punyaSertifikat && magangSelesai;
+
   const cards: Array<{
     key: string;
     label: string;
@@ -326,29 +336,65 @@ export default async function PesertaDashboardPage() {
         </div>
       </section>
 
-      {/* Sertifikat magang: hanya dirender bila admin sudah mengunggah berkas. */}
-      {punyaSertifikat && (
-        <section className="flex flex-col gap-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-              <Award size={20} strokeWidth={2} aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="text-sm font-semibold text-slate-800">Sertifikat Magang</h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                Sertifikat Anda telah diterbitkan oleh admin dan siap diunduh
-                dalam format PDF.
-              </p>
+      {/* Riwayat Sertifikat: kartu permanen — selalu tampil selama berkas
+          sertifikat ada di database dan masa magang selesai, tanpa tergantung
+          riwayat klik/unduh. */}
+      {tampilSertifikat && (
+        <section className="overflow-hidden rounded-2xl border border-emerald-200/80 bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <Award size={20} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm font-semibold text-slate-800">Riwayat Sertifikat</h2>
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                    Tersedia
+                  </span>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  Sertifikat magang Anda telah diterbitkan oleh admin. Kartu ini
+                  tersedia permanen — unduh ulang kapan saja, termasuk saat
+                  memasang ulang aplikasi.
+                </p>
+              </div>
             </div>
+            <a
+              href="/api/sertifikat"
+              download
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              Unduh Sertifikat
+            </a>
           </div>
-          <a
-            href="/api/sertifikat"
-            download
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-          >
-            <Download className="h-4 w-4" aria-hidden="true" />
-            Unduh Sertifikat
-          </a>
+          <dl className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div className="px-5 py-3">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Nama Peserta
+              </dt>
+              <dd className="mt-1 truncate text-sm font-medium text-slate-700">
+                {peserta.pendaftar?.nama ?? session.user.name ?? "-"}
+              </dd>
+            </div>
+            <div className="px-5 py-3">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Periode Magang
+              </dt>
+              <dd className="mt-1 text-sm font-medium text-slate-700">
+                {formatTanggal(peserta.tanggalMulai)} &rarr; {formatTanggal(peserta.tanggalSelesai)}
+              </dd>
+            </div>
+            <div className="px-5 py-3">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                Status
+              </dt>
+              <dd className="mt-1 text-sm font-medium text-emerald-700">
+                Selesai &middot; Sertifikat diterbitkan
+              </dd>
+            </div>
+          </dl>
         </section>
       )}
 

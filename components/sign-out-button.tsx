@@ -17,8 +17,16 @@ export default function SignOutButton({
       disabled={loading}
       onClick={async () => {
         setLoading(true);
-        await signOut({ redirect: false });
-        window.location.href = "/";
+        // Hancurkan sesi & cookie di server terlebih dahulu
+        // (POST /api/auth/signout menghapus cookie sesi HttpOnly).
+        try {
+          await signOut({ redirect: false });
+        } finally {
+          // Hard navigation (BUKAN router.push): memaksa browser reload penuh
+          // dan membuang seluruh state/memori klien — termasuk sesi UI nama
+          // yang lengket di header.
+          window.location.href = "/";
+        }
       }}
       className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >

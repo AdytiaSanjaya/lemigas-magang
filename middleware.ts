@@ -63,9 +63,37 @@ function denganSecurityHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
+// Header anti-BFCache (Back-Forward Cache) untuk rute panel yang dilindungi
+// (/peserta/* dan /admin/*). Dengan no-store/no-cache, browser DIHARAMKAN
+// menyimpan snapshot halaman sehingga tombol Back memaksa request ulang ke
+// server — dan karena sesi sudah mati setelah logout, user langsung tertendang
+// ke halaman login alih-alih melihat kembali dasbor dari cache klien.
+const antiBFCacheHeaders: Record<string, string> = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
+function adalahRutePanelDilindungi(pathname: string): boolean {
+  return (
+    pathname === "/peserta" ||
+    pathname.startsWith("/peserta/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/")
+  );
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = denganSecurityHeaders(NextResponse.next());
+
+  // Rute panel peserta/admin: larang penyimpanan halaman di cache browser
+  // agar Back Button selalu me-request ulang ke server (anti-BFCache).
+  if (adalahRutePanelDilindungi(pathname)) {
+    Object.entries(antiBFCacheHeaders).forEach(([header, value]) => {
+      response.headers.set(header, value);
+    });
+  }
 
   // Middleware HANYA menangani rute API internal (kecuali /api/auth yang
   // dikelola NextAuth sendiri). Semua rute halaman (/login, /admin/*,

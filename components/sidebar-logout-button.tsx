@@ -12,8 +12,16 @@ export default function SidebarLogoutButton() {
       onSubmit={async (e) => {
         e.preventDefault();
         setLoading(true);
-        await signOut({ redirect: false });
-        window.location.href = "/";
+        // Hancurkan sesi & cookie di server terlebih dahulu
+        // (POST /api/auth/signout menghapus cookie sesi HttpOnly).
+        try {
+          await signOut({ redirect: false });
+        } finally {
+          // Hard navigation (BUKAN router.push): memaksa browser reload penuh
+          // dan membuang seluruh state/memori klien — termasuk sesi UI nama
+          // peserta yang lengket di header/sidebar.
+          window.location.href = "/";
+        }
       }}
     >
       <button
