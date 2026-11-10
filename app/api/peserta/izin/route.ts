@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { izinSchema } from "@/lib/validation/presensi";
-import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { getPesertaBySession, getUserIdBySession, isMagangSelesai } from "@/lib/peserta";
 import { toUtcDate } from "@/lib/dates";
 import { checkDocumentSize, validateUploadFile } from "@/lib/security";
 
@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 // Pengajuan izin / sakit peserta. Menggunakan multipart form agar dapat
-// melampirkan bukti pendukung (PDF/JPG, opsional, maks. 1.5MB).
+// melampirkan bukti pendukung (PDF/JPG/PNG, opsional, maks. 1.5MB).
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user || session.user.role !== "PENDAFTAR") {
@@ -22,6 +22,16 @@ export async function POST(req: NextRequest) {
   if (!peserta) {
     return NextResponse.json(
       { error: "Akun Anda belum terdaftar sebagai peserta aktif." },
+      { status: 403 }
+    );
+  }
+
+  // Offboarding: peserta berstatus "Selesai" tidak boleh mengirim pengajuan
+  // baru — guard server-side yang menutup celah manipulasi data di luar UI
+  // (form sudah disembunyikan di halaman /peserta/izin).
+  if (isMagangSelesai(peserta.tanggalSelesai)) {
+    return NextResponse.json(
+      { error: "Masa magang Anda telah selesai. Pengajuan izin/sakit telah ditutup secara permanen." },
       { status: 403 }
     );
   }
@@ -95,7 +105,13 @@ export async function POST(req: NextRequest) {
     if (!sizeCheck.ok) {
       return NextResponse.json({ error: sizeCheck.error }, { status: 400 });
     }
-    const result = await validateUploadFile(attachment, ["application/pdf", "image/jpeg"]);
+    // Tipe disimpan di data URL memakai hasil deteksi magic bytes (result.mime),
+    // sehingga MIME di string Base64 selalu match dengan isi berkas sebenarnya.
+    const result = await validateUploadFile(attachment, [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+    ]);
     if (!result.ok) {
       return NextResponse.json({ error: `Lampiran: ${result.error}` }, { status: 422 });
     }
@@ -113,9 +129,12 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Instan UI update: bersihkan router cache halaman terkait agar riwayat,
+  // dasbor peserta, dan daftar persetujuan mentor langsung menampilkan data baru.
   revalidatePath("/peserta/izin");
   revalidatePath("/peserta/dashboard");
   revalidatePath("/mentor/izin");
+  revalidatePath("/mentor/peserta");
 
   return NextResponse.json(
     { message: "Pengajuan berhasil dikirim dan menunggu persetujuan mentor.", record },

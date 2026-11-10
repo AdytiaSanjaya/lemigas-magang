@@ -27,10 +27,21 @@ export default async function MentorIzinPage() {
   const emails = [...emailToNama.keys()];
 
   // Ambil data izin + email pemohon (untuk filter & join).
+  // select eksplisit: attachmentUrl hanya dipakai untuk cek ketersediaan
+  // lampiran — kolom lain (catatanReview, diprosesOlehId, dll.) tidak ikut.
   const raw = await prisma.leaveRequest
     .findMany({
       where: { user: { email: { in: emails } } },
-      include: { user: { select: { email: true } } },
+      select: {
+        id: true,
+        type: true,
+        startDate: true,
+        endDate: true,
+        reason: true,
+        status: true,
+        attachmentUrl: true,
+        user: { select: { email: true } },
+      },
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     })
     .catch(() => []);
@@ -123,8 +134,10 @@ export default async function MentorIzinPage() {
                     </td>
                     <td className="px-5 py-3">
                       {r.attachmentUrl ? (
+                        // Route penyaji: mencegah tab kosong (data URL diblokir
+                        // browser) dan memakai MIME sesuai isi berkas.
                         <a
-                          href={r.attachmentUrl}
+                          href={`/api/peserta/izin/lampiran?id=${r.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-xs font-medium text-navy-600 hover:underline"

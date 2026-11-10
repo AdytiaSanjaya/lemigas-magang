@@ -20,6 +20,13 @@ export const getPesertaByEmail = cache(async (email: string | null) => {
       unit: { select: { nama: true } },
       mentor: { select: { nama: true } },
       pendaftar: { select: { email: true, nama: true } },
+      // Penilaian mentor terbaru (read-only): hanya 1 baris terakhir + kolom
+      // yang dirender di Dasbor Peserta ("Hasil Evaluasi Kinerja").
+      evaluasi: {
+        select: { kedisiplinan: true, keaktifan: true, kinerja: true, catatan: true },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
   });
 });
@@ -95,4 +102,14 @@ export const getUserIdByEmail = cache(async (email: string | null) => {
 
 export async function getUserIdBySession(session: Session | null) {
   return getUserIdByEmail(session?.user?.email ?? null);
+}
+
+// Status masa magang peserta: "Selesai" bila akhir hari tanggal selesai sudah
+// lewat. Patokan sama dengan panel admin (/admin/peserta) dan API sertifikat,
+// sehingga status di seluruh aplikasi konsisten. Murni komputasi tanggal —
+// tanpa query, tanpa mutasi data.
+export function isMagangSelesai(tanggalSelesai: Date, now: Date = new Date()): boolean {
+  const batas = new Date(tanggalSelesai);
+  batas.setHours(23, 59, 59, 999);
+  return batas.getTime() <= now.getTime();
 }

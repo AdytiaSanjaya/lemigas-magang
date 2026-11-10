@@ -1,8 +1,9 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { getPesertaBySession, getUserIdBySession, isMagangSelesai } from "@/lib/peserta";
 import { formatTanggal } from "@/lib/format";
 import IzinForm from "@/components/peserta/izin-form";
+import MagangSelesaiCard from "@/components/peserta/magang-selesai-card";
 import StatusBadge from "@/components/ui/status-badge";
 import Pagination from "@/components/ui/pagination";
 import { ClipboardPenLine, FileText, Inbox } from "lucide-react";
@@ -41,6 +42,17 @@ export default async function IzinPage({
     peserta = null;
   }
   if (!peserta) return <NotParticipant />;
+
+  // Offboarding: peserta berstatus "Selesai" tidak lagi mengakses form izin.
+  // Cek server-side di awal komponen — formulir & riwayat tidak dirender,
+  // query pengajuan di bawah pun tidak dijalankan sama sekali.
+  if (isMagangSelesai(peserta.tanggalSelesai)) {
+    return (
+      <div className="w-full min-w-0">
+        <MagangSelesaiCard />
+      </div>
+    );
+  }
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
@@ -180,8 +192,12 @@ export default async function IzinPage({
                         </td>
                         <td className="px-3 py-3 sm:px-4 sm:py-3 whitespace-nowrap">
                           {r.attachmentUrl ? (
+                            // Lewat route penyaji (bukan href data:... langsung):
+                            // Chrome memblokir navigasi top-level ke data URL
+                            // sehingga tab baru kosong. MIME ikut diverifikasi
+                            // dari magic bytes oleh route tersebut.
                             <a
-                              href={r.attachmentUrl}
+                              href={`/api/peserta/izin/lampiran?id=${r.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 text-xs font-medium text-navy-600 hover:text-navy-700 hover:underline"

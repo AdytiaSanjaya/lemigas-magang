@@ -53,9 +53,9 @@ export default function IzinForm() {
 
   function pickFile(f?: File) {
     if (!f) return;
-    const allowed = ["application/pdf", "image/jpeg"];
+    const allowed = ["application/pdf", "image/jpeg", "image/png"];
     if (!allowed.includes(f.type)) {
-      setNotice({ ok: false, text: "Lampiran hanya PDF atau JPG." });
+      setNotice({ ok: false, text: "Lampiran hanya PDF, JPG, atau PNG." });
       return;
     }
     if (f.size > 1_500_000) {
@@ -243,7 +243,7 @@ export default function IzinForm() {
       <div className="mt-6">
         <span className="text-sm font-medium text-slate-700">
           Lampiran Bukti{" "}
-          <span className="font-normal text-slate-400">(opsional, PDF/JPG maks. 1.5MB)</span>
+          <span className="font-normal text-slate-400">(opsional, PDF/JPG/PNG maks. 1.5MB)</span>
         </span>
 
         {file ? (
@@ -285,7 +285,7 @@ export default function IzinForm() {
           >
             <input
               type="file"
-              accept="application/pdf,image/jpeg"
+              accept="application/pdf,image/jpeg,image/png"
               className="sr-only"
               onChange={(e) => pickFile(e.target.files?.[0])}
             />

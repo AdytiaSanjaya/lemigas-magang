@@ -1,9 +1,10 @@
 import { requirePeserta } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { getPesertaBySession, getUserIdBySession } from "@/lib/peserta";
+import { getPesertaBySession, getUserIdBySession, isMagangSelesai } from "@/lib/peserta";
 import { todayStringWib, toUtcDate, utcDateString, monthRange } from "@/lib/dates";
 import CheckInWidget from "@/components/peserta/check-in-widget";
 import AttendanceHistory from "@/components/peserta/attendance-history";
+import MagangSelesaiCard from "@/components/peserta/magang-selesai-card";
 import { PresensiOptimisticProvider } from "@/components/peserta/presensi-optimistic";
 import { CalendarCheck2, CircleAlert, ClipboardPenLine, Flame } from "lucide-react";
 
@@ -41,6 +42,17 @@ export default async function KehadiranPage({
     peserta = null;
   }
   if (!peserta) return <NotParticipant />;
+
+  // Offboarding: peserta berstatus "Selesai" tidak lagi mengakses form absen.
+  // Cek server-side di awal komponen — widget check-in & riwayat tidak dirender,
+  // query presensi di bawah pun tidak dijalankan sama sekali.
+  if (isMagangSelesai(peserta.tanggalSelesai)) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        <MagangSelesaiCard />
+      </div>
+    );
+  }
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);

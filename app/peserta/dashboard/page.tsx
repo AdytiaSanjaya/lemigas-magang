@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import {
   getPesertaBySession,
   getUserIdBySession,
+  isMagangSelesai,
   punyaSertifikatByEmail,
 } from "@/lib/peserta";
 import { todayStringWib, toUtcDate, utcDateString, businessDaysRemaining, formatWaktu } from "@/lib/dates";
@@ -21,6 +22,7 @@ import {
   Building2,
   Award,
   Download,
+  Star,
 } from "lucide-react";
 
 // Selalu render per-request: widget "Presensi Terbaru" & statistik presensi
@@ -180,18 +182,43 @@ export default async function PesertaDashboardPage() {
   // (2) masa magang sudah selesai (akhir hari tanggal selesai sudah lewat).
   // Tidak ada state "sudah pernah diunduh" — tombol tidak pernah disembunyikan
   // setelah diklik, sehingga peserta bebas mengunduh ulang kapan saja.
-  const batasSelesai = new Date(selesai);
-  batasSelesai.setHours(23, 59, 59, 999);
-  const magangSelesai = batasSelesai.getTime() <= now.getTime();
+  const magangSelesai = isMagangSelesai(peserta.tanggalSelesai, now);
   const tampilSertifikat = punyaSertifikat && magangSelesai;
 
-  const cards: Array<{
+  // Hasil evaluasi mentor terbaru (read-only). Kartu "Hasil Evaluasi Kinerja"
+  // hanya dirender bila penilaian sudah ada — belum dinilai = kartu disembunyikan.
+  const evaluasi = peserta.evaluasi?.[0] ?? null;
+  const rataRata = evaluasi
+    ? Math.round((evaluasi.kedisiplinan + evaluasi.keaktifan + evaluasi.kinerja) / 3)
+    : 0;
+  const nilaiEvaluasi = evaluasi
+    ? [
+        { key: "kedisiplinan", label: "Kedisiplinan", value: evaluasi.kedisiplinan, bar: "bg-emerald-500" },
+        { key: "keaktifan", label: "Keaktifan", value: evaluasi.keaktifan, bar: "bg-sky-500" },
+        { key: "kinerja", label: "Kinerja", value: evaluasi.kinerja, bar: "bg-amber-500" },
+        { key: "rata-rata", label: "Nilai Rata-rata", value: rataRata, bar: "bg-navy-600" },
+      ]
+    : [];
+
+  // Rangkasan offboarding (status "Selesai"): dua query berikut HANYA dijalankan
+  // bila magang sudah selesai — peserta aktif tidak menanggung biayanya.
+  let totalHadir = 0;
+  let totalIzinDisetujui = 0;
+  if (magangSelesai) {
+    [totalHadir, totalIzinDisetujui] = await Promise.all([
+      prisma.attendance.count({ where: { userId, status: "HADIR" } }).catch(() => 0),
+      prisma.leaveRequest.count({ where: { userId, status: "APPROVED" } }).catch(() => 0),
+    ]);
+  }
+
+  const cardsHarian: Array<{
     key: string;
     label: string;
     value: string | number;
     icon: typeof Activity;
     iconBg: string;
     chip: string;
+    chipLabel: string;
     sub: string;
     small?: boolean;
   }> = [
@@ -202,6 +229,7 @@ export default async function PesertaDashboardPage() {
       icon: CalendarCheck2,
       iconBg: "bg-emerald-50 text-emerald-600",
       chip: "bg-emerald-50 text-emerald-600",
+      chipLabel: "Total",
       sub: `${kehadiranBulanIni} presensi bulan ini`,
     },
     {
@@ -211,6 +239,7 @@ export default async function PesertaDashboardPage() {
       icon: statusHariIni.icon,
       iconBg: "bg-navy-50 text-navy-600",
       chip: statusHariIni.cls,
+      chipLabel: "Hari ini",
       sub: statusHariIni.text,
       small: true,
     },
@@ -221,6 +250,7 @@ export default async function PesertaDashboardPage() {
       icon: CalendarRange,
       iconBg: "bg-amber-50 text-amber-600",
       chip: "bg-amber-50 text-amber-600",
+      chipLabel: "Kalender",
       sub: `${Math.round(hariTersisa / 7)} minggu kalender tersisa`,
     },
     {
@@ -230,9 +260,59 @@ export default async function PesertaDashboardPage() {
       icon: Briefcase,
       iconBg: "bg-sky-50 text-sky-600",
       chip: "bg-sky-50 text-sky-600",
+      chipLabel: "Kerja",
       sub: "Senin-Jumat",
     },
   ];
+
+  // Rangkasan magang (offboarding) — HANYA untuk status "Selesai": data
+  // historis final, bukan lagi statistik harian.
+  const cardsRangkuman: typeof cardsHarian = [
+    {
+      key: "hadir",
+      label: "Total Kehadiran",
+      value: totalHadir,
+      icon: CalendarCheck2,
+      iconBg: "bg-emerald-50 text-emerald-600",
+      chip: "bg-emerald-50 text-emerald-600",
+      chipLabel: "Hadir",
+      sub: "hari presensi hadir selama magang",
+    },
+    {
+      key: "izin",
+      label: "Total Izin/Sakit",
+      value: totalIzinDisetujui,
+      icon: ClipboardPenLine,
+      iconBg: "bg-amber-50 text-amber-600",
+      chip: "bg-amber-50 text-amber-600",
+      chipLabel: "Disetujui",
+      sub: "pengajuan izin/sakit disetujui",
+    },
+    {
+      key: "nilai",
+      label: "Nilai Akhir",
+      value: evaluasi ? rataRata : "Menunggu Penilaian",
+      icon: Star,
+      iconBg: "bg-navy-50 text-navy-600",
+      chip: "bg-navy-50 text-navy-700",
+      chipLabel: "Evaluasi",
+      sub: evaluasi ? "rata-rata nilai evaluasi mentor" : "mentor belum menilai Anda",
+      small: !evaluasi,
+    },
+    {
+      key: "sertifikat",
+      label: "Sertifikat",
+      value: punyaSertifikat ? "Telah Diterbitkan" : "Menunggu Penerbitan",
+      icon: Award,
+      iconBg: "bg-emerald-50 text-emerald-600",
+      chip: "bg-emerald-50 text-emerald-600",
+      chipLabel: "Sertifikat",
+      sub: punyaSertifikat ? "diterbitkan oleh admin" : "menunggu penerbitan admin",
+      small: true,
+    },
+  ];
+
+  const cards = magangSelesai ? cardsRangkuman : cardsHarian;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -275,10 +355,23 @@ export default async function PesertaDashboardPage() {
           <div className="flex justify-center md:justify-end">
             <div className="inline-flex flex-col items-center rounded-2xl bg-white/10 px-6 py-4 ring-1 ring-white/15 backdrop-blur-sm">
               <RealtimeClock size="lg" />
-              <div className="mt-2 flex items-center justify-center gap-2 text-center text-xs text-slate-300">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                {statusHariIni.label}
-                {izinPending > 0 && <span className="rounded-full bg-yellow-400/20 px-2 py-0.5 font-semibold text-yellow-300">{izinPending} izin menunggu</span>}
+              <div
+                className={`mt-2 flex items-center justify-center gap-2 text-center text-xs ${
+                  magangSelesai ? "text-slate-400" : "text-slate-300"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    magangSelesai ? "bg-slate-400" : "animate-pulse bg-emerald-400"
+                  }`}
+                  aria-hidden="true"
+                />
+                {magangSelesai ? "Masa Magang Selesai" : statusHariIni.label}
+                {!magangSelesai && izinPending > 0 && (
+                  <span className="rounded-full bg-yellow-400/20 px-2 py-0.5 font-semibold text-yellow-300">
+                    {izinPending} izin menunggu
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -301,7 +394,7 @@ export default async function PesertaDashboardPage() {
                   <Icon size={20} strokeWidth={2} aria-hidden="true" />
                 </span>
                 <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${card.chip}`}>
-                  {card.key === "status" ? "Hari ini" : card.key === "total" ? "Total" : card.key === "hari" ? "Kalender" : "Kerja"}
+                  {card.chipLabel}
                 </span>
               </div>
               <div
@@ -335,6 +428,64 @@ export default async function PesertaDashboardPage() {
           <span>Selesai: {formatTanggal(peserta.tanggalSelesai)}</span>
         </div>
       </section>
+
+      {/* Hasil Evaluasi Kinerja: hanya tampil bila mentor sudah menilai. */}
+      {evaluasi && (
+        <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-600">
+                <Star size={20} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm font-semibold text-slate-800">Hasil Evaluasi Kinerja</h2>
+                  <span className="rounded-full bg-navy-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-navy-700">
+                    Dinilai Mentor
+                  </span>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  Penilaian terhadap kedisiplinan, keaktifan, dan kinerja Anda
+                  selama menjalani magang.
+                </p>
+              </div>
+            </div>
+            <span className="hidden shrink-0 rounded-full bg-navy-50 px-3 py-1.5 text-xs font-bold tabular-nums text-navy-700 sm:inline-flex">
+              Rata-rata {rataRata}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-px bg-slate-100 sm:grid-cols-4">
+            {nilaiEvaluasi.map((n) => {
+              const width = Math.min(100, Math.max(0, n.value));
+              return (
+                <div key={n.key} className="bg-white px-5 py-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    {n.label}
+                  </div>
+                  <div
+                    className={`mt-1 text-2xl font-bold tracking-tight ${
+                      n.key === "rata-rata" ? "text-navy-700" : "text-slate-900"
+                    }`}
+                  >
+                    {n.value}
+                  </div>
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className={`h-full rounded-full ${n.bar}`}
+                      style={{ width: `${width}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4">
+            <p className="text-sm leading-relaxed text-slate-600">
+              Catatan Mentor: {evaluasi.catatan ?? "-"}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Riwayat Sertifikat: kartu permanen — selalu tampil selama berkas
           sertifikat ada di database dan masa magang selesai, tanpa tergantung

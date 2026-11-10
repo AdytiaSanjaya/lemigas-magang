@@ -78,6 +78,7 @@ export async function PATCH(req: NextRequest) {
   revalidatePath("/peserta/izin");
   revalidatePath("/peserta/dashboard");
   revalidatePath("/mentor/izin");
+  revalidatePath("/mentor/peserta");
 
   return NextResponse.json({
     message:
