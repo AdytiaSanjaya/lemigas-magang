@@ -77,9 +77,9 @@ export default async function LoginPage({
     /* ════════════════════════════════════════════
         GATEWAY MODE — Split-Screen (desktop) / Stacked (mobile)
     ════════════════════════════════════════════ */
-    <main className="relative grid h-screen w-full grid-cols-1 lg:grid-cols-2">
+    <main className="relative grid min-h-screen lg:h-screen w-full grid-cols-1 lg:grid-cols-2">
       {/* ── LEFT COLUMN — Branding LEMIGAS ── */}
-      <section className="relative flex h-full flex-col justify-center overflow-hidden bg-navy-900 px-6 py-8 sm:px-10 lg:px-12 lg:py-10">
+      <section className="relative flex h-auto lg:h-full flex-col justify-center overflow-hidden bg-navy-900 px-6 py-12 sm:px-10 lg:px-12 lg:py-10">
         {/* Dekorasi lembut */}
         <div
           aria-hidden="true"
@@ -127,7 +127,7 @@ export default async function LoginPage({
       </section>
 
       {/* ── RIGHT COLUMN — Form / Tombol Login ── */}
-      <section className="relative flex h-full flex-col justify-center overflow-y-auto bg-white px-6 py-6 sm:px-10 lg:px-12">
+      <section className="relative flex h-auto lg:h-full flex-col justify-center lg:overflow-y-auto bg-white px-6 py-12 sm:px-10 lg:px-12 lg:py-6">
         {/* Navigasi atas — pojok kiri atas area putih */}
         <div className="relative z-10">
           <Link
